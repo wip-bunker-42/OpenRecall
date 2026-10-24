@@ -1,7 +1,8 @@
 # OpenRecall Desktop Design
 
 Date: 2026-10-24 (Africa/Cairo)
-Status: Draft for user approval; architecture and repository destination approved.
+Status: Approved by the user on 2026-10-24, including revised forms, filters,
+optimization profiles, human-only NVDA testing, and default-on schedule penalties.
 Builder check: Initial and revised independent reviews completed; no important planning questions left.
 Product language: Arabic. Development language: English.
 Intended public repository: `wip-bunker-42/OpenRecall`.
