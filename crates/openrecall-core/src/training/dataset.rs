@@ -78,7 +78,9 @@ pub fn build_dataset(
     if members.len() != context.members.len() {
         return Err(AppError::new("invalidMembership"));
     }
-    let mut groups: BTreeMap<(String, String), Vec<(DateTime<Utc>, Rating)>> = BTreeMap::new();
+    type CardKey = (String, String);
+    type TimedRating = (DateTime<Utc>, Rating);
+    let mut groups: BTreeMap<CardKey, Vec<TimedRating>> = BTreeMap::new();
     for row in history
         .iter()
         .filter(|r| !r.undone && !r.deleted && members.contains(&r.deck_id))
