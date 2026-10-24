@@ -90,6 +90,7 @@ impl App {
         let forms = self.form_drafts(draft, None)?;
         let now = self.clock.now().to_rfc3339();
         let card = CardDetail {
+            bag: Default::default(),
             id: id(),
             deck_id: deck_id.clone(),
             forms,
@@ -118,6 +119,8 @@ impl App {
             return Err(AppError::new("conflict"));
         }
         card.forms = self.form_drafts(draft, Some(&card))?;
+        let ids = card.forms.iter().map(|f| f.id.clone()).collect::<Vec<_>>();
+        crate::scheduling::forms::reconcile_forms(&mut card.bag, &ids, self.random.as_mut())?;
         card.revision = id();
         self.save_card(&card)?;
         self.touch_deck(&card.deck_id)?;

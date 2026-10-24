@@ -19,6 +19,8 @@ pub struct CardForm {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct CardDetail {
+    #[serde(default)]
+    pub bag: crate::scheduling::forms::FormBag,
     pub id: String,
     pub deck_id: String,
     pub forms: Vec<CardForm>,
