@@ -193,6 +193,25 @@ pub fn seed_profile(f: &mut super::Fixture) -> (String, Vec<String>, Vec<String>
         session.status = "ended".into();
         session.ended_at = Some((base + chrono::Duration::days(9)).to_rfc3339());
         session.current = None;
+        let logs: Vec<ReviewLog> = conn
+            .prepare("SELECT payload FROM reviews WHERE session_id=?1")
+            .unwrap()
+            .query_map([&sid], |r| r.get::<_, String>(0))
+            .unwrap()
+            .map(|r| serde_json::from_str(&r.unwrap()).unwrap())
+            .collect();
+        session.attempts = logs.len() as u32;
+        session.response_ms = logs.iter().map(|l| l.response_ms).sum();
+        session.active_ms = session.response_ms;
+        for l in &logs {
+            session.ratings[l.rating.number() as usize - 1] += 1;
+            if !session.unique_card_ids.contains(&l.card_id) {
+                session.unique_card_ids.push(l.card_id.clone());
+            }
+            if l.was_new && !session.new_card_ids.contains(&l.card_id) {
+                session.new_card_ids.push(l.card_id.clone());
+            }
+        }
         conn.execute(
             "UPDATE sessions SET status='ended',payload=?1 WHERE id=?2",
             rusqlite::params![serde_json::to_string(&session).unwrap(), sid],

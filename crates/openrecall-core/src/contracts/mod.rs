@@ -2,6 +2,7 @@ use crate::{AppError, AppResult, domain::settings::Settings};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use ts_rs::TS;
+pub mod backup;
 pub mod cards;
 pub mod import;
 pub mod statistics;
@@ -221,5 +222,8 @@ pub fn export(output: &Path) -> AppResult<()> {
     Request::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     Response::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     AppError::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
+    backup::ExportReport::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
+    backup::RestorePreview::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
+    backup::RestoreReport::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     Ok(())
 }

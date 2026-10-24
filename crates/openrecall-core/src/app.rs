@@ -5,6 +5,8 @@ use crate::{
 };
 use std::{path::Path, sync::Arc};
 pub struct App {
+    pub(crate) restore_previews:
+        std::cell::RefCell<std::collections::HashMap<String, crate::backup::PreparedRestore>>,
     pub(crate) jobs: crate::jobs::JobRegistry,
     pub(crate) import_previews:
         std::collections::HashMap<String, crate::contracts::import::ImportPreview>,
@@ -22,6 +24,7 @@ impl App {
         random: Box<dyn RandomSource>,
     ) -> AppResult<Self> {
         let app = Self {
+            restore_previews: Default::default(),
             jobs: Default::default(),
             import_previews: Default::default(),
             runtime_id: uuid::Uuid::new_v4().to_string(),

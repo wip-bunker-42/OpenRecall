@@ -1,3 +1,4 @@
+mod backup;
 mod cards;
 mod import;
 mod library;

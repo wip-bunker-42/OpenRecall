@@ -1,4 +1,5 @@
 use crate::{AppError, AppResult, domain::settings::Settings};
+mod backup;
 use rusqlite::Connection;
 use std::{path::Path, time::Duration};
 pub(crate) const SCHEMA_VERSION: u32 = 8;

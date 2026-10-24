@@ -18,5 +18,4 @@ unicode-normalization = "0.1"
 ts-rs = { version = "12", features = ["serde-json-impl"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 
-[dev-dependencies]
 tempfile = "3"
