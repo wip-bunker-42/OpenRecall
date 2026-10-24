@@ -13,6 +13,8 @@ pub struct Presentation {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Session {
+    #[serde(default)]
+    pub last_review: Option<crate::contracts::review::ReviewResult>,
     pub id: String,
     pub deck_id: String,
     pub filter: ReviewFilter,

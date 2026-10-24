@@ -5,7 +5,7 @@ use ts_rs::TS;
 pub mod cards;
 pub mod review;
 use crate::scheduling::queue::ReviewFilter;
-use review::{ResumableSession, ReviewView, SessionTiming};
+use review::{RateInput, ResumableSession, ReviewView, SessionTiming};
 pub mod library;
 use crate::domain::card::CardDetail;
 use crate::domain::profile::ProfileDetail;
@@ -29,6 +29,13 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    RateCard(RateInput),
+    UndoReview {
+        session_id: String,
+    },
+    CloseSession {
+        session_id: String,
+    },
     StartSession {
         deck_id: String,
     },
@@ -100,6 +107,9 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    RateCard(ReviewView),
+    UndoReview(ReviewView),
+    CloseSession(DeleteReport),
     StartSession(ReviewView),
     ReadSession(ReviewView),
     ResumeSession(ReviewView),

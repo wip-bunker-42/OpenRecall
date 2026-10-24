@@ -119,6 +119,7 @@ impl App {
             return Err(AppError::new("conflict"));
         }
         card.forms = self.form_drafts(draft, Some(&card))?;
+        self.invalidate_card_undo(&card.id)?;
         let ids = card.forms.iter().map(|f| f.id.clone()).collect::<Vec<_>>();
         crate::scheduling::forms::reconcile_forms(&mut card.bag, &ids, self.random.as_mut())?;
         card.revision = id();
@@ -135,9 +136,11 @@ impl App {
         if card.revision != expected {
             return Err(AppError::new("conflict"));
         }
+        self.invalidate_card_undo(&card_id)?;
         self.store
             .conn
             .execute("DELETE FROM cards WHERE id=?1", [&card_id])?;
+        self.refresh_session_counts(&card.deck_id)?;
         self.touch_deck(&card.deck_id)?;
         Ok(DeleteReport { id: card_id })
     }

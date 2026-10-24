@@ -36,6 +36,13 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::RateCard(input) => Ok(Response::RateCard(self.rate_card(input)?)),
+            Request::UndoReview { session_id } => {
+                Ok(Response::UndoReview(self.undo_review(session_id)?))
+            }
+            Request::CloseSession { session_id } => {
+                Ok(Response::CloseSession(self.close_session(session_id)?))
+            }
             Request::StartSession { deck_id } => {
                 Ok(Response::StartSession(self.start_session(deck_id)?))
             }

@@ -1,7 +1,25 @@
+use crate::scheduling::fsrs::Rating;
 use crate::{
     domain::card::{CardDetail, CardForm},
     scheduling::{fsrs::RatingPreviews, queue::ReviewFilter},
 };
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, TS)]
+#[serde(rename_all = "camelCase")]
+pub struct ReviewResult {
+    pub card_id: String,
+    pub rating: Rating,
+    pub interval_seconds: f64,
+    pub due_at: String,
+}
+#[derive(Clone, Debug, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+pub struct RateInput {
+    pub session_id: String,
+    pub presentation_id: String,
+    pub rating: Rating,
+    pub action_id: String,
+    pub expected_card_revision: String,
+}
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, TS)]
@@ -21,6 +39,7 @@ pub struct Progress {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewFrame {
+    pub last_review: Option<ReviewResult>,
     pub session_id: String,
     pub filter: ReviewFilter,
     pub presentation_id: String,
@@ -36,6 +55,7 @@ pub struct ReviewFrame {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct EmptyFilterView {
+    pub last_review: Option<ReviewResult>,
     pub session_id: String,
     pub filter: ReviewFilter,
     pub next_due_at: Option<String>,
@@ -45,6 +65,7 @@ pub struct EmptyFilterView {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionSummary {
+    pub last_review: Option<ReviewResult>,
     pub session_id: String,
     pub filter: ReviewFilter,
     pub filter_changes: Vec<FilterChange>,

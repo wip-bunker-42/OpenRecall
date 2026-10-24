@@ -1,7 +1,7 @@
 use crate::{AppError, AppResult, domain::settings::Settings};
 use rusqlite::Connection;
 use std::{path::Path, time::Duration};
-pub(crate) const SCHEMA_VERSION: u32 = 5;
+pub(crate) const SCHEMA_VERSION: u32 = 6;
 pub(crate) struct Store {
     pub conn: Connection,
 }
@@ -31,6 +31,9 @@ impl Store {
             }
             if version < 5 {
                 tx.execute_batch(include_str!("migrations/005_sessions.sql"))?;
+            }
+            if version < 6 {
+                tx.execute_batch(include_str!("migrations/006_reviews_undo.sql"))?;
             }
             tx.pragma_update(None, "user_version", SCHEMA_VERSION)?;
             tx.commit()?;

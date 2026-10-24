@@ -98,6 +98,7 @@ impl App {
             return self.read_session(existing.id);
         }
         let mut s = Session {
+            last_review: None,
             id: id(),
             deck_id,
             filter: ReviewFilter::All,
@@ -266,6 +267,7 @@ impl App {
                 None
             };
             let frame = ReviewFrame {
+                last_review: s.last_review.clone(),
                 session_id: s.id.clone(),
                 filter: s.filter,
                 presentation_id: p.id.clone(),
@@ -282,6 +284,7 @@ impl App {
             Ok(ReviewView::Question(Box::new(frame)))
         } else {
             let empty = EmptyFilterView {
+                last_review: s.last_review.clone(),
                 session_id: s.id.clone(),
                 filter: s.filter,
                 next_due_at,
@@ -303,6 +306,7 @@ impl App {
             .map_err(|_| AppError::new("invalidHistory"))?;
         let end: DateTime<Utc> = ended.parse().map_err(|_| AppError::new("invalidHistory"))?;
         Ok(SessionSummary {
+            last_review: s.last_review.clone(),
             session_id: s.id.clone(),
             filter: s.filter,
             filter_changes: s.filter_changes.clone(),
