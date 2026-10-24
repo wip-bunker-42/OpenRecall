@@ -5,6 +5,8 @@ use crate::{
 };
 use std::{path::Path, sync::Arc};
 pub struct App {
+    pub(crate) import_previews:
+        std::collections::HashMap<String, crate::contracts::import::ImportPreview>,
     pub(crate) runtime_id: String,
     pub(crate) store: Store,
     #[allow(dead_code)] // Used by scheduling/session tasks, injected from the first migration.
@@ -19,6 +21,7 @@ impl App {
         random: Box<dyn RandomSource>,
     ) -> AppResult<Self> {
         Ok(Self {
+            import_previews: Default::default(),
             runtime_id: uuid::Uuid::new_v4().to_string(),
             store: Store::open(path)?,
             clock,
@@ -36,6 +39,10 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::PreviewImport { deck_id, text } => {
+                Ok(Response::PreviewImport(self.preview_import(deck_id, text)?))
+            }
+            Request::CommitImport(input) => Ok(Response::CommitImport(self.commit_import(input)?)),
             Request::RateCard(input) => Ok(Response::RateCard(self.rate_card(input)?)),
             Request::UndoReview { session_id } => {
                 Ok(Response::UndoReview(self.undo_review(session_id)?))

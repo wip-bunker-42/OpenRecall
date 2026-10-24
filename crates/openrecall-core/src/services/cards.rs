@@ -86,9 +86,17 @@ impl App {
         deck_id: String,
         draft: CardDraft,
     ) -> AppResult<CardDetail> {
+        self.create_card_at(deck_id, draft, self.clock.now())
+    }
+    pub(crate) fn create_card_at(
+        &mut self,
+        deck_id: String,
+        draft: CardDraft,
+        at: chrono::DateTime<chrono::Utc>,
+    ) -> AppResult<CardDetail> {
         let _: DeckDetail = self.store.get("decks", &deck_id)?;
         let forms = self.form_drafts(draft, None)?;
-        let now = self.clock.now().to_rfc3339();
+        let now = at.to_rfc3339();
         let card = CardDetail {
             bag: Default::default(),
             id: id(),

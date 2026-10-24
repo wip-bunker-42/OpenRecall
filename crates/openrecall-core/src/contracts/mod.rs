@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use ts_rs::TS;
 pub mod cards;
+pub mod import;
+use import::{CommitImportInput, ImportPreview, ImportReport};
 pub mod review;
 use crate::scheduling::queue::ReviewFilter;
 use review::{RateInput, ResumableSession, ReviewView, SessionTiming};
@@ -29,6 +31,11 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    PreviewImport {
+        deck_id: String,
+        text: String,
+    },
+    CommitImport(CommitImportInput),
     RateCard(RateInput),
     UndoReview {
         session_id: String,
@@ -107,6 +114,8 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    PreviewImport(ImportPreview),
+    CommitImport(ImportReport),
     RateCard(ReviewView),
     UndoReview(ReviewView),
     CloseSession(DeleteReport),
