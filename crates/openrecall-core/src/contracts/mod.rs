@@ -2,8 +2,11 @@ use crate::{AppError, AppResult, domain::settings::Settings};
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 use ts_rs::TS;
+pub mod cards;
 pub mod library;
+use crate::domain::card::CardDetail;
 use crate::domain::profile::ProfileDetail;
+use cards::{CardDraft, Page};
 use library::{DeckDetail, DeleteReport};
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
@@ -22,6 +25,28 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    CreateCard {
+        deck_id: String,
+        draft: CardDraft,
+    },
+    UpdateCard {
+        card_id: String,
+        draft: CardDraft,
+        expected_revision: String,
+    },
+    DeleteCard {
+        card_id: String,
+        expected_revision: String,
+    },
+    GetCard {
+        card_id: String,
+    },
+    ListCards {
+        deck_id: String,
+        query: String,
+        page: u32,
+        page_size: u16,
+    },
     Bootstrap {},
     CreateDeck {
         name: String,
@@ -48,6 +73,11 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    CreateCard(CardDetail),
+    UpdateCard(CardDetail),
+    DeleteCard(DeleteReport),
+    GetCard(CardDetail),
+    ListCards(Page<CardDetail>),
     Bootstrap(Bootstrap),
     CreateDeck(DeckDetail),
     RenameDeck(DeckDetail),

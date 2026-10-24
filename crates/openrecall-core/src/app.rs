@@ -34,6 +34,35 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::CreateCard { deck_id, draft } => {
+                Ok(Response::CreateCard(self.create_card(deck_id, draft)?))
+            }
+            Request::UpdateCard {
+                card_id,
+                draft,
+                expected_revision,
+            } => Ok(Response::UpdateCard(self.update_card(
+                card_id,
+                draft,
+                expected_revision,
+            )?)),
+            Request::DeleteCard {
+                card_id,
+                expected_revision,
+            } => Ok(Response::DeleteCard(
+                self.delete_card(card_id, expected_revision)?,
+            )),
+            Request::GetCard { card_id } => {
+                Ok(Response::GetCard(self.store.get("cards", &card_id)?))
+            }
+            Request::ListCards {
+                deck_id,
+                query,
+                page,
+                page_size,
+            } => Ok(Response::ListCards(
+                self.list_cards(deck_id, query, page, page_size)?,
+            )),
             Request::CreateDeck { name, profile_id } => {
                 Ok(Response::CreateDeck(self.create_deck(name, profile_id)?))
             }
@@ -52,10 +81,8 @@ impl App {
             } => Ok(Response::DeleteDeck(
                 self.delete_deck(deck_id, expected_revision)?,
             )),
-            Request::ListDecks {} => Ok(Response::ListDecks(self.store.all("decks")?)),
-            Request::GetDeck { deck_id } => {
-                Ok(Response::GetDeck(self.store.get("decks", &deck_id)?))
-            }
+            Request::ListDecks {} => Ok(Response::ListDecks(self.deck_list()?)),
+            Request::GetDeck { deck_id } => Ok(Response::GetDeck(self.deck_detail(&deck_id)?)),
             Request::SaveSettings {
                 mut settings,
                 expected_revision,
@@ -75,7 +102,7 @@ impl App {
             Request::Bootstrap {} => Ok(Response::Bootstrap(Bootstrap {
                 settings: self.store.settings()?,
                 schema_version: SCHEMA_VERSION,
-                decks: self.store.all("decks")?,
+                decks: self.deck_list()?,
                 profiles: self.store.all("profiles")?,
                 library_revision: self.store.revision()?,
             })),
