@@ -34,6 +34,21 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::SaveSettings {
+                mut settings,
+                expected_revision,
+            } => {
+                if self.store.settings()?.revision != expected_revision {
+                    return Err(crate::AppError::new("conflict"));
+                }
+                settings.validate()?;
+                settings.revision = uuid::Uuid::new_v4().to_string();
+                self.store.conn.execute(
+                    "UPDATE settings SET payload=?1 WHERE id=1",
+                    [serde_json::to_string(&settings)?],
+                )?;
+                Ok(Response::SaveSettings(settings))
+            }
             Request::Bootstrap {} => Ok(Response::Bootstrap(Bootstrap {
                 settings: self.store.settings()?,
                 schema_version: SCHEMA_VERSION,

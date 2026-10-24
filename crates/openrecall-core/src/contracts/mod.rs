@@ -17,11 +17,16 @@ pub struct Bootstrap {
 )]
 pub enum Request {
     Bootstrap {},
+    SaveSettings {
+        settings: Settings,
+        expected_revision: String,
+    },
 }
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
     Bootstrap(Bootstrap),
+    SaveSettings(Settings),
 }
 pub fn export(output: &Path) -> AppResult<()> {
     let config = ts_rs::Config::default().with_out_dir(output);

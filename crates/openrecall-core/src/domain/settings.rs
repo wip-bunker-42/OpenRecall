@@ -30,3 +30,33 @@ impl Default for Settings {
         }
     }
 }
+impl Settings {
+    pub fn validate(&self) -> crate::AppResult<()> {
+        use crate::AppError;
+        if self.timezone.parse::<chrono_tz::Tz>().is_err() {
+            return Err(AppError::field("timezone", "invalidTimezone"));
+        }
+        if self.day_start_minute > 1439 {
+            return Err(AppError::field("dayStartMinute", "range"));
+        }
+        if !self.desired_retention.is_finite() || !(0.70..=0.99).contains(&self.desired_retention) {
+            return Err(AppError::field("desiredRetention", "range"));
+        }
+        if !(10..=3600).contains(&self.min_interval_seconds) {
+            return Err(AppError::field("minIntervalSeconds", "range"));
+        }
+        if !(1..=36500).contains(&self.max_interval_days) {
+            return Err(AppError::field("maxIntervalDays", "range"));
+        }
+        if !self.text_scale.is_finite() || !(0.8..=2.0).contains(&self.text_scale) {
+            return Err(AppError::field("textScale", "range"));
+        }
+        if ![10, 20, 50, 100].contains(&self.page_size) {
+            return Err(AppError::field("pageSize", "range"));
+        }
+        if !["followSystem", "reduce"].contains(&self.reduced_motion.as_str()) {
+            return Err(AppError::field("reducedMotion", "invalidOption"));
+        }
+        Ok(())
+    }
+}
