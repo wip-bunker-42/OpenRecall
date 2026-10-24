@@ -2,6 +2,7 @@ mod app;
 pub mod contracts;
 pub mod domain;
 mod error;
+mod jobs;
 mod runtime;
 pub mod scheduling;
 mod services;

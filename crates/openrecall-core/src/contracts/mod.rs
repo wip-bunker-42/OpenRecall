@@ -7,7 +7,7 @@ pub mod import;
 use import::{CommitImportInput, ImportPreview, ImportReport};
 pub mod profiles;
 pub mod training;
-use training::TrainingEligibility;
+use training::{TrainingEligibility, TrainingJob};
 pub mod review;
 use crate::domain::profile::TrainingConfig;
 use crate::scheduling::queue::ReviewFilter;
@@ -36,6 +36,22 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    StartTraining {
+        profile_id: String,
+    },
+    GetTrainingJob {
+        job_id: String,
+    },
+    CancelTraining {
+        job_id: String,
+    },
+    ApplyTraining {
+        job_id: String,
+        expected_profile_revision: String,
+    },
+    ListTrainingRuns {
+        profile_id: String,
+    },
     GetTrainingEligibility {
         profile_id: String,
     },
@@ -154,6 +170,11 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    StartTraining(TrainingJob),
+    GetTrainingJob(TrainingJob),
+    CancelTraining(TrainingJob),
+    ApplyTraining(ProfileDetail),
+    ListTrainingRuns(Vec<TrainingJob>),
     GetTrainingEligibility(TrainingEligibility),
     ListProfiles(Vec<ProfileDetail>),
     GetProfile(ProfileDetail),

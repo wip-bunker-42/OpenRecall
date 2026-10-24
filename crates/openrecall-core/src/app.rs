@@ -5,6 +5,7 @@ use crate::{
 };
 use std::{path::Path, sync::Arc};
 pub struct App {
+    pub(crate) jobs: crate::jobs::JobRegistry,
     pub(crate) import_previews:
         std::collections::HashMap<String, crate::contracts::import::ImportPreview>,
     pub(crate) runtime_id: String,
@@ -20,18 +21,30 @@ impl App {
         clock: Arc<dyn Clock>,
         random: Box<dyn RandomSource>,
     ) -> AppResult<Self> {
-        Ok(Self {
+        let app = Self {
+            jobs: Default::default(),
             import_previews: Default::default(),
             runtime_id: uuid::Uuid::new_v4().to_string(),
             store: Store::open(path)?,
             clock,
             random,
-        })
+        };
+        app.store.begin()?;
+        let recovered = app.recover_training_jobs();
+        app.store.finish(recovered)?;
+        Ok(app)
     }
     pub fn execute(&mut self, request: Request) -> AppResult<Response> {
         self.store.begin()?;
+        let pending_before = self.jobs.pending.len();
         let result = self.dispatch(request);
-        self.store.finish(result)
+        let result = self.store.finish(result);
+        if result.is_ok() {
+            self.jobs.launch();
+        } else {
+            self.jobs.pending.truncate(pending_before);
+        }
+        result
     }
     pub fn execute_json(&mut self, request: serde_json::Value) -> AppResult<serde_json::Value> {
         let request = serde_json::from_value(request)?;
@@ -39,6 +52,24 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::StartTraining { profile_id } => {
+                Ok(Response::StartTraining(self.start_training(profile_id)?))
+            }
+            Request::GetTrainingJob { job_id } => {
+                Ok(Response::GetTrainingJob(self.poll_training(job_id)?))
+            }
+            Request::CancelTraining { job_id } => {
+                Ok(Response::CancelTraining(self.cancel_training(job_id)?))
+            }
+            Request::ApplyTraining {
+                job_id,
+                expected_profile_revision,
+            } => Ok(Response::ApplyTraining(
+                self.apply_training(job_id, expected_profile_revision)?,
+            )),
+            Request::ListTrainingRuns { profile_id } => Ok(Response::ListTrainingRuns(
+                self.list_training_runs(profile_id)?,
+            )),
             Request::GetTrainingEligibility { profile_id } => Ok(Response::GetTrainingEligibility(
                 self.profile_dataset(&profile_id)?.eligibility,
             )),
