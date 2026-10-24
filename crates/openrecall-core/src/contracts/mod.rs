@@ -5,8 +5,11 @@ use ts_rs::TS;
 pub mod cards;
 pub mod import;
 use import::{CommitImportInput, ImportPreview, ImportReport};
+pub mod profiles;
 pub mod review;
+use crate::domain::profile::TrainingConfig;
 use crate::scheduling::queue::ReviewFilter;
+use profiles::{AssignProfileInput, SaveDeckPolicyInput};
 use review::{RateInput, ResumableSession, ReviewView, SessionTiming};
 pub mod library;
 use crate::domain::card::CardDetail;
@@ -31,6 +34,38 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    ListProfiles {},
+    GetProfile {
+        profile_id: String,
+    },
+    CreateProfile {
+        name: String,
+    },
+    RenameProfile {
+        profile_id: String,
+        name: String,
+        expected_revision: String,
+    },
+    SaveTrainingConfig {
+        profile_id: String,
+        config: TrainingConfig,
+        expected_revision: String,
+    },
+    AssignProfile(AssignProfileInput),
+    DetachProfile {
+        deck_id: String,
+        new_name: String,
+        expected_deck_revision: String,
+    },
+    ResetProfile {
+        profile_id: String,
+        expected_revision: String,
+    },
+    DeleteProfile {
+        profile_id: String,
+        expected_revision: String,
+    },
+    SaveDeckPolicy(SaveDeckPolicyInput),
     PreviewImport {
         deck_id: String,
         text: String,
@@ -114,6 +149,16 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    ListProfiles(Vec<ProfileDetail>),
+    GetProfile(ProfileDetail),
+    CreateProfile(ProfileDetail),
+    RenameProfile(ProfileDetail),
+    SaveTrainingConfig(ProfileDetail),
+    AssignProfile(ProfileDetail),
+    DetachProfile(ProfileDetail),
+    ResetProfile(ProfileDetail),
+    DeleteProfile(DeleteReport),
+    SaveDeckPolicy(DeckDetail),
     PreviewImport(ImportPreview),
     CommitImport(ImportReport),
     RateCard(ReviewView),

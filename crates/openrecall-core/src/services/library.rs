@@ -16,6 +16,8 @@ pub(crate) fn name(value: String) -> AppResult<String> {
 impl App {
     pub(crate) fn create_default_profile(&self, name: String) -> AppResult<ProfileDetail> {
         let model = ModelRevision {
+            model_version: crate::domain::profile::model_version(),
+            engine_revision: crate::domain::profile::engine_revision(),
             id: id(),
             parameters: fsrs::DEFAULT_PARAMETERS.to_vec(),
             origin: "default".into(),
@@ -25,6 +27,7 @@ impl App {
         };
         self.store.put("models", &model.id, &model)?;
         let profile = ProfileDetail {
+            model_revision: Some(model.clone()),
             id: id(),
             name,
             config: TrainingConfig::default(),

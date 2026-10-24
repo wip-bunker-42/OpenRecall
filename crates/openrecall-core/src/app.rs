@@ -39,6 +39,58 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::ListProfiles {} => Ok(Response::ListProfiles(self.store.all("profiles")?)),
+            Request::GetProfile { profile_id } => {
+                Ok(Response::GetProfile(self.get_profile(&profile_id)?))
+            }
+            Request::CreateProfile { name } => {
+                Ok(Response::CreateProfile(self.create_profile(name)?))
+            }
+            Request::RenameProfile {
+                profile_id,
+                name,
+                expected_revision,
+            } => Ok(Response::RenameProfile(self.rename_profile(
+                profile_id,
+                name,
+                expected_revision,
+            )?)),
+            Request::SaveTrainingConfig {
+                profile_id,
+                config,
+                expected_revision,
+            } => Ok(Response::SaveTrainingConfig(self.save_training_config(
+                profile_id,
+                config,
+                expected_revision,
+            )?)),
+            Request::AssignProfile(input) => {
+                Ok(Response::AssignProfile(self.assign_profile(input)?))
+            }
+            Request::DetachProfile {
+                deck_id,
+                new_name,
+                expected_deck_revision,
+            } => Ok(Response::DetachProfile(self.detach_profile(
+                deck_id,
+                new_name,
+                expected_deck_revision,
+            )?)),
+            Request::ResetProfile {
+                profile_id,
+                expected_revision,
+            } => Ok(Response::ResetProfile(
+                self.reset_profile(profile_id, expected_revision)?,
+            )),
+            Request::DeleteProfile {
+                profile_id,
+                expected_revision,
+            } => Ok(Response::DeleteProfile(
+                self.delete_profile(profile_id, expected_revision)?,
+            )),
+            Request::SaveDeckPolicy(input) => {
+                Ok(Response::SaveDeckPolicy(self.save_deck_policy(input)?))
+            }
             Request::PreviewImport { deck_id, text } => {
                 Ok(Response::PreviewImport(self.preview_import(deck_id, text)?))
             }
