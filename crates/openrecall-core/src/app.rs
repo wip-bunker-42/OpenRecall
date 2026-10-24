@@ -34,6 +34,28 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::CreateDeck { name, profile_id } => {
+                Ok(Response::CreateDeck(self.create_deck(name, profile_id)?))
+            }
+            Request::RenameDeck {
+                deck_id,
+                name,
+                expected_revision,
+            } => Ok(Response::RenameDeck(self.rename_deck(
+                deck_id,
+                name,
+                expected_revision,
+            )?)),
+            Request::DeleteDeck {
+                deck_id,
+                expected_revision,
+            } => Ok(Response::DeleteDeck(
+                self.delete_deck(deck_id, expected_revision)?,
+            )),
+            Request::ListDecks {} => Ok(Response::ListDecks(self.store.all("decks")?)),
+            Request::GetDeck { deck_id } => {
+                Ok(Response::GetDeck(self.store.get("decks", &deck_id)?))
+            }
             Request::SaveSettings {
                 mut settings,
                 expected_revision,
@@ -47,11 +69,15 @@ impl App {
                     "UPDATE settings SET payload=?1 WHERE id=1",
                     [serde_json::to_string(&settings)?],
                 )?;
+                self.store.touch()?;
                 Ok(Response::SaveSettings(settings))
             }
             Request::Bootstrap {} => Ok(Response::Bootstrap(Bootstrap {
                 settings: self.store.settings()?,
                 schema_version: SCHEMA_VERSION,
+                decks: self.store.all("decks")?,
+                profiles: self.store.all("profiles")?,
+                library_revision: self.store.revision()?,
             })),
         }
     }

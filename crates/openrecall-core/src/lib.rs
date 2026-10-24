@@ -3,6 +3,7 @@ pub mod contracts;
 pub mod domain;
 mod error;
 mod runtime;
+mod services;
 mod storage;
 pub use app::App;
 pub use error::{AppError, AppResult, FieldError};
