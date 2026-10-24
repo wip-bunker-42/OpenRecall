@@ -2,7 +2,7 @@
 
 Date: 2026-10-24 (Africa/Cairo)
 Status: Draft for user approval; architecture and repository destination approved.
-Builder check: Independent review completed; no important planning questions left.
+Builder check: Initial and revised independent reviews completed; no important planning questions left.
 Product language: Arabic. Development language: English.
 Intended public repository: `wip-bunker-42/OpenRecall`.
 
@@ -15,7 +15,7 @@ review process, import previews, settings, statistics, dialogs, and updates.
 
 Windows 11 is the primary platform; Windows 10, macOS, and Linux are secondary.
 The initial product includes real persistence, genuine FSRS-7 scheduling and
-per-deck optimization, backups, installers, and an in-app updater. It is not a
+optimization profiles, backups, installers, and an in-app updater. It is not a
 browser-only mockup or a service that needs an account or network connection to
 study. There is no cloud backend, telemetry, or automatic upload of study data.
 
@@ -31,18 +31,26 @@ study. There is no cloud backend, telemetry, or automatic upload of study data.
 - Collapsed-by-default sections for card lists, statistics, advanced settings,
   and optimization details. Primary actions remain directly available.
 - One learning state per logical card shared by all of its alternative forms.
+- Randomized forms without replacement within each cycle, with no immediate
+  repeat across cycle boundaries when at least two forms exist.
 - FSRS-7 scheduling using actual elapsed time, including intraday intervals.
 - Review all currently due cards, including new cards; dynamically discover cards
-  that become due while a session is running.
+  that become due while a session is running. Allow an in-session filter for all,
+  new, or previously reviewed cards; default every new session to all.
 - Accessible interval previews for all four ratings and a complete undo of the
   most recent rating, including from the session summary.
 - Validate and preview JSON imports, let the user exclude rows, and prevent exact
   duplicates of existing questions and answers from being imported again.
-- Local per-deck training with a meaningful, enforced data sufficiency gate.
+- Local training through named optimization profiles, each assigned to one or
+  more chosen decks, with a meaningful enforced data sufficiency gate. Enable
+  FSRS-7 schedule penalties by default.
 - Per-deck statistics and a useful session summary.
 - Full, versioned backup export to Downloads and safe full restore.
 - Public GitHub source, quality checks, dependency maintenance, release artifacts,
   and cryptographically verified updates initiated inside the app.
+- Automated accessibility checks by the development agent; manual NVDA testing
+  is performed exclusively by the human partner. The agent must not operate
+  NVDA, Narrator, or another screen reader on the user's machine.
 
 ### Non-goals for the first version
 
@@ -108,11 +116,14 @@ library unless an actual implementation need justifies it.
 - **Library:** create a deck, list decks, compact counts (logical cards, due now,
   new), open a deck, review it, rename it, or delete it.
 - **Deck:** name and compact status; start review; create a card; import JSON;
-  collapsed cards, statistics, and optimization sections. The card section has
+  choose or detach an optimization profile; collapsed cards, statistics, and
+  optimization sections. The card section has
   search and pagination so a large deck does not produce an unbounded page.
 - **Settings:** study preferences, appearance/accessibility preferences, advanced
-  scheduling and training controls, full backups, and updates.
-- **Review and summary:** a focused study flow entered for one deck at a time.
+  scheduling controls, named optimization profiles and their training controls,
+  full backups, and updates.
+- **Review and summary:** a focused study flow entered for one deck at a time,
+  with a visible all/new/previously-reviewed filter.
 
 There is no separate account or sign-in screen. Empty states explain the next
 action. Deletion dialogs identify the target and explain associated data removal.
@@ -178,26 +189,33 @@ entities are:
 | Entity | Essential responsibility |
 | --- | --- |
 | App settings | Validated preferences, study timezone and day boundary |
-| Deck | Name, creation order, per-deck scheduling overrides and active parameters |
-| Card | Deck membership, one memory state, due time, review counts, lifecycle state |
+| Deck | Name, creation order, per-deck scheduling overrides, optimization profile ID |
+| Optimization profile | Name, active parameter revision, training configuration, linked-deck membership revision |
+| Model revision | Immutable parameter vector, FSRS version, origin, training report and provenance |
+| Card | Deck membership, one memory state, due time, review counts, lifecycle state, persistent shuffle-bag state |
 | Card form | Parent card, front/back/notes, stable display order, optional language |
 | Review log | Card, form shown, rating, timestamps, elapsed time, before/after scheduler state, effective settings/model identity, response time |
-| Session | Deck, start/end/status, persisted in-progress presentation and counters |
+| Session | Deck, all/new/previously-reviewed filter, filter changes, start/end/status, persisted presentation and counters |
 | Undo record | Before-image and session/presentation state for the latest rating |
-| Training run | Deck, eligibility counts, configuration, dataset revision, progress, evaluation, candidate parameters and outcome |
+| Training run | Profile, contributing deck IDs, eligibility counts, configuration, dataset and membership revisions, progress, evaluation, candidate parameters and outcome |
 | Schema metadata | Schema version and migration history |
 
 Every card has one primary form at position zero and zero or more alternatives.
 Forms never have a due date or independent FSRS state. The editor always leaves
 at least one valid form. Original imported primary and variant order is retained.
+This is the editor/export order; presentation uses the randomized bag below.
 
 Card and deck edits are transactional. Editing a wording preserves progress and
 does not automatically reset the schedule. An explicit reset-progress action, if
 provided, must be separately labeled and confirmed. Deleting a card removes its
 forms, review history, and undo references; historical aggregates are recalculated
 from remaining history. Deleting a deck removes its cards, histories, sessions,
-and trained parameters. Deletion dialogs explain this. This is an engineering
-choice for simple, predictable ownership and complete deletion.
+and profile assignment, and invalidates affected training snapshots. It does not
+delete a shared profile or change another deck's parameters. Profiles can remain
+unassigned and be managed independently. Immutable model revisions referenced by
+surviving review logs retain their provenance. Deletion dialogs explain this.
+This is an engineering choice for predictable ownership and complete content
+deletion without destroying shared training resources.
 
 Application startup runs migrations safely before accessing data. Back up before
 a destructive schema migration. Do not operate on a newer unsupported schema.
@@ -234,7 +252,7 @@ ratings directly to the corresponding FSRS next state.
 - Apply a configurable lower interval bound (default 60 seconds) and maximum
   interval (default 36500 days). Clamp to a valid ordered range, preserving the
   chosen FSRS memory state. The bounds and the effective interval are visible.
-- No random interval fuzz is required in the first release. Variant rotation
+- No random interval fuzz is required in the first release. Randomized form selection
   addresses wording repetition without adding scheduling randomness.
 - Store the resulting absolute UTC due time and the complete post-review memory
   state atomically with the review log.
@@ -255,32 +273,86 @@ Do not promise that forgetting disappears or that a due card never repeats.
 The enforceable repetition rule concerns forms, not suppressing necessary due
 reviews. The app does not generate alternative questions on its own.
 
-### Variant rotation
+### Randomized forms without replacement
 
-The first presentation uses the primary form. After a successfully committed
-rating, advance to the next form in stable cyclic order. With alternatives, do
-not show the same form again before the other current forms have been visited.
-The next presentation can happen in the same session if FSRS makes it due.
+Treat the primary form and all alternatives as one pool. For each logical card,
+create a randomly shuffled bag containing every current form ID exactly once.
+The next presentation uses the head of that persisted bag; the first ever
+presentation can therefore be any form, including the primary. Do not reshuffle
+on every render or open. Consume that form only with a successfully committed
+rating. Every form appears once within a cycle before that bag is exhausted.
 
-Viewing a card, revealing its answer, opening the editor, or abandoning a review
-does not advance rotation. Undo restores the form cursor exactly. After editing
-forms, keep the next surviving stable form ID; if it was removed, choose the next
-surviving form in order. With only one form, it is naturally reused. All forms
-share ratings, history, memory state, and the next due date.
+When the bag is exhausted, shuffle all current forms into a new bag. With at least
+two forms, prevent the first form of the new bag from equaling the last form
+consumed in the previous bag. This is random order without replacement per
+cycle, plus prevention of an immediate boundary repeat; it is not a fixed
+rotation and does not promise a minimum time gap for every wording across cycles.
+With one form, reuse is necessary. The next presentation can occur in the same
+session if FSRS makes the shared card due.
+
+Persist the remaining ordered IDs, cycle membership/consumed IDs, last consumed
+ID, and any reserved presentation, so restart, session filters, and backup restore
+do not reset the bag or allow selecting a new wording by reopening a question.
+Viewing/revealing, opening the editor, changing filters, or abandoning review
+does not consume a form. Undo restores the exact pre-rating bag and selected
+form, including when a rating exhausted a bag; it must not draw a new form.
+
+After form edits, remove deleted IDs from the bag and cycle membership, retain a
+surviving reserved form, and randomly insert newly created IDs among the unused
+forms. An edit to the text of an existing stable ID does not create a fresh form
+for cycle purposes. Refill only when no valid unused forms remain. A removed
+reserved form is replaced by the next valid unused form. Use actual runtime
+randomness and an injected seeded generator for reproducible tests. All forms
+still share one memory state, schedule, review history, and logical-card count.
 
 ## 7. Review session and queue
 
 Starting review selects one deck and all its nondeleted cards with `due_at <=
-now`, including new, learning, relearning, and review cards. No default daily
-limit or new-card cap hides eligible cards.
+now`, including new, learning, relearning, and review cards. The default filter
+for every new session is all. No default daily limit or new-card cap hides
+eligible cards.
+
+### Review filter
+
+Expose a labeled native select or radio group inside the review screen:
+
+- `الكل`: all due cards in the deck.
+- `الجديدة`: due cards that have never had a committed rating.
+- `سبق مراجعتها`: due cards with at least one committed rating, including those
+  in learning, relearning, or review.
+
+"Older cards" is interpreted here as previously reviewed, not a cutoff on card
+creation dates. The filter restricts the current queue, not the deck's data, due
+dates, or FSRS state. Do not include future cards to fill a filtered session.
+Keep the selected filter across resume of this session; a new session starts on
+all unless the user changes it there.
+
+Membership uses the live learning state. In new-only mode, a card leaves that
+filter after its first committed rating even if rated Again; its later due
+learning review appears under all or previously reviewed. State this in help text.
+Undoing its first rating makes it new again.
+
+Changing the filter does not rate or consume the currently displayed form. Keep
+that presentation and reveal state if the card is still eligible; otherwise
+park it unchanged and show the earliest matching due card. Revisiting the parked
+card restores the same form and reveal state. Preserve already committed session
+history and timings; record filter changes for the summary. Recompute the queue,
+progress denominator, earliest eligible timer, and remaining count. If no matching
+cards are due after an explicit filter change, show an empty-filter state with
+the filter control, a return-to-all action, and an end-session action rather than
+immediately navigating away. When an eligible queue is naturally exhausted after
+a rating, complete it using the rules below.
+
+### Due ordering and live updates
 
 Sort by earliest due timestamp first, then creation time and stable ID for ties.
 New cards use their creation/import timestamp as their initial due time. This
 matches the requested oldest/most urgent due order without an undisclosed
 priority algorithm.
 
-The currently displayed card remains stable while the user reads it. Query and
-merge newly due cards after every rating or undo, on app resume/focus, and when
+The currently displayed card remains stable while the user reads it unless the
+user explicitly changes its filter. Query and merge newly due cards that match
+the current filter after every rating or undo, on app resume/focus, and when
 a timer reaches the earliest upcoming due timestamp. Re-sort only the waiting
 queue. Ensure at most one pending occurrence of a card, and do not insert the
 displayed card again while it is being answered. A rated card can return only
@@ -288,8 +360,11 @@ when its new due time is reached.
 
 Above the question show `البطاقة X من Y`. X counts committed review attempts in
 the session plus the current presentation. Y is committed attempts plus the
-current card and currently due waiting cards. Announce that the total can grow
-when additional cards become due. Keep distinct-card counts separately so the
+current card and currently due waiting cards matching the current filter.
+Previously completed attempts remain counted even when the filter changes;
+the displayed total is explicitly a live session total, not a fixed deck size.
+Announce changes when newly due cards or a filter switch changes the total.
+Keep distinct-card counts separately so the
 summary does not confuse repeat attempts with unique cards.
 
 The answer-revealed state displays all four interval previews. A successful
@@ -297,8 +372,9 @@ rating persists one atomic change, announces the actual due date, and moves to
 the next available question. Disable duplicate submission while a command is in
 flight and recover visibly from write failures without losing the displayed card.
 
-Before completing an empty queue, query due cards again inside the completion
-operation. If none are due now, finish and show the summary immediately. Do not
+Before completing an empty queue, query due cards matching the selected filter
+again inside the completion operation. If none are due now, finish and show the
+summary immediately, except for the explicit empty-filter state above. Do not
 keep the session open waiting for future due cards; they have not become due
 during this session. Show the next future due time in the summary. If no cards
 were due when starting, show a useful zero-review summary and that next time.
@@ -318,19 +394,24 @@ completed session; consecutive undos may be supported if the same transaction
 model remains simple, but one-level undo is the required acceptance target.
 
 Persist enough before-state to restore the card's complete memory, lifecycle,
-due time, counts, last-review timestamp, form cursor, displayed form, reveal
-state, session counts, and review log. The undone rating must not contribute to
+due time, counts, last-review timestamp, complete shuffle-bag state, displayed
+form, reveal state, active filter, parked presentations, session counts, and review
+log. The undone rating must not contribute to
 statistics or training. Undo the last rating from a summary returns to that
 question. Refresh time-dependent queue membership after restoring the prior
 presentation; real elapsed time is not reversed. Irrelevant dialogs and render
-events do not replace the undo record. Leaving that session, deleting its card,
+events and changing filters do not replace the undo record. Undo restores the
+filter that was active before that rating, even if the user changed it afterward,
+so the restored question is visible. Leaving that session, deleting its card,
 or restoring a backup invalidates its undo record clearly.
 
 ### Summary
 
 Include start/end time, wall and active duration, review attempts, unique logical
 cards, new cards studied, distribution of the four ratings, mean active response
-time, remaining due count if ended early, and earliest upcoming due time. State
+time, selected filter and any filter changes, matching remaining due count if
+ended early, total deck due count across all filters, and earliest upcoming due
+time matching the final filter. State
 that recall rate means ratings 2-4 divided by scored attempts, not a promise of
 future retention. Provide return-to-deck and undo actions.
 
@@ -423,16 +504,21 @@ Defaults and constraints are engineering proposals, not prior user selections.
 | Training seed | Upstream default | Unsigned bounded integer |
 | Training maximum sequence length | 256 | Validated 32-4096 |
 | Training regularization multiplier (gamma) | Upstream default 1.0 | Validated 0.1-5 |
-| Schedule penalties | Upstream default off | Advanced per-deck toggle |
+| Schedule penalties | On (explicit user choice) | Advanced per-profile toggle |
 
 Use normal and collapsed advanced sections with help text, valid units, and
 reset-to-default actions. Decks inherit global scheduling defaults unless they
-have explicit overrides. Training controls are set and stored per deck; the
-settings area can link to each deck's optimization panel.
+have explicit overrides. Training controls and parameters belong to optimization
+profiles; deck pages link to their assigned profile. Desired retention and
+interval bounds remain scheduling preferences and can differ between decks that
+share a trained parameter vector. Explicitly send `enable_sched_penalties: true`
+for a new profile; do not inherit the upstream library's false default. The
+user can disable it per profile, and the effective value is stored in each run.
 
 Expose the active learned parameter vector, its origin, last training metrics,
 engine/model versions, schema version, and data location as read-only information.
-Offer an explicit restore-default-parameters action for a deck. Raw learned
+Offer an explicit restore-default-parameters action for a profile, showing all
+affected decks before confirmation. Raw learned
 weights, derived counts, database paths, and compatibility identifiers are
 read-only because editing them without preserving model constraints or data
 relationships would be unsafe. These do not restrict valid scheduling/training
@@ -451,21 +537,69 @@ Retention/interval setting changes and activation of trained/default parameters
 affect future ratings. Rebuild affected cards' memory states from their actual
 histories when the parameter vector changes, but preserve already committed due
 times until the next review. Do not silently rewrite a deck's future calendar.
-Apply model updates only outside an active session for that deck; do not allow a
-training result to invalidate the question currently being answered.
+Apply model updates only outside active sessions for every affected deck; do not
+allow a training result or reassignment to invalidate a displayed question.
 
-## 10. Per-deck optimization
+## 10. Optimization profiles and shared training
 
-Training is manual, local, cancellable, and scoped to exactly one deck. It never
-borrows another deck's history. Multiple forms contribute to their parent card's
-single chronological history. Exclude undone reviews and deleted cards. Preserve
-fractional-day deltas and use zero for each first review.
+Training is manual, local, cancellable, and scoped to a named optimization
+profile. A profile may serve one or more user-selected decks. Unrelated profiles
+and unassigned decks never contribute data to its training. This replaces the
+original mandatory one-trained-model-per-deck design without creating one
+automatic user-wide model.
+
+### Profile lifecycle and assignments
+
+- Settings includes profile creation, renaming, model/configuration inspection,
+  linked-deck management, training, restoring default weights, and deletion of
+  unused profiles. A deck page can select an existing profile, create an
+  independent profile, or detach into an independent copy.
+- Every deck has exactly one assigned profile. Creating a deck creates an
+  independent default profile unless the user explicitly selects an existing
+  profile. Independent default profiles start with official FSRS-7 parameters,
+  short-term support enabled, and schedule penalties enabled.
+- Linking several decks to one profile makes them use the profile's active
+  parameter vector and training configuration. Their cards, progress, due dates,
+  review sessions, deck statistics, desired retention, and interval bounds remain
+  separate. Sharing a model never merges cards or variants.
+- The proposed interpretation of shared optimization is pooled training on the
+  complete usable histories of the currently linked decks. Counts for data
+  sufficiency are pooled across those decks. The profile screen names the
+  contributing decks and shows each one's contribution; sharing is explicit.
+- Assigning a deck to an already trained profile applies that active model after
+  confirmation and rebuilds its memory states from its own history, preserving
+  existing due times. A model is identified by its immutable revision, not by
+  duplicating a mutable vector into each deck.
+- Detach means creating a new independent profile assigned only to that deck,
+  copying the current parameter revision and training configuration so behavior
+  initially remains consistent. Future training of either profile does not
+  change the other. It preserves every card, history, due instant, and shuffle
+  bag. An alternative explicit action can reassign to a fresh default profile.
+- An active learned vector can reflect decks that contributed to its previous
+  training, even after membership changes. Keep its provenance visible. Detaching
+  is separation for future training; it does not mathematically remove past
+  contributors from an already learned vector. Reset to default weights or train
+  the independent profile to replace those inherited weights.
+- Block deletion of a profile while any deck uses it. The user can first reassign
+  or detach those decks. Deleting an unassigned profile must not delete cards,
+  other profiles, or immutable revisions still referenced by surviving history.
+- Assignment/membership/configuration changes invalidate pending training
+  candidates and update the membership/settings revision. Change assignments or
+  activate/reset a model only when no involved deck has an active or resumable
+  review session; the user can finish that session first. Renaming alone does
+  not change the model or require rebuilding states.
+
+Multiple forms contribute to their parent card's single chronological history.
+Exclude undone reviews and deleted cards. Use globally unique card IDs in pooled
+datasets so similarly numbered cards from different decks cannot collide.
+Preserve fractional-day deltas and use zero for each first review.
 
 ### Data eligibility policy
 
 The following conservative product gate is an engineering choice. It is separate
 from the library's much lower implementation minimum and is not a statistical
-guarantee of improvement. Require:
+guarantee of improvement. Apply it to the current profile's pooled eligible data,
+or just one deck when the profile has one member. Require:
 
 - At least 400 eligible scored recall observations after a card's first rating.
 - At least 50 distinct cards contributing such observations.
@@ -475,39 +609,51 @@ guarantee of improvement. Require:
   and a held-out partition with at least 80 observations from at least 10 cards.
 
 Count actual usable observations, not just raw button presses or all first
-ratings. Show current counts and each unmet condition. Disable training and also
+ratings. Show current counts, contributing decks, and each unmet condition.
+An unassigned profile has no training data and is ineligible. Disable training and also
 reject the command in Rust while ineligible. Explain when defaults are being
 used and why collecting more history is necessary.
 
 ### Training and evaluation
 
-Take an immutable, revision-tagged snapshot. Construct chronological per-card
-histories and prefix items with stable aligned card IDs for the upstream trainer.
+Take an immutable snapshot tagged with profile/model/configuration revisions,
+the exact member-deck set, and each member's data revision. Construct
+chronological per-card histories and prefix items with stable aligned card IDs
+for the upstream trainer.
 Split by target observation timestamp, approximately oldest 80% for training and
 newest 20% held out. Training prefixes must contain no events beyond the cutoff.
 Held-out predictions may use genuinely earlier observations of the same card,
 but never the target rating or later observations. Compare the candidate against
-the deck's existing parameters on precisely the same held-out targets using
+the profile's existing parameters on precisely the same held-out targets using
 unweighted log loss and root mean squared probability error. Explain both metrics
 in Arabic in expandable details.
 
-Use the real upstream `compute_parameters` for `Fsrs7`, with short-term support,
-and report genuine progress. Validate parameter length, finite numbers, and
+Use the real upstream `compute_parameters` for `Fsrs7`, with short-term support
+and the profile's explicit schedule-penalty value (true by default), and report
+genuine progress. Validate parameter length, finite numbers, and
 upstream model constraints before constructing a candidate. Do not call returning
 unchanged default parameters an optimized result.
 
 An acceptable candidate improves held-out log loss by at least 0.0001 and does
 not worsen RMSE by more than 0.0001. These numeric tolerances are implementation
-policy and tested explicitly. Show counts, old/new metrics, and outcome. If it
+policy and tested explicitly. Show counts, old/new pooled metrics, per-deck
+held-out breakdowns when data permits, and outcome. State that improvement is
+measured for the pooled profile and need not mean improvement in every member
+deck. If it
 does not pass, keep the current model. If it passes, allow the user to apply it
-or keep the current model; applying rebuilds memory states atomically and
-preserves existing due dates. Do not perform a second fit on the held-out data
+or keep the current model; confirmation lists all affected decks. Applying
+atomically publishes one immutable revision and rebuilds memory states for all
+linked decks from their own histories, preserving existing due dates. Other
+profiles remain unchanged. Do not perform a second fit on the held-out data
 and then misrepresent its validation score as an independent test.
 
 Allow cancellation, keep UI responsive, and leave active parameters intact on
-failure or cancellation. If the deck's data/settings revision changes during a
-run, do not activate a stale candidate; require a fresh run. Persist the training
-report and model provenance. Do not train during a review session of that deck.
+failure or cancellation. If any contributing deck's data, profile membership,
+training settings, or baseline model revision changes during a run, do not
+activate a stale candidate; require a fresh run. Persist the report and complete
+model provenance. Do not train during an active or resumable review session of
+any linked deck. Unrelated decks may be reviewed without contributing to or
+invalidating the run.
 
 ## 11. Statistics
 
@@ -521,7 +667,8 @@ collapsed per-deck statistics section includes:
   time over today, the last seven days, the last thirty days, and all time.
 - Four-rating distribution and observed recall rate with the stated definition.
 - Daily history grouped by configured study date.
-- Trained/default parameter status and optimization eligibility progress.
+- Assigned optimization profile, trained/default parameter status, and pooled
+  optimization eligibility progress, clearly distinguished from deck-only counts.
 
 All metrics have explicit definitions and empty states; do not display NaN,
 divide by zero, or invent sample progress. Tables and text are authoritative;
@@ -534,9 +681,11 @@ definitions after undo. Editing/deleting data invalidates derived caches.
 Full export is distinct from importing a deck's card JSON. Create a UTF-8,
 versioned `OpenRecall-backup-<local-timestamp>.json` file in the OS-resolved
 Downloads directory, avoiding filename collisions. Export a consistent database
-snapshot including settings, decks, all forms, memory states, absolute due dates,
-review logs, sessions (including resumable state and valid undo records), trained parameters, model
-provenance, training reports, and other user state necessary to resume studying.
+snapshot including settings, decks, all forms, complete shuffle bags, memory
+states, absolute due dates, review logs, sessions (including filters, parked
+presentations, resumable state, and valid undo records), optimization profiles,
+deck-to-profile assignments, immutable model revisions and provenance, training
+reports, and other user state necessary to resume studying.
 Include format/schema/app versions and export time. Exclude machine-bound paths
 and development signing credentials; resolve platform paths on restore.
 
@@ -637,32 +786,46 @@ behavior rather than mirror implementation. The following are required:
 2. **FSRS:** golden cases against the pinned real engine for all ratings, first
    reviews, intraday learning, long intervals, full three-field memory state,
    parameter validation, and fixed-clock preview/commit agreement.
-3. **Forms:** primary -> variant 1 -> variant 2 -> primary, shared schedule and
-   counts, no advancement on reveal/abandon, correct undo and form-edit behavior.
+3. **Forms:** randomized shuffle bags across multiple deterministic test seeds,
+   each current form exactly once per cycle, no immediate boundary repeats when
+   alternatives exist, shared schedule/counts, no consumption on reveal/abandon
+   or filtering, and exact bag restoration on undo/restart/backup/form edits.
 4. **Queue:** includes all due lifecycle states, excludes future cards, orders
    oldest due first, discovers a card becoming due during another question,
-   avoids duplicates, and rechecks before session completion.
+   avoids duplicates, and rechecks before session completion. Verify default-all,
+   new-only and previously-reviewed filters, live membership after first rating,
+   matching timers, in-session switches, parked questions, empty-filter state,
+   filter-aware progress, and undo restoring the applicable prior filter.
 5. **Undo:** restores schedule, memory, form, answer visibility, logs, statistics,
    counters, and summary transition; repeated rating submission is idempotent.
 6. **Import:** malformed/type-invalid/nested/empty/multilingual inputs, optional
    fields, partial variant exclusion, existing and in-file duplicates, zero
    writes before commit, revision conflict, and transaction rollback on failure.
-7. **Training:** prevents insufficient or single-deck-crossed data, uses genuine
-   upstream training on a sufficient deterministic fixture, avoids temporal
-   leakage, handles cancellation/stale data, retains baseline on no improvement,
-   and isolates applied parameters to the correct deck.
+7. **Training:** prevents insufficient data and contributions from unrelated
+   profiles, uses genuine upstream training on a sufficient deterministic
+   single-deck and pooled fixture, avoids temporal leakage, handles cancellation,
+   stale data/membership/settings, and retains baseline on no improvement. Verify
+   default-on schedule penalties, explicit override persistence, all-linked-deck
+   model activation, due-date preservation, attach/detach, independent future
+   training after detach, profile deletion guards, and unaffected other profiles.
 8. **Time:** Cairo DST transitions, configurable day rollover, unchanged due
    instants after timezone changes, fractional deltas, and app resume behavior.
 9. **Backup:** export/restore round trip preserves all study state, cross-platform
    paths are resolved, invalid/future/corrupted snapshots leave data intact, and
-   safety backup failure prevents replacement.
+   safety backup failure prevents replacement. Include shared profiles and model
+   references, memberships, shuffle bags, active filters, and parked questions.
 10. **Frontend:** keyboard-only creation/import/review/undo; correct H1/H2/H3
     labels and hidden answers; accessible interval names; disclosure states;
     focus management; Arabic/English mixed content; error and empty states.
-11. **Native accessibility:** a Windows WebView2 smoke test plus manual assistive
-    technology checks where available, including focus after Alt+Tab. Explicitly
-    record what was tested with NVDA/Narrator and what still needs user testing;
-    automated axe results alone do not establish screen reader compatibility.
+11. **Accessibility responsibility:** the agent runs automated semantic, keyboard,
+    focus, disclosure, contrast, accessibility-tree, and axe checks, plus an
+    automated Windows WebView2 focus/Alt+Tab smoke test where supported. The human
+    partner alone performs manual NVDA checks. The agent must not launch,
+    control, reconfigure, or otherwise use NVDA, Narrator, or any screen reader on
+    the user's computer. Deliver a concise manual test checklist and clearly
+    distinguish automated results from pending human testing. Human NVDA testing
+    is not a prerequisite to delivering source/installers; do not claim it has
+    been completed unless the human reports the results.
 12. **Release:** production frontend and native Windows build, installer artifact,
     CI builds for secondary platforms, updater manifest/signature validation,
     offline use smoke test, and source publication at the approved GitHub URL.
@@ -686,6 +849,11 @@ data guarantees.
 The chosen duplicate scope, training gate, default interval bounds, MIT license,
 plain-text-only content, complete-delete policy, and full-replacement restore
 are explicit engineering proposals for the user to review with this document.
+The interpretation of older cards as previously reviewed, live-state new-only
+filtering, and pooled training within user-selected optimization profiles are
+also explicit proposals. Randomized forms without replacement, optional shared
+profiles, human-only NVDA testing, and default-on schedule penalties are direct
+requirements from the user's design feedback.
 
 ## 17. Primary research references
 
