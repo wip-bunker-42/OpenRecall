@@ -4,6 +4,7 @@ use std::path::Path;
 use ts_rs::TS;
 pub mod cards;
 pub mod import;
+pub mod statistics;
 use import::{CommitImportInput, ImportPreview, ImportReport};
 pub mod profiles;
 pub mod training;
@@ -36,6 +37,9 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    GetDeckStatistics {
+        deck_id: String,
+    },
     StartTraining {
         profile_id: String,
     },
@@ -170,6 +174,7 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    GetDeckStatistics(statistics::DeckStatistics),
     StartTraining(TrainingJob),
     GetTrainingJob(TrainingJob),
     CancelTraining(TrainingJob),
