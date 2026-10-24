@@ -4,3 +4,4 @@ mod library;
 mod profiles;
 mod reviews;
 mod sessions;
+mod training;

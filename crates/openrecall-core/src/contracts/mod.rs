@@ -6,6 +6,8 @@ pub mod cards;
 pub mod import;
 use import::{CommitImportInput, ImportPreview, ImportReport};
 pub mod profiles;
+pub mod training;
+use training::TrainingEligibility;
 pub mod review;
 use crate::domain::profile::TrainingConfig;
 use crate::scheduling::queue::ReviewFilter;
@@ -34,6 +36,9 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    GetTrainingEligibility {
+        profile_id: String,
+    },
     ListProfiles {},
     GetProfile {
         profile_id: String,
@@ -149,6 +154,7 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    GetTrainingEligibility(TrainingEligibility),
     ListProfiles(Vec<ProfileDetail>),
     GetProfile(ProfileDetail),
     CreateProfile(ProfileDetail),

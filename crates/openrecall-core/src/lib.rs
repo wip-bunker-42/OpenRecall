@@ -6,6 +6,7 @@ mod runtime;
 pub mod scheduling;
 mod services;
 mod storage;
+pub mod training;
 pub use app::App;
 pub use error::{AppError, AppResult, FieldError};
 pub use runtime::{Clock, RandomSource, SystemClock, SystemRandom};

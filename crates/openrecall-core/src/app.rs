@@ -39,6 +39,9 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::GetTrainingEligibility { profile_id } => Ok(Response::GetTrainingEligibility(
+                self.profile_dataset(&profile_id)?.eligibility,
+            )),
             Request::ListProfiles {} => Ok(Response::ListProfiles(self.store.all("profiles")?)),
             Request::GetProfile { profile_id } => {
                 Ok(Response::GetProfile(self.get_profile(&profile_id)?))

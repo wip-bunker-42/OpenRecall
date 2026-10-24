@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+pub mod training;
 use chrono::{DateTime, Utc};
 use openrecall_core::{App, Clock, RandomSource};
 use rand::{SeedableRng, seq::SliceRandom};
