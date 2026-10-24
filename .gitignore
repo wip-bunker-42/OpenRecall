@@ -1,0 +1,11 @@
+/target/
+/node_modules/
+/dist/
+/.superpowers/
+/test-results/
+/playwright-report/
+*.sqlite3*
+*.key
+*.pem
+.env*
+!.env.example
