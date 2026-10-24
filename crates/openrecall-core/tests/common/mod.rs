@@ -36,6 +36,21 @@ pub struct Fixture {
     pub app: App,
 }
 impl Fixture {
+    pub fn deck(&mut self, name: &str) -> String {
+        self.call("createDeck", json!({"name":name,"profileId":null}))["id"]
+            .as_str()
+            .unwrap()
+            .into()
+    }
+    pub fn card(&mut self, deck: &str, front: &str, back: &str) -> String {
+        self.call(
+            "createCard",
+            json!({"deckId":deck,"draft":{"forms":[{"front":front,"back":back,"notes":""}]}}),
+        )["id"]
+            .as_str()
+            .unwrap()
+            .into()
+    }
     pub fn new() -> Self {
         let dir = tempfile::tempdir().unwrap();
         let clock = Arc::new(FixedClock {

@@ -3,6 +3,9 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use ts_rs::TS;
 pub mod cards;
+pub mod review;
+use crate::scheduling::queue::ReviewFilter;
+use review::{ResumableSession, ReviewView, SessionTiming};
 pub mod library;
 use crate::domain::card::CardDetail;
 use crate::domain::profile::ProfileDetail;
@@ -11,6 +14,7 @@ use library::{DeckDetail, DeleteReport};
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct Bootstrap {
+    pub resumable_sessions: Vec<ResumableSession>,
     pub settings: Settings,
     pub schema_version: u32,
     pub decks: Vec<DeckDetail>,
@@ -25,6 +29,29 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    StartSession {
+        deck_id: String,
+    },
+    ReadSession {
+        session_id: String,
+    },
+    ResumeSession {
+        session_id: String,
+    },
+    SetReviewFilter {
+        session_id: String,
+        filter: ReviewFilter,
+    },
+    RevealAnswer {
+        session_id: String,
+    },
+    EndSession {
+        session_id: String,
+    },
+    SetSessionActivity {
+        session_id: String,
+        active: bool,
+    },
     CreateCard {
         deck_id: String,
         draft: CardDraft,
@@ -73,6 +100,13 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    StartSession(ReviewView),
+    ReadSession(ReviewView),
+    ResumeSession(ReviewView),
+    SetReviewFilter(ReviewView),
+    RevealAnswer(ReviewView),
+    EndSession(ReviewView),
+    SetSessionActivity(SessionTiming),
     CreateCard(CardDetail),
     UpdateCard(CardDetail),
     DeleteCard(DeleteReport),

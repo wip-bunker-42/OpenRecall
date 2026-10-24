@@ -5,6 +5,7 @@ use crate::{
 };
 use std::{path::Path, sync::Arc};
 pub struct App {
+    pub(crate) runtime_id: String,
     pub(crate) store: Store,
     #[allow(dead_code)] // Used by scheduling/session tasks, injected from the first migration.
     pub(crate) clock: Arc<dyn Clock>,
@@ -18,6 +19,7 @@ impl App {
         random: Box<dyn RandomSource>,
     ) -> AppResult<Self> {
         Ok(Self {
+            runtime_id: uuid::Uuid::new_v4().to_string(),
             store: Store::open(path)?,
             clock,
             random,
@@ -34,6 +36,27 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::StartSession { deck_id } => {
+                Ok(Response::StartSession(self.start_session(deck_id)?))
+            }
+            Request::ReadSession { session_id } => {
+                Ok(Response::ReadSession(self.read_session(session_id)?))
+            }
+            Request::ResumeSession { session_id } => {
+                Ok(Response::ResumeSession(self.read_session(session_id)?))
+            }
+            Request::SetReviewFilter { session_id, filter } => Ok(Response::SetReviewFilter(
+                self.set_filter(session_id, filter)?,
+            )),
+            Request::RevealAnswer { session_id } => {
+                Ok(Response::RevealAnswer(self.reveal_answer(session_id)?))
+            }
+            Request::EndSession { session_id } => {
+                Ok(Response::EndSession(self.end_session(session_id)?))
+            }
+            Request::SetSessionActivity { session_id, active } => Ok(Response::SetSessionActivity(
+                self.session_activity(session_id, active)?,
+            )),
             Request::CreateCard { deck_id, draft } => {
                 Ok(Response::CreateCard(self.create_card(deck_id, draft)?))
             }
@@ -102,6 +125,7 @@ impl App {
             Request::Bootstrap {} => Ok(Response::Bootstrap(Bootstrap {
                 settings: self.store.settings()?,
                 schema_version: SCHEMA_VERSION,
+                resumable_sessions: self.resumable_sessions()?,
                 decks: self.deck_list()?,
                 profiles: self.store.all("profiles")?,
                 library_revision: self.store.revision()?,
