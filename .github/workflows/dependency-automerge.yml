@@ -1,0 +1,32 @@
+name: Verified dependency maintenance
+on:
+  workflow_run:
+    workflows: [Quality]
+    types: [completed]
+permissions:
+  contents: read
+concurrency:
+  group: dependency-merge-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+jobs:
+  merge:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: read
+      statuses: read
+    steps:
+      # Always execute trusted default-branch policy, never PR scripts or dependencies.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - run: node scripts/dependency-policy.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}

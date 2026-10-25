@@ -10,7 +10,9 @@ fn exported_digest_matches_the_canonical_json_payload_actually_written() {
     let file = f.dir.path().join("digest.json");
     f.app.export_snapshot(&file).unwrap();
     let raw = read(&file);
-    let hash: String = Sha256::digest(serde_json::to_vec(&raw["data"]).unwrap())
+    let mut canonical = raw["data"].clone();
+    canonical.sort_all_objects();
+    let hash: String = Sha256::digest(serde_json::to_vec(&canonical).unwrap())
         .iter()
         .map(|b| format!("{b:02x}"))
         .collect();

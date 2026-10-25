@@ -1,0 +1,167 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing reviewed release tag
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+env:
+  CARGO_INCREMENTAL: '0'
+  CARGO_PROFILE_DEV_DEBUG: '0'
+  CARGO_PROFILE_TEST_DEBUG: '0'
+jobs:
+  prepare:
+    if: github.ref_type == 'tag' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      checks: read
+    outputs:
+      version: ${{ steps.context.outputs.version }}
+      sha: ${{ steps.context.outputs.sha }}
+      tag: ${{ steps.context.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - id: context
+        run: node scripts/release-context.mjs
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+  build:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-x86_64
+            os: windows-2025
+            target: x86_64-pc-windows-msvc
+            bundles: nsis
+            jobs: '4'
+          - platform: linux-x86_64
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            bundles: appimage,deb
+            jobs: '4'
+          - platform: darwin-aarch64
+            os: macos-15
+            target: aarch64-apple-darwin
+            bundles: app,dmg
+            jobs: '2'
+          - platform: darwin-x86_64
+            os: macos-15-intel
+            target: x86_64-apple-darwin
+            bundles: app,dmg
+            jobs: '2'
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    env:
+      CARGO_BUILD_JOBS: ${{ matrix.jobs }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          persist-credentials: false
+      - name: Require signing configuration
+        shell: bash
+        run: node -e "for (const key of ['TAURI_SIGNING_PRIVATE_KEY','TAURI_SIGNING_PRIVATE_KEY_PASSWORD']) if (!process.env[key]) throw new Error('Missing release signing secret '+key)"
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - uses: ./.github/actions/setup
+        with:
+          target: ${{ matrix.target }}
+          cache-key: bundle-${{ matrix.target }}
+      - name: Compile reviewed production source without signing credentials
+        shell: bash
+        run: pnpm tauri build --ci --target '${{ matrix.target }}' --no-bundle
+      - name: Bundle and sign existing production binary
+        shell: bash
+        run: pnpm tauri bundle --ci --target '${{ matrix.target }}' --bundles '${{ matrix.bundles }}'
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - name: Preserve normal signed assets
+        shell: bash
+        run: node scripts/stage-release.mjs '${{ matrix.platform }}' '${{ needs.prepare.outputs.version }}' '${{ matrix.target }}'
+      - name: Bundle offline WebView2 installer from the same Windows binary
+        if: runner.os == 'Windows'
+        shell: bash
+        run: pnpm tauri bundle --ci --target '${{ matrix.target }}' --config src-tauri/tauri.offline.conf.json --bundles nsis
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      - name: Preserve offline installer
+        if: runner.os == 'Windows'
+        shell: bash
+        run: node scripts/stage-release.mjs '${{ matrix.platform }}' '${{ needs.prepare.outputs.version }}' '${{ matrix.target }}' offline
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: release-${{ matrix.platform }}
+          path: release-assets/${{ matrix.platform }}/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+  publish:
+    needs: [prepare, build]
+    runs-on: windows-2025
+    timeout-minutes: 75
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ needs.prepare.outputs.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          cache-key: windows-tests
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          pattern: release-*
+          path: release-assets
+          merge-multiple: true
+      - name: Verify every signature and assemble complete updater manifest
+        run: node scripts/assemble-release.mjs release-assets '${{ needs.prepare.outputs.version }}'
+      - name: Publish only after complete artifact verification
+        run: node scripts/publish-release.mjs release-assets '${{ needs.prepare.outputs.version }}'
+        env:
+          RELEASE_SHA: ${{ needs.prepare.outputs.sha }}
+          GH_TOKEN: ${{ github.token }}
+  notify-failure:
+    needs: [prepare, build, publish]
+    if: always() && failure()
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24.21.0'
+          package-manager-cache: false
+      - run: node scripts/release-failure.mjs
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+          GH_TOKEN: ${{ github.token }}

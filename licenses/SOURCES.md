@@ -1,0 +1,433 @@
+# Third-party source locations
+
+These are the unmodified upstream sources corresponding to the licensed Rust
+packages. MPL-2.0 crate archives are also included under `sources/`.
+
+- [adler2 2.0.1](https://crates.io/api/v1/crates/adler2/2.0.1/download) — 0BSD OR MIT OR Apache-2.0
+- [aho-corasick 1.1.5](https://crates.io/api/v1/crates/aho-corasick/1.1.5/download) — Unlicense OR MIT
+- [alloc-no-stdlib 3.0.0](https://crates.io/api/v1/crates/alloc-no-stdlib/3.0.0/download) — BSD-3-Clause
+- [alloc-stdlib 0.3.0](https://crates.io/api/v1/crates/alloc-stdlib/0.3.0/download) — BSD-3-Clause
+- [anyhow 1.0.104](https://crates.io/api/v1/crates/anyhow/1.0.104/download) — MIT OR Apache-2.0
+- [async-broadcast 0.7.2](https://crates.io/api/v1/crates/async-broadcast/0.7.2/download) — MIT OR Apache-2.0
+- [async-channel 2.5.0](https://crates.io/api/v1/crates/async-channel/2.5.0/download) — Apache-2.0 OR MIT
+- [async-executor 1.14.0](https://crates.io/api/v1/crates/async-executor/1.14.0/download) — Apache-2.0 OR MIT
+- [async-io 2.6.0](https://crates.io/api/v1/crates/async-io/2.6.0/download) — Apache-2.0 OR MIT
+- [async-lock 3.4.2](https://crates.io/api/v1/crates/async-lock/3.4.2/download) — Apache-2.0 OR MIT
+- [async-process 2.5.0](https://crates.io/api/v1/crates/async-process/2.5.0/download) — Apache-2.0 OR MIT
+- [async-recursion 1.2.0](https://crates.io/api/v1/crates/async-recursion/1.2.0/download) — MIT OR Apache-2.0
+- [async-signal 0.2.14](https://crates.io/api/v1/crates/async-signal/0.2.14/download) — Apache-2.0 OR MIT
+- [async-task 4.7.1](https://crates.io/api/v1/crates/async-task/4.7.1/download) — Apache-2.0 OR MIT
+- [async-trait 0.1.92](https://crates.io/api/v1/crates/async-trait/0.1.92/download) — MIT OR Apache-2.0
+- [atk-sys 0.18.2](https://crates.io/api/v1/crates/atk-sys/0.18.2/download) — MIT
+- [atk 0.18.2](https://crates.io/api/v1/crates/atk/0.18.2/download) — MIT
+- [atomic-waker 1.1.2](https://crates.io/api/v1/crates/atomic-waker/1.1.2/download) — Apache-2.0 OR MIT
+- [base64 0.21.7](https://crates.io/api/v1/crates/base64/0.21.7/download) — MIT OR Apache-2.0
+- [base64 0.22.1](https://crates.io/api/v1/crates/base64/0.22.1/download) — MIT OR Apache-2.0
+- [base64 0.23.1](https://crates.io/api/v1/crates/base64/0.23.1/download) — MIT OR Apache-2.0
+- [bit-set 0.8.0](https://crates.io/api/v1/crates/bit-set/0.8.0/download) — Apache-2.0 OR MIT
+- [bit-vec 0.8.0](https://crates.io/api/v1/crates/bit-vec/0.8.0/download) — Apache-2.0 OR MIT
+- [bitflags 1.3.2](https://crates.io/api/v1/crates/bitflags/1.3.2/download) — MIT OR Apache-2.0
+- [bitflags 2.13.2](https://crates.io/api/v1/crates/bitflags/2.13.2/download) — MIT OR Apache-2.0
+- [block-buffer 0.10.4](https://crates.io/api/v1/crates/block-buffer/0.10.4/download) — MIT OR Apache-2.0
+- [block-buffer 0.12.1](https://crates.io/api/v1/crates/block-buffer/0.12.1/download) — MIT OR Apache-2.0
+- [block2 0.6.2](https://crates.io/api/v1/crates/block2/0.6.2/download) — MIT
+- [blocking 1.7.0](https://crates.io/api/v1/crates/blocking/1.7.0/download) — Apache-2.0 OR MIT
+- [brotli-decompressor 6.0.1](https://crates.io/api/v1/crates/brotli-decompressor/6.0.1/download) — BSD-3-Clause OR MIT
+- [brotli 9.0.0](https://crates.io/api/v1/crates/brotli/9.0.0/download) — BSD-3-Clause AND MIT
+- [bytemuck 1.25.2](https://crates.io/api/v1/crates/bytemuck/1.25.2/download) — Zlib OR Apache-2.0 OR MIT
+- [byteorder 1.5.0](https://crates.io/api/v1/crates/byteorder/1.5.0/download) — Unlicense OR MIT
+- [bytes 1.12.1](https://crates.io/api/v1/crates/bytes/1.12.1/download) — MIT
+- [cairo-rs 0.18.5](https://crates.io/api/v1/crates/cairo-rs/0.18.5/download) — MIT
+- [cairo-sys-rs 0.18.2](https://crates.io/api/v1/crates/cairo-sys-rs/0.18.2/download) — MIT
+- [camino 1.2.6](https://crates.io/api/v1/crates/camino/1.2.6/download) — MIT OR Apache-2.0
+- [cargo-platform 0.1.9](https://crates.io/api/v1/crates/cargo-platform/0.1.9/download) — MIT OR Apache-2.0
+- [cargo_metadata 0.19.2](https://crates.io/api/v1/crates/cargo_metadata/0.19.2/download) — MIT
+- [cfb 0.14.0](https://crates.io/api/v1/crates/cfb/0.14.0/download) — MIT
+- [cfg-if 1.0.5](https://crates.io/api/v1/crates/cfg-if/1.0.5/download) — MIT OR Apache-2.0
+- [chrono-tz 0.10.4](https://crates.io/api/v1/crates/chrono-tz/0.10.4/download) — MIT OR Apache-2.0
+- [chrono 0.4.45](https://crates.io/api/v1/crates/chrono/0.4.45/download) — MIT OR Apache-2.0
+- [concurrent-queue 2.5.0](https://crates.io/api/v1/crates/concurrent-queue/2.5.0/download) — Apache-2.0 OR MIT
+- [const-oid 0.10.2](https://crates.io/api/v1/crates/const-oid/0.10.2/download) — Apache-2.0 OR MIT
+- [cookie 0.18.2](https://crates.io/api/v1/crates/cookie/0.18.2/download) — MIT OR Apache-2.0
+- [core-foundation-sys 0.8.7](https://crates.io/api/v1/crates/core-foundation-sys/0.8.7/download) — MIT OR Apache-2.0
+- [core-foundation 0.10.1](https://crates.io/api/v1/crates/core-foundation/0.10.1/download) — MIT OR Apache-2.0
+- [core-foundation 0.9.4](https://crates.io/api/v1/crates/core-foundation/0.9.4/download) — MIT OR Apache-2.0
+- [core-graphics-types 0.2.0](https://crates.io/api/v1/crates/core-graphics-types/0.2.0/download) — MIT OR Apache-2.0
+- [core-graphics 0.25.0](https://crates.io/api/v1/crates/core-graphics/0.25.0/download) — MIT OR Apache-2.0
+- [cpufeatures 0.2.17](https://crates.io/api/v1/crates/cpufeatures/0.2.17/download) — MIT OR Apache-2.0
+- [cpufeatures 0.3.1](https://crates.io/api/v1/crates/cpufeatures/0.3.1/download) — MIT OR Apache-2.0
+- [crc32fast 1.5.3](https://crates.io/api/v1/crates/crc32fast/1.5.3/download) — MIT OR Apache-2.0
+- [crossbeam-channel 0.5.17](https://crates.io/api/v1/crates/crossbeam-channel/0.5.17/download) — MIT OR Apache-2.0
+- [crossbeam-deque 0.8.8](https://crates.io/api/v1/crates/crossbeam-deque/0.8.8/download) — MIT OR Apache-2.0
+- [crossbeam-epoch 0.9.21](https://crates.io/api/v1/crates/crossbeam-epoch/0.9.21/download) — MIT OR Apache-2.0
+- [crossbeam-utils 0.8.23](https://crates.io/api/v1/crates/crossbeam-utils/0.8.23/download) — MIT OR Apache-2.0
+- [crypto-common 0.1.7](https://crates.io/api/v1/crates/crypto-common/0.1.7/download) — MIT OR Apache-2.0
+- [crypto-common 0.2.2](https://crates.io/api/v1/crates/crypto-common/0.2.2/download) — MIT OR Apache-2.0
+- [cssparser-macros 0.7.1](https://crates.io/api/v1/crates/cssparser-macros/0.7.1/download) — MPL-2.0
+- [cssparser 0.37.0](https://crates.io/api/v1/crates/cssparser/0.37.0/download) — MPL-2.0
+- [ctor 1.0.13](https://crates.io/api/v1/crates/ctor/1.0.13/download) — Apache-2.0 OR MIT
+- [darling 0.24.1](https://crates.io/api/v1/crates/darling/0.24.1/download) — MIT
+- [darling_core 0.24.1](https://crates.io/api/v1/crates/darling_core/0.24.1/download) — MIT
+- [darling_macro 0.24.1](https://crates.io/api/v1/crates/darling_macro/0.24.1/download) — MIT
+- [dbus 0.9.12](https://crates.io/api/v1/crates/dbus/0.9.12/download) — Apache-2.0 OR MIT
+- [deranged 0.5.9](https://crates.io/api/v1/crates/deranged/0.5.9/download) — MIT OR Apache-2.0
+- [derive_more-impl 2.1.1](https://crates.io/api/v1/crates/derive_more-impl/2.1.1/download) — MIT
+- [derive_more 2.1.1](https://crates.io/api/v1/crates/derive_more/2.1.1/download) — MIT
+- [digest 0.10.7](https://crates.io/api/v1/crates/digest/0.10.7/download) — MIT OR Apache-2.0
+- [digest 0.11.3](https://crates.io/api/v1/crates/digest/0.11.3/download) — MIT OR Apache-2.0
+- [dirs-sys 0.5.0](https://crates.io/api/v1/crates/dirs-sys/0.5.0/download) — MIT OR Apache-2.0
+- [dirs 7.0.0](https://crates.io/api/v1/crates/dirs/7.0.0/download) — MIT OR Apache-2.0
+- [dispatch2 0.3.1](https://crates.io/api/v1/crates/dispatch2/0.3.1/download) — Zlib OR Apache-2.0 OR MIT
+- [displaydoc 0.2.7](https://crates.io/api/v1/crates/displaydoc/0.2.7/download) — MIT OR Apache-2.0
+- [dlopen2 0.8.2](https://crates.io/api/v1/crates/dlopen2/0.8.2/download) — MIT
+- [dlopen2_derive 0.4.3](https://crates.io/api/v1/crates/dlopen2_derive/0.4.3/download) — MIT
+- [dom_query 0.28.0](https://crates.io/api/v1/crates/dom_query/0.28.0/download) — MIT
+- [dpi 0.1.2](https://crates.io/api/v1/crates/dpi/0.1.2/download) — Apache-2.0 AND MIT
+- [dtoa-short 0.3.5](https://crates.io/api/v1/crates/dtoa-short/0.3.5/download) — MPL-2.0
+- [dtoa 1.0.11](https://crates.io/api/v1/crates/dtoa/1.0.11/download) — MIT OR Apache-2.0
+- [dunce 1.0.5](https://crates.io/api/v1/crates/dunce/1.0.5/download) — CC0-1.0 OR MIT-0 OR Apache-2.0
+- [dyn-clone 1.0.20](https://crates.io/api/v1/crates/dyn-clone/1.0.20/download) — MIT OR Apache-2.0
+- [either 1.19.0](https://crates.io/api/v1/crates/either/1.19.0/download) — MIT OR Apache-2.0
+- [embed_plist 1.2.2](https://crates.io/api/v1/crates/embed_plist/1.2.2/download) — MIT OR Apache-2.0
+- [endi 1.1.1](https://crates.io/api/v1/crates/endi/1.1.1/download) — MIT
+- [enumflags2 0.7.12](https://crates.io/api/v1/crates/enumflags2/0.7.12/download) — MIT OR Apache-2.0
+- [enumflags2_derive 0.7.12](https://crates.io/api/v1/crates/enumflags2_derive/0.7.12/download) — MIT OR Apache-2.0
+- [equivalent 1.0.3](https://crates.io/api/v1/crates/equivalent/1.0.3/download) — Apache-2.0 OR MIT
+- [erased-serde 0.4.10](https://crates.io/api/v1/crates/erased-serde/0.4.10/download) — MIT OR Apache-2.0
+- [errno 0.3.14](https://crates.io/api/v1/crates/errno/0.3.14/download) — MIT OR Apache-2.0
+- [event-listener-strategy 0.5.4](https://crates.io/api/v1/crates/event-listener-strategy/0.5.4/download) — Apache-2.0 OR MIT
+- [event-listener 5.4.2](https://crates.io/api/v1/crates/event-listener/5.4.2/download) — Apache-2.0 OR MIT
+- [fallible-iterator 0.3.0](https://crates.io/api/v1/crates/fallible-iterator/0.3.0/download) — MIT OR Apache-2.0
+- [fallible-streaming-iterator 0.1.9](https://crates.io/api/v1/crates/fallible-streaming-iterator/0.1.9/download) — MIT OR Apache-2.0
+- [fastrand 2.5.0](https://crates.io/api/v1/crates/fastrand/2.5.0/download) — Apache-2.0 OR MIT
+- [fdeflate 0.3.7](https://crates.io/api/v1/crates/fdeflate/0.3.7/download) — MIT OR Apache-2.0
+- [field-offset 0.3.6](https://crates.io/api/v1/crates/field-offset/0.3.6/download) — MIT OR Apache-2.0
+- [filetime 0.2.29](https://crates.io/api/v1/crates/filetime/0.2.29/download) — MIT OR Apache-2.0
+- [flate2 1.1.10](https://crates.io/api/v1/crates/flate2/1.1.10/download) — MIT OR Apache-2.0
+- [fnv 1.0.7](https://crates.io/api/v1/crates/fnv/1.0.7/download) — Apache-2.0  OR  MIT
+- [foldhash 0.2.0](https://crates.io/api/v1/crates/foldhash/0.2.0/download) — Zlib
+- [foreign-types-macros 0.2.4](https://crates.io/api/v1/crates/foreign-types-macros/0.2.4/download) — MIT OR Apache-2.0
+- [foreign-types-shared 0.3.1](https://crates.io/api/v1/crates/foreign-types-shared/0.3.1/download) — MIT OR Apache-2.0
+- [foreign-types 0.5.0](https://crates.io/api/v1/crates/foreign-types/0.5.0/download) — MIT OR Apache-2.0
+- [form_urlencoded 1.2.2](https://crates.io/api/v1/crates/form_urlencoded/1.2.2/download) — MIT OR Apache-2.0
+- [fsrs 6.6.2](https://github.com/open-spaced-repetition/fsrs-rs/tree/0fd59949e9168af7194418c2dba99836b5548e87) — BSD-3-Clause
+- [futures-channel 0.3.34](https://crates.io/api/v1/crates/futures-channel/0.3.34/download) — MIT OR Apache-2.0
+- [futures-core 0.3.34](https://crates.io/api/v1/crates/futures-core/0.3.34/download) — MIT OR Apache-2.0
+- [futures-executor 0.3.34](https://crates.io/api/v1/crates/futures-executor/0.3.34/download) — MIT OR Apache-2.0
+- [futures-io 0.3.34](https://crates.io/api/v1/crates/futures-io/0.3.34/download) — MIT OR Apache-2.0
+- [futures-lite 2.6.1](https://crates.io/api/v1/crates/futures-lite/2.6.1/download) — Apache-2.0 OR MIT
+- [futures-macro 0.3.34](https://crates.io/api/v1/crates/futures-macro/0.3.34/download) — MIT OR Apache-2.0
+- [futures-sink 0.3.34](https://crates.io/api/v1/crates/futures-sink/0.3.34/download) — MIT OR Apache-2.0
+- [futures-task 0.3.34](https://crates.io/api/v1/crates/futures-task/0.3.34/download) — MIT OR Apache-2.0
+- [futures-util 0.3.34](https://crates.io/api/v1/crates/futures-util/0.3.34/download) — MIT OR Apache-2.0
+- [gdk-pixbuf-sys 0.18.0](https://crates.io/api/v1/crates/gdk-pixbuf-sys/0.18.0/download) — MIT
+- [gdk-pixbuf 0.18.5](https://crates.io/api/v1/crates/gdk-pixbuf/0.18.5/download) — MIT
+- [gdk-sys 0.18.2](https://crates.io/api/v1/crates/gdk-sys/0.18.2/download) — MIT
+- [gdk 0.18.2](https://crates.io/api/v1/crates/gdk/0.18.2/download) — MIT
+- [gdkwayland-sys 0.18.2](https://crates.io/api/v1/crates/gdkwayland-sys/0.18.2/download) — MIT
+- [gdkx11-sys 0.18.2](https://crates.io/api/v1/crates/gdkx11-sys/0.18.2/download) — MIT
+- [gdkx11 0.18.2](https://crates.io/api/v1/crates/gdkx11/0.18.2/download) — MIT
+- [generic-array 0.14.7](https://crates.io/api/v1/crates/generic-array/0.14.7/download) — MIT
+- [getrandom 0.2.17](https://crates.io/api/v1/crates/getrandom/0.2.17/download) — MIT OR Apache-2.0
+- [getrandom 0.3.4](https://crates.io/api/v1/crates/getrandom/0.3.4/download) — MIT OR Apache-2.0
+- [getrandom 0.4.3](https://crates.io/api/v1/crates/getrandom/0.4.3/download) — MIT OR Apache-2.0
+- [gio-sys 0.18.1](https://crates.io/api/v1/crates/gio-sys/0.18.1/download) — MIT
+- [gio 0.18.4](https://crates.io/api/v1/crates/gio/0.18.4/download) — MIT
+- [glib-macros 0.18.5](https://crates.io/api/v1/crates/glib-macros/0.18.5/download) — MIT
+- [glib-sys 0.18.1](https://crates.io/api/v1/crates/glib-sys/0.18.1/download) — MIT
+- [glib 0.18.5](https://crates.io/api/v1/crates/glib/0.18.5/download) — MIT
+- [glob 0.3.4](https://crates.io/api/v1/crates/glob/0.3.4/download) — MIT OR Apache-2.0
+- [gobject-sys 0.18.0](https://crates.io/api/v1/crates/gobject-sys/0.18.0/download) — MIT
+- [gtk-sys 0.18.2](https://crates.io/api/v1/crates/gtk-sys/0.18.2/download) — MIT
+- [gtk3-macros 0.18.2](https://crates.io/api/v1/crates/gtk3-macros/0.18.2/download) — MIT
+- [gtk 0.18.2](https://crates.io/api/v1/crates/gtk/0.18.2/download) — MIT
+- [hashbrown 0.17.1](https://crates.io/api/v1/crates/hashbrown/0.17.1/download) — MIT OR Apache-2.0
+- [hashlink 0.12.2](https://crates.io/api/v1/crates/hashlink/0.12.2/download) — MIT OR Apache-2.0
+- [heck 0.4.1](https://crates.io/api/v1/crates/heck/0.4.1/download) — MIT OR Apache-2.0
+- [heck 0.5.0](https://crates.io/api/v1/crates/heck/0.5.0/download) — MIT OR Apache-2.0
+- [hex 0.4.3](https://crates.io/api/v1/crates/hex/0.4.3/download) — MIT OR Apache-2.0
+- [html5ever 0.39.0](https://crates.io/api/v1/crates/html5ever/0.39.0/download) — MIT OR Apache-2.0
+- [http-body-util 0.1.5](https://crates.io/api/v1/crates/http-body-util/0.1.5/download) — MIT
+- [http-body 1.1.0](https://crates.io/api/v1/crates/http-body/1.1.0/download) — MIT
+- [http 1.5.0](https://crates.io/api/v1/crates/http/1.5.0/download) — MIT OR Apache-2.0
+- [httparse 1.10.1](https://crates.io/api/v1/crates/httparse/1.10.1/download) — MIT OR Apache-2.0
+- [hybrid-array 0.4.15](https://crates.io/api/v1/crates/hybrid-array/0.4.15/download) — MIT OR Apache-2.0
+- [hyper-rustls 0.27.10](https://crates.io/api/v1/crates/hyper-rustls/0.27.10/download) — Apache-2.0 OR ISC OR MIT
+- [hyper-util 0.1.21](https://crates.io/api/v1/crates/hyper-util/0.1.21/download) — MIT
+- [hyper 1.12.0](https://crates.io/api/v1/crates/hyper/1.12.0/download) — MIT
+- [iana-time-zone 0.1.65](https://crates.io/api/v1/crates/iana-time-zone/0.1.65/download) — MIT OR Apache-2.0
+- [ico 0.6.0](https://crates.io/api/v1/crates/ico/0.6.0/download) — MIT
+- [icu_collections 2.4.0](https://crates.io/api/v1/crates/icu_collections/2.4.0/download) — Unicode-3.0
+- [icu_locale_core 2.4.0](https://crates.io/api/v1/crates/icu_locale_core/2.4.0/download) — Unicode-3.0
+- [icu_normalizer 2.4.0](https://crates.io/api/v1/crates/icu_normalizer/2.4.0/download) — Unicode-3.0
+- [icu_normalizer_data 2.4.0](https://crates.io/api/v1/crates/icu_normalizer_data/2.4.0/download) — Unicode-3.0
+- [icu_properties 2.4.0](https://crates.io/api/v1/crates/icu_properties/2.4.0/download) — Unicode-3.0
+- [icu_properties_data 2.4.0](https://crates.io/api/v1/crates/icu_properties_data/2.4.0/download) — Unicode-3.0
+- [icu_provider 2.4.0](https://crates.io/api/v1/crates/icu_provider/2.4.0/download) — Unicode-3.0
+- [ident_case 1.0.1](https://crates.io/api/v1/crates/ident_case/1.0.1/download) — MIT OR Apache-2.0
+- [idna 1.1.0](https://crates.io/api/v1/crates/idna/1.1.0/download) — MIT OR Apache-2.0
+- [idna_adapter 1.2.2](https://crates.io/api/v1/crates/idna_adapter/1.2.2/download) — Apache-2.0 OR MIT
+- [indexmap 2.14.2](https://crates.io/api/v1/crates/indexmap/2.14.2/download) — Apache-2.0 OR MIT
+- [infer 0.22.0](https://crates.io/api/v1/crates/infer/0.22.0/download) — MIT
+- [ipnet 2.12.2](https://crates.io/api/v1/crates/ipnet/2.12.2/download) — MIT OR Apache-2.0
+- [is-docker 0.2.0](https://crates.io/api/v1/crates/is-docker/0.2.0/download) — MIT
+- [is-wsl 0.4.0](https://crates.io/api/v1/crates/is-wsl/0.4.0/download) — MIT
+- [itertools 0.15.0](https://crates.io/api/v1/crates/itertools/0.15.0/download) — MIT OR Apache-2.0
+- [itoa 1.0.18](https://crates.io/api/v1/crates/itoa/1.0.18/download) — MIT OR Apache-2.0
+- [javascriptcore-rs-sys 1.1.1](https://crates.io/api/v1/crates/javascriptcore-rs-sys/1.1.1/download) — MIT
+- [javascriptcore-rs 1.1.2](https://crates.io/api/v1/crates/javascriptcore-rs/1.1.2/download) — MIT
+- [json-patch 4.2.0](https://crates.io/api/v1/crates/json-patch/4.2.0/download) — MIT OR Apache-2.0
+- [jsonptr 0.7.1](https://crates.io/api/v1/crates/jsonptr/0.7.1/download) — MIT OR Apache-2.0
+- [keyboard-types 0.8.3](https://crates.io/api/v1/crates/keyboard-types/0.8.3/download) — MIT OR Apache-2.0
+- [libc 0.2.191](https://crates.io/api/v1/crates/libc/0.2.191/download) — MIT OR Apache-2.0
+- [libdbus-sys 0.2.7](https://crates.io/api/v1/crates/libdbus-sys/0.2.7/download) — Apache-2.0 OR MIT
+- [libm 0.2.16](https://crates.io/api/v1/crates/libm/0.2.16/download) — MIT
+- [libsqlite3-sys 0.39.0](https://crates.io/api/v1/crates/libsqlite3-sys/0.39.0/download) — MIT
+- [linux-raw-sys 0.12.1](https://crates.io/api/v1/crates/linux-raw-sys/0.12.1/download) — Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
+- [litemap 0.8.3](https://crates.io/api/v1/crates/litemap/0.8.3/download) — Unicode-3.0
+- [lock_api 0.4.14](https://crates.io/api/v1/crates/lock_api/0.4.14/download) — MIT OR Apache-2.0
+- [log 0.4.34](https://crates.io/api/v1/crates/log/0.4.34/download) — MIT OR Apache-2.0
+- [markup5ever 0.39.0](https://crates.io/api/v1/crates/markup5ever/0.39.0/download) — MIT OR Apache-2.0
+- [matrixmultiply 0.3.11](https://crates.io/api/v1/crates/matrixmultiply/0.3.11/download) — MIT OR Apache-2.0
+- [memchr 2.8.3](https://crates.io/api/v1/crates/memchr/2.8.3/download) — Unlicense OR MIT
+- [memoffset 0.9.1](https://crates.io/api/v1/crates/memoffset/0.9.1/download) — MIT
+- [mime 0.3.17](https://crates.io/api/v1/crates/mime/0.3.17/download) — MIT OR Apache-2.0
+- [minisign-verify 0.3.0](https://crates.io/api/v1/crates/minisign-verify/0.3.0/download) — MIT
+- [miniz_oxide 0.8.9](https://crates.io/api/v1/crates/miniz_oxide/0.8.9/download) — MIT OR Zlib OR Apache-2.0
+- [miniz_oxide 0.9.1](https://crates.io/api/v1/crates/miniz_oxide/0.9.1/download) — MIT OR Zlib OR Apache-2.0
+- [mio 1.2.4](https://crates.io/api/v1/crates/mio/1.2.4/download) — MIT
+- [muda 0.20.0](https://crates.io/api/v1/crates/muda/0.20.0/download) — Apache-2.0 OR MIT
+- [ndarray 0.17.2](https://crates.io/api/v1/crates/ndarray/0.17.2/download) — MIT OR Apache-2.0
+- [new_debug_unreachable 1.0.6](https://crates.io/api/v1/crates/new_debug_unreachable/1.0.6/download) — MIT
+- [num-complex 0.4.6](https://crates.io/api/v1/crates/num-complex/0.4.6/download) — MIT OR Apache-2.0
+- [num-conv 0.2.2](https://crates.io/api/v1/crates/num-conv/0.2.2/download) — MIT OR Apache-2.0
+- [num-integer 0.1.47](https://crates.io/api/v1/crates/num-integer/0.1.47/download) — MIT OR Apache-2.0
+- [num-traits 0.2.19](https://crates.io/api/v1/crates/num-traits/0.2.19/download) — MIT OR Apache-2.0
+- [objc2-app-kit 0.3.2](https://crates.io/api/v1/crates/objc2-app-kit/0.3.2/download) — Zlib OR Apache-2.0 OR MIT
+- [objc2-core-foundation 0.3.2](https://crates.io/api/v1/crates/objc2-core-foundation/0.3.2/download) — Zlib OR Apache-2.0 OR MIT
+- [objc2-core-graphics 0.3.2](https://crates.io/api/v1/crates/objc2-core-graphics/0.3.2/download) — Zlib OR Apache-2.0 OR MIT
+- [objc2-encode 4.1.0](https://crates.io/api/v1/crates/objc2-encode/4.1.0/download) — MIT
+- [objc2-exception-helper 0.1.1](https://crates.io/api/v1/crates/objc2-exception-helper/0.1.1/download) — Zlib OR Apache-2.0 OR MIT
+- [objc2-foundation 0.3.2](https://crates.io/api/v1/crates/objc2-foundation/0.3.2/download) — MIT
+- [objc2-osa-kit 0.3.2](https://crates.io/api/v1/crates/objc2-osa-kit/0.3.2/download) — Zlib OR Apache-2.0 OR MIT
+- [objc2-quartz-core 0.3.2](https://crates.io/api/v1/crates/objc2-quartz-core/0.3.2/download) — Zlib OR Apache-2.0 OR MIT
+- [objc2-web-kit 0.3.2](https://crates.io/api/v1/crates/objc2-web-kit/0.3.2/download) — Zlib OR Apache-2.0 OR MIT
+- [objc2 0.6.5](https://crates.io/api/v1/crates/objc2/0.6.5/download) — MIT
+- [once_cell 1.21.4](https://crates.io/api/v1/crates/once_cell/1.21.4/download) — MIT OR Apache-2.0
+- [open 5.4.5](https://crates.io/api/v1/crates/open/5.4.5/download) — MIT
+- [openssl-probe 0.2.1](https://crates.io/api/v1/crates/openssl-probe/0.2.1/download) — MIT OR Apache-2.0
+- [option-ext 0.2.0](https://crates.io/api/v1/crates/option-ext/0.2.0/download) — MPL-2.0
+- [ordered-stream 0.2.0](https://crates.io/api/v1/crates/ordered-stream/0.2.0/download) — MIT OR Apache-2.0
+- [osakit 0.3.1](https://crates.io/api/v1/crates/osakit/0.3.1/download) — MIT OR Apache-2.0
+- [pango-sys 0.18.0](https://crates.io/api/v1/crates/pango-sys/0.18.0/download) — MIT
+- [pango 0.18.3](https://crates.io/api/v1/crates/pango/0.18.3/download) — MIT
+- [parking 2.2.1](https://crates.io/api/v1/crates/parking/2.2.1/download) — Apache-2.0 OR MIT
+- [parking_lot 0.12.5](https://crates.io/api/v1/crates/parking_lot/0.12.5/download) — MIT OR Apache-2.0
+- [parking_lot_core 0.9.12](https://crates.io/api/v1/crates/parking_lot_core/0.9.12/download) — MIT OR Apache-2.0
+- [percent-encoding 2.3.2](https://crates.io/api/v1/crates/percent-encoding/2.3.2/download) — MIT OR Apache-2.0
+- [phf 0.12.1](https://crates.io/api/v1/crates/phf/0.12.1/download) — MIT
+- [phf 0.13.1](https://crates.io/api/v1/crates/phf/0.13.1/download) — MIT
+- [phf_generator 0.13.1](https://crates.io/api/v1/crates/phf_generator/0.13.1/download) — MIT
+- [phf_macros 0.13.1](https://crates.io/api/v1/crates/phf_macros/0.13.1/download) — MIT
+- [phf_shared 0.12.1](https://crates.io/api/v1/crates/phf_shared/0.12.1/download) — MIT
+- [phf_shared 0.13.1](https://crates.io/api/v1/crates/phf_shared/0.13.1/download) — MIT
+- [pin-project-lite 0.2.17](https://crates.io/api/v1/crates/pin-project-lite/0.2.17/download) — Apache-2.0 OR MIT
+- [piper 0.2.5](https://crates.io/api/v1/crates/piper/0.2.5/download) — MIT OR Apache-2.0
+- [plist 1.10.3](https://crates.io/api/v1/crates/plist/1.10.3/download) — MIT
+- [png 0.18.1](https://crates.io/api/v1/crates/png/0.18.1/download) — MIT OR Apache-2.0
+- [polling 3.11.0](https://crates.io/api/v1/crates/polling/3.11.0/download) — Apache-2.0 OR MIT
+- [potential_utf 0.1.6](https://crates.io/api/v1/crates/potential_utf/0.1.6/download) — Unicode-3.0
+- [powerfmt 0.2.1](https://crates.io/api/v1/crates/powerfmt/0.2.1/download) — MIT OR Apache-2.0
+- [ppv-lite86 0.2.21](https://crates.io/api/v1/crates/ppv-lite86/0.2.21/download) — MIT OR Apache-2.0
+- [precomputed-hash 0.1.1](https://crates.io/api/v1/crates/precomputed-hash/0.1.1/download) — MIT
+- [proc-macro-crate 1.3.1](https://crates.io/api/v1/crates/proc-macro-crate/1.3.1/download) — MIT OR Apache-2.0
+- [proc-macro-crate 2.0.2](https://crates.io/api/v1/crates/proc-macro-crate/2.0.2/download) — MIT OR Apache-2.0
+- [proc-macro-crate 3.5.0](https://crates.io/api/v1/crates/proc-macro-crate/3.5.0/download) — MIT OR Apache-2.0
+- [proc-macro-error-attr 1.0.4](https://crates.io/api/v1/crates/proc-macro-error-attr/1.0.4/download) — MIT OR Apache-2.0
+- [proc-macro-error 1.0.4](https://crates.io/api/v1/crates/proc-macro-error/1.0.4/download) — MIT OR Apache-2.0
+- [proc-macro2 1.0.107](https://crates.io/api/v1/crates/proc-macro2/1.0.107/download) — MIT OR Apache-2.0
+- [quick-xml 0.42.0](https://crates.io/api/v1/crates/quick-xml/0.42.0/download) — MIT
+- [quote 1.0.47](https://crates.io/api/v1/crates/quote/1.0.47/download) — MIT OR Apache-2.0
+- [rand 0.9.5](https://crates.io/api/v1/crates/rand/0.9.5/download) — MIT OR Apache-2.0
+- [rand_chacha 0.9.0](https://crates.io/api/v1/crates/rand_chacha/0.9.0/download) — MIT OR Apache-2.0
+- [rand_core 0.9.5](https://crates.io/api/v1/crates/rand_core/0.9.5/download) — MIT OR Apache-2.0
+- [rand_distr 0.5.1](https://crates.io/api/v1/crates/rand_distr/0.5.1/download) — MIT OR Apache-2.0
+- [raw-window-handle 0.6.2](https://crates.io/api/v1/crates/raw-window-handle/0.6.2/download) — MIT OR Apache-2.0 OR Zlib
+- [rawpointer 0.2.1](https://crates.io/api/v1/crates/rawpointer/0.2.1/download) — MIT OR Apache-2.0
+- [rayon-core 1.13.0](https://crates.io/api/v1/crates/rayon-core/1.13.0/download) — MIT OR Apache-2.0
+- [rayon 1.12.0](https://crates.io/api/v1/crates/rayon/1.12.0/download) — MIT OR Apache-2.0
+- [regex-automata 0.4.18](https://crates.io/api/v1/crates/regex-automata/0.4.18/download) — MIT OR Apache-2.0
+- [regex-syntax 0.8.11](https://crates.io/api/v1/crates/regex-syntax/0.8.11/download) — MIT OR Apache-2.0
+- [regex 1.13.1](https://crates.io/api/v1/crates/regex/1.13.1/download) — MIT OR Apache-2.0
+- [reqwest 0.13.5](https://crates.io/api/v1/crates/reqwest/0.13.5/download) — MIT OR Apache-2.0
+- [rfd 0.16.1](https://crates.io/api/v1/crates/rfd/0.16.1/download) — MIT
+- [ring 0.17.14](https://crates.io/api/v1/crates/ring/0.17.14/download) — Apache-2.0 AND ISC
+- [rusqlite 0.41.0](https://crates.io/api/v1/crates/rusqlite/0.41.0/download) — MIT
+- [rustc-hash 2.1.3](https://crates.io/api/v1/crates/rustc-hash/2.1.3/download) — Apache-2.0 OR MIT
+- [rustix 1.1.5](https://crates.io/api/v1/crates/rustix/1.1.5/download) — Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
+- [rustls-native-certs 0.8.5](https://crates.io/api/v1/crates/rustls-native-certs/0.8.5/download) — Apache-2.0 OR ISC OR MIT
+- [rustls-pki-types 1.15.1](https://crates.io/api/v1/crates/rustls-pki-types/1.15.1/download) — MIT OR Apache-2.0
+- [rustls-platform-verifier 0.7.1](https://crates.io/api/v1/crates/rustls-platform-verifier/0.7.1/download) — MIT OR Apache-2.0
+- [rustls-webpki 0.103.16](https://crates.io/api/v1/crates/rustls-webpki/0.103.16/download) — ISC
+- [rustls 0.23.46](https://crates.io/api/v1/crates/rustls/0.23.46/download) — Apache-2.0 OR ISC OR MIT
+- [safe_arch 0.7.4](https://crates.io/api/v1/crates/safe_arch/0.7.4/download) — Zlib OR Apache-2.0 OR MIT
+- [same-file 1.0.6](https://crates.io/api/v1/crates/same-file/1.0.6/download) — Unlicense OR MIT
+- [schannel 0.1.30](https://crates.io/api/v1/crates/schannel/0.1.30/download) — MIT
+- [schemars 0.8.22](https://crates.io/api/v1/crates/schemars/0.8.22/download) — MIT
+- [schemars_derive 0.8.22](https://crates.io/api/v1/crates/schemars_derive/0.8.22/download) — MIT
+- [scopeguard 1.2.0](https://crates.io/api/v1/crates/scopeguard/1.2.0/download) — MIT OR Apache-2.0
+- [security-framework-sys 2.17.0](https://crates.io/api/v1/crates/security-framework-sys/2.17.0/download) — MIT OR Apache-2.0
+- [security-framework 3.7.0](https://crates.io/api/v1/crates/security-framework/3.7.0/download) — MIT OR Apache-2.0
+- [selectors 0.38.0](https://crates.io/api/v1/crates/selectors/0.38.0/download) — MPL-2.0
+- [semver 1.0.28](https://crates.io/api/v1/crates/semver/1.0.28/download) — MIT OR Apache-2.0
+- [serde-untagged 0.1.9](https://crates.io/api/v1/crates/serde-untagged/0.1.9/download) — MIT OR Apache-2.0
+- [serde 1.0.229](https://crates.io/api/v1/crates/serde/1.0.229/download) — MIT OR Apache-2.0
+- [serde_core 1.0.229](https://crates.io/api/v1/crates/serde_core/1.0.229/download) — MIT OR Apache-2.0
+- [serde_derive 1.0.229](https://crates.io/api/v1/crates/serde_derive/1.0.229/download) — MIT OR Apache-2.0
+- [serde_derive_internals 0.29.1](https://crates.io/api/v1/crates/serde_derive_internals/0.29.1/download) — MIT OR Apache-2.0
+- [serde_json 1.0.154](https://crates.io/api/v1/crates/serde_json/1.0.154/download) — MIT OR Apache-2.0
+- [serde_repr 0.1.21](https://crates.io/api/v1/crates/serde_repr/0.1.21/download) — MIT OR Apache-2.0
+- [serde_spanned 1.1.2](https://crates.io/api/v1/crates/serde_spanned/1.1.2/download) — MIT OR Apache-2.0
+- [serde_with 3.24.0](https://crates.io/api/v1/crates/serde_with/3.24.0/download) — MIT OR Apache-2.0
+- [serde_with_macros 3.24.0](https://crates.io/api/v1/crates/serde_with_macros/3.24.0/download) — MIT OR Apache-2.0
+- [serialize-to-javascript-impl 0.1.2](https://crates.io/api/v1/crates/serialize-to-javascript-impl/0.1.2/download) — MIT OR Apache-2.0
+- [serialize-to-javascript 0.1.2](https://crates.io/api/v1/crates/serialize-to-javascript/0.1.2/download) — MIT OR Apache-2.0
+- [servo_arc 0.4.3](https://crates.io/api/v1/crates/servo_arc/0.4.3/download) — MIT OR Apache-2.0
+- [sha2 0.10.9](https://crates.io/api/v1/crates/sha2/0.10.9/download) — MIT OR Apache-2.0
+- [sha2 0.11.1](https://crates.io/api/v1/crates/sha2/0.11.1/download) — MIT OR Apache-2.0
+- [signal-hook-registry 1.4.8](https://crates.io/api/v1/crates/signal-hook-registry/1.4.8/download) — MIT OR Apache-2.0
+- [simd-adler32 0.3.10](https://crates.io/api/v1/crates/simd-adler32/0.3.10/download) — MIT
+- [siphasher 1.0.4](https://crates.io/api/v1/crates/siphasher/1.0.4/download) — MIT OR Apache-2.0
+- [slab 0.4.12](https://crates.io/api/v1/crates/slab/0.4.12/download) — MIT
+- [smallvec 1.16.4](https://crates.io/api/v1/crates/smallvec/1.16.4/download) — MIT OR Apache-2.0
+- [snafu-derive 0.9.2](https://crates.io/api/v1/crates/snafu-derive/0.9.2/download) — MIT OR Apache-2.0
+- [snafu 0.9.2](https://crates.io/api/v1/crates/snafu/0.9.2/download) — MIT OR Apache-2.0
+- [socket2 0.6.5](https://crates.io/api/v1/crates/socket2/0.6.5/download) — MIT OR Apache-2.0
+- [softbuffer 0.4.8](https://crates.io/api/v1/crates/softbuffer/0.4.8/download) — MIT OR Apache-2.0
+- [soup3-sys 0.5.0](https://crates.io/api/v1/crates/soup3-sys/0.5.0/download) — MIT
+- [soup3 0.5.0](https://crates.io/api/v1/crates/soup3/0.5.0/download) — MIT
+- [stable_deref_trait 1.2.1](https://crates.io/api/v1/crates/stable_deref_trait/1.2.1/download) — MIT OR Apache-2.0
+- [string_cache 0.9.0](https://crates.io/api/v1/crates/string_cache/0.9.0/download) — MIT OR Apache-2.0
+- [strsim 0.11.1](https://crates.io/api/v1/crates/strsim/0.11.1/download) — MIT
+- [subtle 2.6.1](https://crates.io/api/v1/crates/subtle/2.6.1/download) — BSD-3-Clause
+- [swift-rs 1.0.9](https://crates.io/api/v1/crates/swift-rs/1.0.9/download) — MIT OR Apache-2.0
+- [syn 1.0.109](https://crates.io/api/v1/crates/syn/1.0.109/download) — MIT OR Apache-2.0
+- [syn 2.0.119](https://crates.io/api/v1/crates/syn/2.0.119/download) — MIT OR Apache-2.0
+- [syn 3.0.9](https://crates.io/api/v1/crates/syn/3.0.9/download) — MIT OR Apache-2.0
+- [sync_wrapper 1.0.2](https://crates.io/api/v1/crates/sync_wrapper/1.0.2/download) — Apache-2.0
+- [synstructure 0.14.0](https://crates.io/api/v1/crates/synstructure/0.14.0/download) — MIT
+- [system-configuration-sys 0.6.0](https://crates.io/api/v1/crates/system-configuration-sys/0.6.0/download) — MIT OR Apache-2.0
+- [system-configuration 0.7.0](https://crates.io/api/v1/crates/system-configuration/0.7.0/download) — MIT OR Apache-2.0
+- [tao 0.37.2](https://crates.io/api/v1/crates/tao/0.37.2/download) — Apache-2.0
+- [tar 0.4.46](https://crates.io/api/v1/crates/tar/0.4.46/download) — MIT OR Apache-2.0
+- [tauri-codegen 2.7.4](https://crates.io/api/v1/crates/tauri-codegen/2.7.4/download) — Apache-2.0 OR MIT
+- [tauri-macros 2.7.4](https://crates.io/api/v1/crates/tauri-macros/2.7.4/download) — Apache-2.0 OR MIT
+- [tauri-plugin-dialog 2.8.3](https://crates.io/api/v1/crates/tauri-plugin-dialog/2.8.3/download) — Apache-2.0 OR MIT
+- [tauri-plugin-fs 2.7.1](https://crates.io/api/v1/crates/tauri-plugin-fs/2.7.1/download) — Apache-2.0 OR MIT
+- [tauri-plugin-opener 2.7.2](https://crates.io/api/v1/crates/tauri-plugin-opener/2.7.2/download) — Apache-2.0 OR MIT
+- [tauri-plugin-single-instance 2.5.4](https://crates.io/api/v1/crates/tauri-plugin-single-instance/2.5.4/download) — Apache-2.0 OR MIT
+- [tauri-plugin-updater 2.14.0](https://crates.io/api/v1/crates/tauri-plugin-updater/2.14.0/download) — Apache-2.0 OR MIT
+- [tauri-runtime-wry 2.12.3](https://crates.io/api/v1/crates/tauri-runtime-wry/2.12.3/download) — Apache-2.0 OR MIT
+- [tauri-runtime 2.12.2](https://crates.io/api/v1/crates/tauri-runtime/2.12.2/download) — Apache-2.0 OR MIT
+- [tauri-utils 2.10.2](https://crates.io/api/v1/crates/tauri-utils/2.10.2/download) — Apache-2.0 OR MIT
+- [tauri 2.12.5](https://crates.io/api/v1/crates/tauri/2.12.5/download) — Apache-2.0 OR MIT
+- [tempfile 3.27.0](https://crates.io/api/v1/crates/tempfile/3.27.0/download) — MIT OR Apache-2.0
+- [tendril 0.5.1](https://crates.io/api/v1/crates/tendril/0.5.1/download) — MIT OR Apache-2.0
+- [termcolor 1.4.1](https://crates.io/api/v1/crates/termcolor/1.4.1/download) — Unlicense OR MIT
+- [thiserror-impl 1.0.69](https://crates.io/api/v1/crates/thiserror-impl/1.0.69/download) — MIT OR Apache-2.0
+- [thiserror-impl 2.0.21](https://crates.io/api/v1/crates/thiserror-impl/2.0.21/download) — MIT OR Apache-2.0
+- [thiserror 1.0.69](https://crates.io/api/v1/crates/thiserror/1.0.69/download) — MIT OR Apache-2.0
+- [thiserror 2.0.21](https://crates.io/api/v1/crates/thiserror/2.0.21/download) — MIT OR Apache-2.0
+- [time-core 0.1.9](https://crates.io/api/v1/crates/time-core/0.1.9/download) — MIT OR Apache-2.0
+- [time-macros 0.2.32](https://crates.io/api/v1/crates/time-macros/0.2.32/download) — MIT OR Apache-2.0
+- [time 0.3.55](https://crates.io/api/v1/crates/time/0.3.55/download) — MIT OR Apache-2.0
+- [tinystr 0.8.5](https://crates.io/api/v1/crates/tinystr/0.8.5/download) — Unicode-3.0
+- [tinyvec 1.13.3](https://crates.io/api/v1/crates/tinyvec/1.13.3/download) — Zlib OR Apache-2.0 OR MIT
+- [tokio-rustls 0.26.6](https://crates.io/api/v1/crates/tokio-rustls/0.26.6/download) — MIT OR Apache-2.0
+- [tokio-util 0.7.20](https://crates.io/api/v1/crates/tokio-util/0.7.20/download) — MIT
+- [tokio 1.54.1](https://crates.io/api/v1/crates/tokio/1.54.1/download) — MIT
+- [toml 1.1.8+spec-1.1.0](https://crates.io/api/v1/crates/toml/1.1.8%2Bspec-1.1.0/download) — MIT OR Apache-2.0
+- [toml_datetime 0.6.3](https://crates.io/api/v1/crates/toml_datetime/0.6.3/download) — MIT OR Apache-2.0
+- [toml_datetime 1.1.2+spec-1.1.0](https://crates.io/api/v1/crates/toml_datetime/1.1.2%2Bspec-1.1.0/download) — MIT OR Apache-2.0
+- [toml_edit 0.19.15](https://crates.io/api/v1/crates/toml_edit/0.19.15/download) — MIT OR Apache-2.0
+- [toml_edit 0.20.2](https://crates.io/api/v1/crates/toml_edit/0.20.2/download) — MIT OR Apache-2.0
+- [toml_edit 0.25.17+spec-1.1.0](https://crates.io/api/v1/crates/toml_edit/0.25.17%2Bspec-1.1.0/download) — MIT OR Apache-2.0
+- [toml_parser 1.1.5+spec-1.1.0](https://crates.io/api/v1/crates/toml_parser/1.1.5%2Bspec-1.1.0/download) — MIT OR Apache-2.0
+- [toml_writer 1.1.3+spec-1.1.0](https://crates.io/api/v1/crates/toml_writer/1.1.3%2Bspec-1.1.0/download) — MIT OR Apache-2.0
+- [tower-http 0.6.11](https://crates.io/api/v1/crates/tower-http/0.6.11/download) — MIT
+- [tower-layer 0.3.3](https://crates.io/api/v1/crates/tower-layer/0.3.3/download) — MIT
+- [tower-service 0.3.3](https://crates.io/api/v1/crates/tower-service/0.3.3/download) — MIT
+- [tower 0.5.3](https://crates.io/api/v1/crates/tower/0.5.3/download) — MIT
+- [tracing-attributes 0.1.31](https://crates.io/api/v1/crates/tracing-attributes/0.1.31/download) — MIT
+- [tracing-core 0.1.36](https://crates.io/api/v1/crates/tracing-core/0.1.36/download) — MIT
+- [tracing 0.1.44](https://crates.io/api/v1/crates/tracing/0.1.44/download) — MIT
+- [try-lock 0.2.5](https://crates.io/api/v1/crates/try-lock/0.2.5/download) — MIT
+- [ts-rs-macros 12.0.1](https://crates.io/api/v1/crates/ts-rs-macros/12.0.1/download) — MIT
+- [ts-rs 12.0.1](https://crates.io/api/v1/crates/ts-rs/12.0.1/download) — MIT
+- [typeid 1.0.3](https://crates.io/api/v1/crates/typeid/1.0.3/download) — MIT OR Apache-2.0
+- [typenum 1.20.1](https://crates.io/api/v1/crates/typenum/1.20.1/download) — MIT OR Apache-2.0
+- [uds_windows 1.2.1](https://crates.io/api/v1/crates/uds_windows/1.2.1/download) — MIT
+- [unicode-ident 1.0.27](https://crates.io/api/v1/crates/unicode-ident/1.0.27/download) — (MIT OR Apache-2.0) AND Unicode-3.0
+- [unicode-normalization 0.1.26](https://crates.io/api/v1/crates/unicode-normalization/0.1.26/download) — (MIT OR Apache-2.0) AND Unicode-3.0
+- [unicode-segmentation 1.13.3](https://crates.io/api/v1/crates/unicode-segmentation/1.13.3/download) — MIT OR Apache-2.0
+- [untrusted 0.9.0](https://crates.io/api/v1/crates/untrusted/0.9.0/download) — ISC
+- [url 2.5.8](https://crates.io/api/v1/crates/url/2.5.8/download) — MIT OR Apache-2.0
+- [urlpattern 0.6.0](https://crates.io/api/v1/crates/urlpattern/0.6.0/download) — MIT
+- [utf8_iter 1.0.4](https://crates.io/api/v1/crates/utf8_iter/1.0.4/download) — Apache-2.0 OR MIT
+- [uuid 1.29.0](https://crates.io/api/v1/crates/uuid/1.29.0/download) — Apache-2.0 OR MIT
+- [walkdir 2.5.0](https://crates.io/api/v1/crates/walkdir/2.5.0/download) — Unlicense OR MIT
+- [want 0.3.2](https://crates.io/api/v1/crates/want/0.3.2/download) — MIT
+- [web-time 1.1.0](https://crates.io/api/v1/crates/web-time/1.1.0/download) — MIT OR Apache-2.0
+- [web_atoms 0.2.6](https://crates.io/api/v1/crates/web_atoms/0.2.6/download) — MIT OR Apache-2.0
+- [webkit2gtk-sys 2.0.2](https://crates.io/api/v1/crates/webkit2gtk-sys/2.0.2/download) — MIT
+- [webkit2gtk 2.0.2](https://crates.io/api/v1/crates/webkit2gtk/2.0.2/download) — MIT
+- [webview2-com-macros 0.8.1](https://crates.io/api/v1/crates/webview2-com-macros/0.8.1/download) — MIT
+- [webview2-com-sys 0.39.1](https://crates.io/api/v1/crates/webview2-com-sys/0.39.1/download) — MIT
+- [webview2-com 0.39.1](https://crates.io/api/v1/crates/webview2-com/0.39.1/download) — MIT
+- [wide 0.7.33](https://crates.io/api/v1/crates/wide/0.7.33/download) — Zlib OR Apache-2.0 OR MIT
+- [winapi-util 0.1.11](https://crates.io/api/v1/crates/winapi-util/0.1.11/download) — Unlicense OR MIT
+- [winapi 0.3.9](https://crates.io/api/v1/crates/winapi/0.3.9/download) — MIT OR Apache-2.0
+- [window-vibrancy 0.8.1](https://crates.io/api/v1/crates/window-vibrancy/0.8.1/download) — Apache-2.0 OR MIT
+- [windows-collections 0.3.2](https://crates.io/api/v1/crates/windows-collections/0.3.2/download) — MIT OR Apache-2.0
+- [windows-core 0.62.2](https://crates.io/api/v1/crates/windows-core/0.62.2/download) — MIT OR Apache-2.0
+- [windows-future 0.3.2](https://crates.io/api/v1/crates/windows-future/0.3.2/download) — MIT OR Apache-2.0
+- [windows-implement 0.60.2](https://crates.io/api/v1/crates/windows-implement/0.60.2/download) — MIT OR Apache-2.0
+- [windows-interface 0.59.3](https://crates.io/api/v1/crates/windows-interface/0.59.3/download) — MIT OR Apache-2.0
+- [windows-link 0.2.1](https://crates.io/api/v1/crates/windows-link/0.2.1/download) — MIT OR Apache-2.0
+- [windows-numerics 0.3.1](https://crates.io/api/v1/crates/windows-numerics/0.3.1/download) — MIT OR Apache-2.0
+- [windows-registry 0.6.1](https://crates.io/api/v1/crates/windows-registry/0.6.1/download) — MIT OR Apache-2.0
+- [windows-result 0.4.1](https://crates.io/api/v1/crates/windows-result/0.4.1/download) — MIT OR Apache-2.0
+- [windows-strings 0.5.1](https://crates.io/api/v1/crates/windows-strings/0.5.1/download) — MIT OR Apache-2.0
+- [windows-sys 0.60.2](https://crates.io/api/v1/crates/windows-sys/0.60.2/download) — MIT OR Apache-2.0
+- [windows-sys 0.61.2](https://crates.io/api/v1/crates/windows-sys/0.61.2/download) — MIT OR Apache-2.0
+- [windows-targets 0.53.5](https://crates.io/api/v1/crates/windows-targets/0.53.5/download) — MIT OR Apache-2.0
+- [windows-threading 0.2.1](https://crates.io/api/v1/crates/windows-threading/0.2.1/download) — MIT OR Apache-2.0
+- [windows-version 0.1.7](https://crates.io/api/v1/crates/windows-version/0.1.7/download) — MIT OR Apache-2.0
+- [windows 0.62.2](https://crates.io/api/v1/crates/windows/0.62.2/download) — MIT OR Apache-2.0
+- [windows_x86_64_gnu 0.53.1](https://crates.io/api/v1/crates/windows_x86_64_gnu/0.53.1/download) — MIT OR Apache-2.0
+- [windows_x86_64_msvc 0.53.1](https://crates.io/api/v1/crates/windows_x86_64_msvc/0.53.1/download) — MIT OR Apache-2.0
+- [winnow 0.5.40](https://crates.io/api/v1/crates/winnow/0.5.40/download) — MIT
+- [winnow 1.0.4](https://crates.io/api/v1/crates/winnow/1.0.4/download) — MIT
+- [writeable 0.6.4](https://crates.io/api/v1/crates/writeable/0.6.4/download) — Unicode-3.0
+- [wry 0.57.1](https://crates.io/api/v1/crates/wry/0.57.1/download) — Apache-2.0 OR MIT
+- [x11-dl 2.21.0](https://crates.io/api/v1/crates/x11-dl/2.21.0/download) — MIT
+- [x11 2.21.0](https://crates.io/api/v1/crates/x11/2.21.0/download) — MIT
+- [xattr 1.6.1](https://crates.io/api/v1/crates/xattr/1.6.1/download) — MIT OR Apache-2.0
+- [yoke-derive 0.8.4](https://crates.io/api/v1/crates/yoke-derive/0.8.4/download) — Unicode-3.0
+- [yoke 0.8.4](https://crates.io/api/v1/crates/yoke/0.8.4/download) — Unicode-3.0
+- [zbus 5.19.0](https://crates.io/api/v1/crates/zbus/5.19.0/download) — MIT
+- [zbus_macros 5.19.0](https://crates.io/api/v1/crates/zbus_macros/5.19.0/download) — MIT
+- [zbus_names 4.3.5](https://crates.io/api/v1/crates/zbus_names/4.3.5/download) — MIT
+- [zcheapstr 1.1.0](https://crates.io/api/v1/crates/zcheapstr/1.1.0/download) — MIT
+- [zerocopy 0.8.63](https://crates.io/api/v1/crates/zerocopy/0.8.63/download) — BSD-2-Clause OR Apache-2.0 OR MIT
+- [zerofrom-derive 0.1.8](https://crates.io/api/v1/crates/zerofrom-derive/0.1.8/download) — Unicode-3.0
+- [zerofrom 0.1.8](https://crates.io/api/v1/crates/zerofrom/0.1.8/download) — Unicode-3.0
+- [zeroize 1.9.1](https://crates.io/api/v1/crates/zeroize/1.9.1/download) — Apache-2.0 OR MIT
+- [zerotrie 0.2.5](https://crates.io/api/v1/crates/zerotrie/0.2.5/download) — Unicode-3.0
+- [zerovec-derive 0.11.7](https://crates.io/api/v1/crates/zerovec-derive/0.11.7/download) — Unicode-3.0
+- [zerovec 0.11.9](https://crates.io/api/v1/crates/zerovec/0.11.9/download) — Unicode-3.0
+- [zip 4.6.1](https://crates.io/api/v1/crates/zip/4.6.1/download) — MIT
+- [zmij 1.0.23](https://crates.io/api/v1/crates/zmij/1.0.23/download) — MIT
+- [zvariant 5.15.1](https://crates.io/api/v1/crates/zvariant/5.15.1/download) — MIT
+- [zvariant_derive 5.15.1](https://crates.io/api/v1/crates/zvariant_derive/5.15.1/download) — MIT
+- [zvariant_utils 4.2.0](https://crates.io/api/v1/crates/zvariant_utils/4.2.0/download) — MIT

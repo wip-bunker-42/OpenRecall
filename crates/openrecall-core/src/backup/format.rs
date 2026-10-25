@@ -35,13 +35,17 @@ pub struct BackupData {
     pub undo_records: Vec<UndoRecord>,
     pub training_runs: Vec<TrainingJob>,
 }
+pub(crate) fn canonical_value<T: Serialize>(input: &T) -> crate::AppResult<serde_json::Value> {
+    let mut value = serde_json::to_value(input)?;
+    // Remain canonical even if another dependency enables preserve_order.
+    value.sort_all_objects();
+    Ok(value)
+}
 pub fn digest(data: &BackupData) -> crate::AppResult<String> {
     use sha2::{Digest, Sha256};
-    // Value uses sorted object keys. Digest is independent of struct field order.
-    Ok(
-        Sha256::digest(serde_json::to_vec(&serde_json::to_value(data)?)?)
-            .iter()
-            .map(|b| format!("{b:02x}"))
-            .collect(),
-    )
+    // Explicit canonical ordering is independent of struct/dependency features.
+    Ok(Sha256::digest(serde_json::to_vec(&canonical_value(data)?)?)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect())
 }

@@ -1,6 +1,6 @@
 use super::{
     BackupLimits,
-    format::{BackupEnvelope, FORMAT_VERSION, digest},
+    format::{BackupEnvelope, FORMAT_VERSION, canonical_value, digest},
 };
 use crate::{AppError, AppResult};
 use std::{
@@ -40,7 +40,7 @@ pub(crate) fn write(
     limits: BackupLimits,
 ) -> AppResult<(PathBuf, u64)> {
     // Hashing and writing use the same JSON number representation (including f32).
-    let bytes = serde_json::to_vec_pretty(&serde_json::to_value(envelope)?)?;
+    let bytes = serde_json::to_vec_pretty(&canonical_value(envelope)?)?;
     if bytes.len() as u64 > limits.max_bytes {
         return Err(AppError::new("backupTooLarge"));
     }

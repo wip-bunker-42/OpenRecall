@@ -32,6 +32,12 @@
     "targets": ["nsis"],
     "shortDescription": "Offline accessible spaced repetition",
     "category": "Education",
+    "licenseFile": "../LICENSE",
+    "resources": {
+      "../LICENSE": "licenses/OpenRecall-LICENSE.txt",
+      "../THIRD_PARTY_NOTICES.md": "licenses/THIRD_PARTY_NOTICES.md",
+      "../licenses/": "licenses/"
+    },
     "createUpdaterArtifacts": true,
     "windows": {
       "nsis": {
