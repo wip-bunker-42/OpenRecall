@@ -332,3 +332,126 @@ section {
   animation: none !important;
   transition: none !important;
 }
+.review-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-block-end: 1.4rem;
+}
+.review-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+}
+.review-filters label {
+  margin: 0.2rem 0;
+}
+.review-filters input {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-inline-end: 0.5rem;
+}
+.review-progress {
+  margin-block: 0.7rem 0.2rem;
+  color: var(--muted);
+}
+progress {
+  width: 100%;
+  height: 0.45rem;
+  accent-color: var(--accent);
+}
+.study-column {
+  max-width: 850px;
+  margin-inline: auto;
+}
+.study-column section {
+  margin-block: 2rem;
+}
+.question-text {
+  font-size: 1.25rem;
+  line-height: 1.95;
+}
+.answer-block {
+  border-block-start: 1px solid var(--line);
+  padding-block-start: 1.5rem;
+}
+.rating-fieldset {
+  padding: 0;
+  border: 0;
+}
+.rating-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+.rating {
+  width: 100%;
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.65rem;
+}
+.rating-again {
+  color: var(--danger);
+}
+.rating-easy {
+  border-color: var(--accent);
+}
+.rating-interval {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+kbd {
+  font: inherit;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.statistics-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  max-width: 780px;
+  gap: 0.5rem 1.5rem;
+}
+.statistics-list dd {
+  margin: 0;
+}
+.statistics-list dt {
+  color: var(--muted);
+}
+.filter-help,
+.shortcuts-help {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.filter-help summary,
+.shortcuts-help summary {
+  font-size: inherit;
+  font-weight: 400;
+  padding-block: 0.3rem;
+}
+.reveal-button {
+  min-width: 13rem;
+  margin-block: 1rem;
+}
+@media (max-width: 1050px) {
+  .rating-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .statistics-list {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+  .statistics-list dd {
+    margin-block-end: 0.8rem;
+  }
+  .rating {
+    min-height: 110px;
+  }
+}

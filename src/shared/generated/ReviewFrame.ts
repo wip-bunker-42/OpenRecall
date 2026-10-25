@@ -2,8 +2,9 @@
 import type { CardDetail } from "./CardDetail";
 import type { CardForm } from "./CardForm";
 import type { Progress } from "./Progress";
+import type { RatingDueDates } from "./RatingDueDates";
 import type { RatingPreviews } from "./RatingPreviews";
 import type { ReviewFilter } from "./ReviewFilter";
 import type { ReviewResult } from "./ReviewResult";
 
-export type ReviewFrame = { lastReview: ReviewResult | null, sessionId: string, filter: ReviewFilter, presentationId: string, card: CardDetail, form: CardForm, answerRevealed: boolean, previews: RatingPreviews | null, progress: Progress, nextDueAt: string | null, cardRevision: string, canUndo: boolean, };
+export type ReviewFrame = { previewDueAt: RatingDueDates | null, lastReview: ReviewResult | null, sessionId: string, filter: ReviewFilter, presentationId: string, card: CardDetail, form: CardForm, answerRevealed: boolean, previews: RatingPreviews | null, progress: Progress, nextDueAt: string | null, cardRevision: string, canUndo: boolean, };

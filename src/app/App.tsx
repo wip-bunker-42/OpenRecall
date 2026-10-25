@@ -8,15 +8,33 @@ import { focusHeading } from '../shared/focus';
 import { DeckPage } from '../features/cards/DeckPage';
 import { Dialog } from '../components/Dialog';
 import { UnsavedContext } from './unsaved';
+import { ReviewPage } from '../features/review/ReviewPage';
 export function App({ api, native }: { api: Api; native: NativeApi }) {
   const [bootstrap, setBootstrap] = useState<Bootstrap | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [route, setRoute] = useState<Route>({ page: 'library' });
   const [dirty, setDirty] = useState(false);
   const [pending, setPending] = useState<Route | null>(null);
+  const [reviewBusy, setReviewBusy] = useState(false);
+  const [navigationBusy, setNavigationBusy] = useState(false);
   function go(next: Route) {
-    setRoute(next);
-    if (next.page === 'library') void refresh().catch(setError);
+    if (reviewBusy || navigationBusy) return;
+    setNavigationBusy(true);
+    void (async () => {
+      try {
+        if (
+          route.page === 'review' &&
+          (next.page !== 'review' || next.sessionId !== route.sessionId)
+        )
+          await api.call('closeSession', { sessionId: route.sessionId });
+        setRoute(next);
+        if (next.page === 'library') await refresh();
+      } catch (e) {
+        setError(e);
+      } finally {
+        setNavigationBusy(false);
+      }
+    })();
   }
   function navigate(next: Route) {
     if (dirty) setPending(next);
@@ -66,18 +84,21 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
             </div>
             <nav aria-label="التنقل الرئيسي">
               <button
+                disabled={reviewBusy || navigationBusy}
                 aria-current={route.page === 'library' ? 'page' : undefined}
                 onClick={() => navigate({ page: 'library' })}
               >
                 المجموعات
               </button>
               <button
+                disabled={reviewBusy || navigationBusy}
                 aria-current={route.page === 'profiles' ? 'page' : undefined}
                 onClick={() => navigate({ page: 'profiles' })}
               >
                 نماذج التحسين
               </button>
               <button
+                disabled={reviewBusy || navigationBusy}
                 aria-current={route.page === 'settings' ? 'page' : undefined}
                 onClick={() => navigate({ page: 'settings' })}
               >
@@ -111,16 +132,20 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
                 navigate={navigate}
                 pageSize={bootstrap.settings.pageSize}
               />
+            ) : route.page === 'review' ? (
+              <ReviewPage
+                key={route.sessionId}
+                sessionId={route.sessionId}
+                deckId={route.deckId}
+                api={api}
+                navigate={navigate}
+                onBusyChange={setReviewBusy}
+                externalBusy={navigationBusy}
+                shortcutsEnabled={bootstrap.settings.shortcutsEnabled}
+                timezone={bootstrap.settings.timezone}
+              />
             ) : (
-              <h1 tabIndex={-1}>
-                {route.page === 'settings'
-                  ? 'الإعدادات'
-                  : route.page === 'profiles'
-                    ? 'نماذج التحسين'
-                    : route.page === 'review'
-                      ? 'المراجعة'
-                      : 'المجموعة'}
-              </h1>
+              <h1 tabIndex={-1}>{route.page === 'settings' ? 'الإعدادات' : 'نماذج التحسين'}</h1>
             )}
           </main>
         </div>

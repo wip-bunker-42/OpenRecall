@@ -4,6 +4,30 @@ use common::*;
 use openrecall_core::scheduling::queue::*;
 use serde_json::{Value, json};
 #[test]
+fn rating_preview_absolute_due_instants_come_from_the_native_clock() {
+    use openrecall_core::Clock;
+    let mut f = Fixture::new();
+    let d = f.deck("absolute due");
+    f.card(&d, "q", "a");
+    let s = f.call("startSession", json!({"deckId":d}));
+    let sid = s["payload"]["sessionId"].clone();
+    let r = f.call("revealAnswer", json!({"sessionId":sid}));
+    let frame = &r["payload"];
+    for rating in ["again", "hard", "good", "easy"] {
+        let due: DateTime<Utc> = frame["previewDueAt"][rating]
+            .as_str()
+            .expect("native absolute preview")
+            .parse()
+            .unwrap();
+        let interval = frame["previews"][rating]["intervalSeconds"]
+            .as_f64()
+            .unwrap();
+        assert!(
+            ((due - f.clock.now()).num_milliseconds() as f64 - interval * 1000.0).abs() <= 0.51
+        );
+    }
+}
+#[test]
 fn due_order_filters_and_future_exclusion_are_explicit() {
     let now: DateTime<Utc> = "2026-10-24T00:00:00Z".parse().unwrap();
     let entries = vec![

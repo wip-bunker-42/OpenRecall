@@ -47,7 +47,7 @@ export function DeckPage({
     setError(null);
     try {
       const view = await api.call('startSession', { deckId });
-      navigate({ page: 'review', sessionId: view.payload.sessionId });
+      navigate({ page: 'review', sessionId: view.payload.sessionId, deckId });
     } catch (e) {
       setError(e);
     } finally {

@@ -3,4 +3,4 @@ import type { FilterChange } from "./FilterChange";
 import type { ReviewFilter } from "./ReviewFilter";
 import type { ReviewResult } from "./ReviewResult";
 
-export type SessionSummary = { lastReview: ReviewResult | null, sessionId: string, filter: ReviewFilter, filterChanges: Array<FilterChange>, startedAt: string, endedAt: string, wallMs: bigint, activeMs: bigint, attempts: number, uniqueCards: number, newCards: number, ratings: [number, number, number, number], meanResponseMs: number | null, matchingDueRemaining: number, allDueRemaining: number, nextDueAt: string | null, canUndo: boolean, };
+export type SessionSummary = { lastReview: ReviewResult | null, sessionId: string, filter: ReviewFilter, filterChanges: Array<FilterChange>, startedAt: string, endedAt: string, wallMs: number, activeMs: number, attempts: number, uniqueCards: number, newCards: number, ratings: [number, number, number, number], meanResponseMs: number | null, matchingDueRemaining: number, allDueRemaining: number, nextDueAt: string | null, canUndo: boolean, };

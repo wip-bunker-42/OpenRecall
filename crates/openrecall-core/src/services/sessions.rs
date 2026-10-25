@@ -76,12 +76,16 @@ impl App {
             profile.active_model_revision,
         ))
     }
-    pub(crate) fn card_previews(&self, card: &CardDetail) -> AppResult<RatingPreviews> {
+    pub(crate) fn card_previews(
+        &self,
+        card: &CardDetail,
+        now: DateTime<Utc>,
+    ) -> AppResult<RatingPreviews> {
         let (scheduler, policy, _) = self.scheduler_for(card)?;
         let elapsed = match card.reviewed_at.as_ref() {
             Some(t) => crate::domain::time::elapsed_days(
                 t.parse().map_err(|_| AppError::new("invalidHistory"))?,
-                self.clock.now(),
+                now,
             ),
             None => 0.0,
         };
@@ -261,12 +265,26 @@ impl App {
                 .find(|f| f.id == p.form_id)
                 .cloned()
                 .ok_or_else(|| AppError::new("noForms"))?;
+            let preview_time = self.clock.now();
             let previews = if p.answer_revealed {
-                Some(self.card_previews(&card)?)
+                Some(self.card_previews(&card, preview_time)?)
             } else {
                 None
             };
             let frame = ReviewFrame {
+                preview_due_at: previews.as_ref().map(|previews| {
+                    let due = |seconds: f64| {
+                        (preview_time
+                            + chrono::Duration::milliseconds((seconds * 1000.0).round() as i64))
+                        .to_rfc3339()
+                    };
+                    RatingDueDates {
+                        again: due(previews.again.interval_seconds),
+                        hard: due(previews.hard.interval_seconds),
+                        good: due(previews.good.interval_seconds),
+                        easy: due(previews.easy.interval_seconds),
+                    }
+                }),
                 last_review: s.last_review.clone(),
                 session_id: s.id.clone(),
                 filter: s.filter,

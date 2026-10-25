@@ -39,6 +39,7 @@ pub struct Progress {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewFrame {
+    pub preview_due_at: Option<RatingDueDates>,
     pub last_review: Option<ReviewResult>,
     pub session_id: String,
     pub filter: ReviewFilter,
@@ -51,6 +52,14 @@ pub struct ReviewFrame {
     pub next_due_at: Option<String>,
     pub card_revision: String,
     pub can_undo: bool,
+}
+#[derive(Clone, Debug, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+pub struct RatingDueDates {
+    pub again: String,
+    pub hard: String,
+    pub good: String,
+    pub easy: String,
 }
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]

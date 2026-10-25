@@ -219,7 +219,9 @@ pub enum Response {
     SaveSettings(Settings),
 }
 pub fn export(output: &Path) -> AppResult<()> {
-    let config = ts_rs::Config::default().with_out_dir(output);
+    let config = ts_rs::Config::default()
+        .with_large_int("number")
+        .with_out_dir(output);
     Request::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     Response::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     AppError::export_all(&config).map_err(|_| AppError::new("contractExport"))?;

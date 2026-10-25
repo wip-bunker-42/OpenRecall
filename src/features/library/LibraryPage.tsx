@@ -66,7 +66,7 @@ export function LibraryPage({
     setError(null);
     try {
       const view = await api.call('startSession', { deckId });
-      navigate({ page: 'review', sessionId: view.payload.sessionId });
+      navigate({ page: 'review', sessionId: view.payload.sessionId, deckId });
     } catch (e) {
       setError(e);
     } finally {
@@ -92,9 +92,9 @@ export function LibraryPage({
           {bootstrap.resumableSessions.map((s) => (
             <button
               key={s.sessionId}
-              onClick={() => navigate({ page: 'review', sessionId: s.sessionId })}
+              onClick={() => navigate({ page: 'review', sessionId: s.sessionId, deckId: s.deckId })}
             >
-              استكمال المراجعة
+              استكمال مراجعة {bootstrap.decks.find((d) => d.id === s.deckId)?.name}
             </button>
           ))}
         </section>

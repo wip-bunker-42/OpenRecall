@@ -36,9 +36,11 @@ export const bootstrapFixture: Bootstrap = {
   profiles: [],
   libraryRevision: 'library-revision',
 };
-export function fixtureApi(handler?: (r: Request) => Response | undefined) {
+export function fixtureApi(
+  handler?: (r: Request) => Response | undefined | Promise<Response | undefined>,
+) {
   return createApi(async (r) => {
-    const response = handler?.(r);
+    const response = await handler?.(r);
     if (response) return response;
     if (r.kind === 'bootstrap') return { kind: r.kind, payload: bootstrapFixture };
     if (r.kind === 'listDecks') return { kind: r.kind, payload: [deckFixture] };
