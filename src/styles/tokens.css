@@ -1,0 +1,17 @@
+:root {
+  color-scheme: dark;
+  --canvas: #101d30;
+  --surface: #192b42;
+  --surface-raised: #243951;
+  --text: #edf2f7;
+  --muted: #b8c9db;
+  --accent: #96bdff;
+  --danger: #ffb4bd;
+  --line: #4c637c;
+  --text-scale: 1;
+  font-family: 'Noto Sans Arabic Variable', 'Segoe UI', sans-serif;
+  font-size: calc(18px * var(--text-scale));
+  line-height: 1.85;
+  background: var(--canvas);
+  color: var(--text);
+}

@@ -1,0 +1,21 @@
+[package]
+name = "openrecall-desktop"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+[lib]
+name = "openrecall_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+[features]
+automation = []
+[build-dependencies]
+tauri-build = {version = "=2.7.4", features = []}
+[dependencies]
+openrecall-core = {path = "../crates/openrecall-core"}
+tauri = {version = "=2.12.5", features = []}
+tauri-plugin-single-instance = "=2.5.4"
+serde = {version = "1", features = ["derive"]}
+serde_json = "1"
+[dev-dependencies]
+tempfile = "3"

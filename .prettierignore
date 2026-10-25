@@ -1,0 +1,6 @@
+src/shared/generated
+dist
+node_modules
+src-tauri/gen
+docs/superpowers
+.superpowers

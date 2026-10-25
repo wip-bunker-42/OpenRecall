@@ -1,0 +1,8 @@
+[[permission]]
+identifier = "allow-execute"
+description = "Execute validated local study requests"
+commands.allow = ["execute"]
+[[permission]]
+identifier = "allow-get-system-info"
+description = "Read application version and resolved data directory"
+commands.allow = ["get_system_info"]

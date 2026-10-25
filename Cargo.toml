@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/openrecall-core"]
+members = ["crates/openrecall-core", "src-tauri"]
 resolver = "3"
 
 [workspace.package]
