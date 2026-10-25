@@ -8,7 +8,7 @@ use crate::{
     domain::{
         card::CardDetail,
         review::{ActionRecord, ReviewLog, UndoRecord},
-        session::Session,
+        session::{Presentation, Session},
     },
     scheduling::fsrs::Rating,
 };
@@ -22,6 +22,12 @@ impl App {
                     .next_card_before
                     .as_ref()
                     .is_some_and(|c| c.id == card_id)
+                || undo
+                    .session_before
+                    .current
+                    .iter()
+                    .chain(&undo.session_before.parked)
+                    .any(|p| p.card_id == card_id)
             {
                 self.store
                     .conn
@@ -36,6 +42,28 @@ impl App {
                 .is_some_and(|id| invalid.contains(id))
             {
                 session.undo_id = None;
+                self.save_session(&session)?;
+            }
+        }
+        Ok(())
+    }
+    pub(crate) fn reconcile_card_presentations(&self, card: &CardDetail) -> AppResult<()> {
+        let invalid = |p: &Presentation| {
+            p.card_id == card.id && !card.forms.iter().any(|form| form.id == p.form_id)
+        };
+        for mut session in self
+            .store
+            .all::<Session>("sessions")?
+            .into_iter()
+            .filter(|session| session.deck_id == card.deck_id)
+        {
+            let current_invalid = session.current.as_ref().is_some_and(invalid);
+            if current_invalid {
+                session.current = None;
+            }
+            let parked_count = session.parked.len();
+            session.parked.retain(|p| !invalid(p));
+            if current_invalid || parked_count != session.parked.len() {
                 self.save_session(&session)?;
             }
         }

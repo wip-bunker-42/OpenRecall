@@ -132,6 +132,7 @@ impl App {
         crate::scheduling::forms::reconcile_forms(&mut card.bag, &ids, self.random.as_mut())?;
         card.revision = id();
         self.save_card(&card)?;
+        self.reconcile_card_presentations(&card)?;
         self.touch_deck(&card.deck_id)?;
         Ok(card)
     }
