@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import type { Request } from './generated/Request';
 import type { Response } from './generated/Response';
 import type { SystemInfo } from './generated/SystemInfo';
+import type { PickedImportFile } from './generated/PickedImportFile';
 export type Kind = Request['kind'];
 export type Input<K extends Kind> = Extract<Request, { kind: K }>['payload'];
 export type Output<K extends Kind> = Extract<Response, { kind: K }>['payload'];
@@ -28,8 +29,12 @@ export function createTauriApi(): Api {
   return createApi((request) => invoke('execute', { request }));
 }
 export interface NativeApi {
+  pickImportFile(): Promise<PickedImportFile | null>;
   getSystemInfo(): Promise<SystemInfo>;
 }
 export function createNativeApi(): NativeApi {
-  return { getSystemInfo: () => invoke('get_system_info') };
+  return {
+    getSystemInfo: () => invoke('get_system_info'),
+    pickImportFile: () => invoke('pick_import_file'),
+  };
 }

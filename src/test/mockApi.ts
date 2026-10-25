@@ -46,6 +46,9 @@ export function fixtureApi(handler?: (r: Request) => Response | undefined) {
   });
 }
 export const nativeFixture: NativeApi = {
+  async pickImportFile() {
+    return null;
+  },
   async getSystemInfo() {
     return {
       appVersion: '0.1.0',

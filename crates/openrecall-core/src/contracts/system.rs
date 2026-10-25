@@ -9,3 +9,9 @@ pub struct SystemInfo {
     pub schema_version: u32,
     pub data_directory: String,
 }
+#[derive(Clone, Debug, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+pub struct PickedImportFile {
+    pub name: String,
+    pub text: String,
+}

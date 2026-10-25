@@ -224,6 +224,7 @@ pub fn export(output: &Path) -> AppResult<()> {
     Response::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     AppError::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     system::SystemInfo::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
+    system::PickedImportFile::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     backup::ExportReport::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     backup::RestorePreview::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     backup::RestoreReport::export_all(&config).map_err(|_| AppError::new("contractExport"))?;

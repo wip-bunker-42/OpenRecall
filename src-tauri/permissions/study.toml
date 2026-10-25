@@ -6,3 +6,7 @@ commands.allow = ["execute"]
 identifier = "allow-get-system-info"
 description = "Read application version and resolved data directory"
 commands.allow = ["get_system_info"]
+[[permission]]
+identifier = "allow-pick-import-file"
+description = "Select and read a bounded UTF-8 JSON file using a native dialog"
+commands.allow = ["pick_import_file"]

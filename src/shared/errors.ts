@@ -2,6 +2,13 @@ export function errorText(error: unknown): string {
   const code =
     typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : 'unknown';
   const messages: Record<string, string> = {
+    requiredCardFields: 'السؤال والإجابة مطلوبان في كل صيغة. أكمل الحقول الفارغة ثم احفظ البطاقة.',
+    invalidJson: 'محتوى JSON غير صحيح. راجع علامات التنصيص والفواصل والأقواس ثم افحصه مرة أخرى.',
+    arrayExpected: 'يجب أن يبدأ الملف بمصفوفة بطاقات بين قوسين مربعين [ ].',
+    importTooLarge: 'حجم ملف البطاقات أكبر من ٥٠ ميبيبايت. قسّمه إلى ملفات أصغر.',
+    invalidUtf8: 'ترميز الملف غير صالح. احفظه بترميز UTF-8 ثم أعد اختياره.',
+    noSelection: 'حدد بطاقة صالحة واحدة على الأقل للاستيراد.',
+    previewExpired: 'انتهت صلاحية المعاينة. افحص JSON مرة أخرى ثم حدد البطاقات.',
     storage: 'تعذر حفظ البيانات. أعد المحاولة وتأكد من توفر مساحة على الجهاز.',
     fileAccess: 'تعذر فتح الملف أو حفظه. تحقق من صلاحية الوصول إلى المجلد.',
     validation: 'راجع الحقول المطلوبة والقيم المسموح بها.',

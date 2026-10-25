@@ -16,7 +16,11 @@ export function Dialog({
     const previous = document.activeElement as HTMLElement | null;
     const dialog = ref.current;
     dialog?.showModal();
-    dialog?.querySelector<HTMLElement>('[data-autofocus],input:not([type=hidden]),button')?.focus();
+    dialog
+      ?.querySelector<HTMLElement>(
+        '[data-autofocus],input:not([type=hidden]),textarea,select,button',
+      )
+      ?.focus();
     return () => {
       dialog?.close();
       previous?.focus();

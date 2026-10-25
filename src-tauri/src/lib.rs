@@ -1,9 +1,11 @@
 mod commands;
+pub mod files;
 pub mod paths;
 use std::sync::{Arc, Mutex};
 use tauri::Manager;
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.show();
@@ -30,7 +32,8 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::execute,
-            commands::get_system_info
+            commands::get_system_info,
+            files::pick_import_file
         ])
         .run(tauri::generate_context!())
         .expect("Unable to start OpenRecall");

@@ -2,5 +2,10 @@
   "identifier": "main-capability",
   "description": "Local study commands for the main window only",
   "windows": ["main"],
-  "permissions": ["core:default", "allow-execute", "allow-get-system-info"]
+  "permissions": [
+    "core:default",
+    "allow-execute",
+    "allow-get-system-info",
+    "allow-pick-import-file"
+  ]
 }
