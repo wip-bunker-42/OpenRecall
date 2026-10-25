@@ -144,7 +144,7 @@ impl App {
         if card.revision != expected {
             return Err(AppError::new("conflict"));
         }
-        self.invalidate_card_undo(&card_id)?;
+        self.clear_deck_undos(std::slice::from_ref(&card.deck_id))?;
         self.store
             .conn
             .execute("DELETE FROM cards WHERE id=?1", [&card_id])?;

@@ -9,6 +9,7 @@ import { FormErrors } from '../../components/FormErrors';
 import { StatusRegion } from '../../components/StatusRegion';
 import { numeric, validation } from '../../shared/forms';
 import { useUnsaved } from '../../app/unsaved';
+import { BackupPanel } from '../backup/BackupPanel';
 function SettingsForm({
   settings,
   api,
@@ -207,11 +208,13 @@ export function SettingsPage({
   native,
   navigate,
   onSaved,
+  onRestored,
 }: {
   api: Api;
   native: NativeApi;
   navigate: Navigate;
   onSaved?: () => void | Promise<void>;
+  onRestored?: () => void | Promise<void>;
 }) {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [info, setInfo] = useState<SystemInfo | null>(null);
@@ -259,6 +262,10 @@ export function SettingsPage({
       ) : (
         <p role="status">جارٍ تحميل الإعدادات…</p>
       )}
+      <BackupPanel
+        native={native}
+        onRestored={onRestored ?? (() => navigate({ page: 'library' }))}
+      />
       <Disclosure title="معلومات التطبيق">
         {info ? (
           <>

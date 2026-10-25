@@ -6,6 +6,7 @@
     "core:default",
     "allow-execute",
     "allow-get-system-info",
-    "allow-pick-import-file"
+    "allow-pick-import-file",
+    "allow-backup"
   ]
 }

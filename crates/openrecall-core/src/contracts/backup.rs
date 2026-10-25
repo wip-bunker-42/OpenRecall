@@ -3,6 +3,7 @@ use ts_rs::TS;
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ExportReport {
+    pub export_id: String,
     pub path: String,
     pub bytes: u64,
     pub payload_sha256: String,

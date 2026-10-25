@@ -37,7 +37,8 @@ pub(crate) fn write(
     envelope: &BackupEnvelope,
     limits: BackupLimits,
 ) -> AppResult<(PathBuf, u64)> {
-    let bytes = serde_json::to_vec_pretty(envelope)?;
+    // Hashing and writing use the same JSON number representation (including f32).
+    let bytes = serde_json::to_vec_pretty(&serde_json::to_value(envelope)?)?;
     if bytes.len() as u64 > limits.max_bytes {
         return Err(AppError::new("backupTooLarge"));
     }

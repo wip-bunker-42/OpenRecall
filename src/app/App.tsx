@@ -69,6 +69,9 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
     }
   }, [bootstrap]);
   useEffect(() => {
+    void native.setEditState({ unsavedChanges: dirty }).catch(setError);
+  }, [dirty, native]);
+  useEffect(() => {
     if (!dirty) return;
     const guard = (e: BeforeUnloadEvent) => {
       e.preventDefault();
@@ -77,7 +80,7 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
     return () => window.removeEventListener('beforeunload', guard);
   }, [dirty]);
   return (
-    <UnsavedContext.Provider value={{ setDirty }}>
+    <UnsavedContext.Provider value={{ setDirty, dirty }}>
       <>
         <a className="skip" href="#main">
           تجاوز إلى المحتوى
@@ -154,7 +157,16 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
                 timezone={bootstrap.settings.timezone}
               />
             ) : route.page === 'settings' ? (
-              <SettingsPage api={api} native={native} navigate={navigate} onSaved={refresh} />
+              <SettingsPage
+                api={api}
+                native={native}
+                navigate={navigate}
+                onSaved={refresh}
+                onRestored={async () => {
+                  await refresh();
+                  go({ page: 'library' });
+                }}
+              />
             ) : (
               <ProfilesPage api={api} navigate={navigate} />
             )}

@@ -28,6 +28,7 @@ impl App {
         };
         let (path, bytes) = crate::backup::files::write(destination, &envelope, limits)?;
         Ok(ExportReport {
+            export_id: uuid::Uuid::new_v4().to_string(),
             path: path.to_string_lossy().into_owned(),
             bytes,
             payload_sha256: envelope.payload_sha256,

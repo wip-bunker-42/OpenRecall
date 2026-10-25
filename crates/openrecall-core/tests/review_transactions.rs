@@ -2,6 +2,51 @@ mod common;
 use common::*;
 use openrecall_core::Clock;
 use serde_json::{Value, json};
+#[test]
+fn a_new_session_cannot_rewind_a_previous_completed_session() {
+    let mut f = Fixture::new();
+    let d = f.deck("undo ownership");
+    let cid = f.card(&d, "q", "a");
+    let start = f.call("startSession", json!({"deckId":d}));
+    let old = start["payload"]["sessionId"].clone();
+    let reveal = f.call("revealAnswer", json!({"sessionId":old}));
+    f.app
+        .execute_json(request(&reveal["payload"], "easy", "old grade"))
+        .unwrap();
+    f.call("startSession", json!({"deckId":d}));
+    assert_eq!(
+        f.app
+            .execute_json(json!({"kind":"undoReview","payload":{"sessionId":old}}))
+            .unwrap_err()
+            .code,
+        "undoUnavailable"
+    );
+    assert_eq!(f.call("getCard", json!({"cardId":cid}))["reviewCount"], 1);
+}
+#[test]
+fn deleting_other_session_history_invalidates_stale_undo_aggregates() {
+    let mut f = Fixture::new();
+    let d = f.deck("delete history");
+    f.card(&d, "a", "1");
+    f.card(&d, "b", "2");
+    let start = f.call("startSession", json!({"deckId":d}));
+    let sid = start["payload"]["sessionId"].clone();
+    let first = start["payload"]["card"]["id"].clone();
+    for action in ["first", "second"] {
+        let reveal = f.call("revealAnswer", json!({"sessionId":sid}));
+        f.app
+            .execute_json(request(&reveal["payload"], "easy", action))
+            .unwrap();
+    }
+    let card = f.call("getCard", json!({"cardId":first}));
+    f.call(
+        "deleteCard",
+        json!({"cardId":first,"expectedRevision":card["revision"]}),
+    );
+    let view = f.call("readSession", json!({"sessionId":sid}));
+    assert_eq!(view["payload"]["attempts"], 1);
+    assert_eq!(view["payload"]["canUndo"], false);
+}
 fn request(frame: &Value, rating: &str, action: &str) -> Value {
     let id = uuid::Uuid::from_u128(
         action

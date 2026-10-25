@@ -101,6 +101,7 @@ impl App {
         {
             return self.read_session(existing.id);
         }
+        self.clear_deck_undos(std::slice::from_ref(&deck_id))?;
         let mut s = Session {
             last_review: None,
             id: id(),

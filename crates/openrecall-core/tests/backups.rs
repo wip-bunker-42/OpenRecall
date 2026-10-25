@@ -1,6 +1,59 @@
 mod common;
 use common::*;
 use serde_json::{Value, json};
+#[test]
+fn exported_digest_matches_the_canonical_json_payload_actually_written() {
+    use sha2::{Digest, Sha256};
+    let mut f = Fixture::new();
+    let d = f.deck("digest");
+    f.card(&d, "q", "a");
+    let file = f.dir.path().join("digest.json");
+    f.app.export_snapshot(&file).unwrap();
+    let raw = read(&file);
+    let hash: String = Sha256::digest(serde_json::to_vec(&raw["data"]).unwrap())
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect();
+    assert_eq!(raw["payloadSha256"], hash);
+}
+#[test]
+fn corrupt_card_progress_and_undo_before_images_are_rejected_semantically() {
+    use openrecall_core::backup::format::{BackupEnvelope, digest};
+    let mut f = Fixture::new();
+    let deck = f.deck("progress integrity");
+    f.card(&deck, "q", "a");
+    let start = f.call("startSession", json!({"deckId":deck}));
+    let sid = start["payload"]["sessionId"].clone();
+    let reveal = f.call("revealAnswer", json!({"sessionId":sid}));
+    let frame = &reveal["payload"];
+    f.call("rateCard",json!({"sessionId":sid,"presentationId":frame["presentationId"],"rating":"easy","actionId":uuid::Uuid::new_v4(),"expectedCardRevision":frame["cardRevision"]}));
+    let file = f.dir.path().join("progress.json");
+    f.app.export_snapshot(&file).unwrap();
+    let original: BackupEnvelope = serde_json::from_value(read(&file)).unwrap();
+    for mode in 0..7 {
+        let mut bad = original.clone();
+        match mode {
+            0 => bad.data.cards[0].review_count += 1,
+            1 => bad.data.cards[0].lapse_count = 1,
+            2 => bad.data.cards[0].reviewed_at = Some("2020-01-01T00:00:00Z".into()),
+            3 => bad.data.cards[0].due_at = "2030-01-01T00:00:00Z".into(),
+            4 => {
+                bad.data.undo_records[0].card_before = bad.data.cards[0].clone();
+            }
+            5 => bad.data.undo_records[0].session_before.attempts = 99,
+            _ => bad.data.undo_records[0].card_before.forms[0].front = "independent text".into(),
+        };
+        bad.payload_sha256 = digest(&bad.data).unwrap();
+        let target = f.dir.path().join(format!("bad-progress-{mode}.json"));
+        std::fs::write(
+            &target,
+            serde_json::to_vec(&serde_json::to_value(&bad).unwrap()).unwrap(),
+        )
+        .unwrap();
+        let error = f.app.preview_restore(&target).unwrap_err();
+        assert_eq!(error.code, "invalidBackup", "mode {mode}");
+    }
+}
 fn read(path: &std::path::Path) -> Value {
     serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
 }

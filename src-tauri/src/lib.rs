@@ -1,5 +1,7 @@
+pub mod backup;
 mod commands;
 pub mod files;
+pub mod lifecycle;
 pub mod paths;
 use std::sync::{Arc, Mutex};
 use tauri::Manager;
@@ -25,6 +27,8 @@ pub fn run() {
                 Box::new(openrecall_core::SystemRandom::default()),
             )?;
             app.manage(commands::AppState {
+                lifecycle: Arc::new(Default::default()),
+                backup_files: Arc::new(Mutex::new(Default::default())),
                 core: Arc::new(Mutex::new(core)),
                 paths,
             });
@@ -33,7 +37,12 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::execute,
             commands::get_system_info,
-            files::pick_import_file
+            files::pick_import_file,
+            lifecycle::set_edit_state,
+            backup::export_backup,
+            backup::pick_backup_for_preview,
+            backup::restore_backup,
+            backup::reveal_export
         ])
         .run(tauri::generate_context!())
         .expect("Unable to start OpenRecall");

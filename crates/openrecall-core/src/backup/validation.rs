@@ -92,6 +92,57 @@ fn session(s: &Session, cards: &HashMap<&str, &CardDetail>) -> AppResult<()> {
     }
     Ok(())
 }
+fn aggregates(s: &Session, logs: &[&crate::domain::review::ReviewLog]) -> AppResult<()> {
+    let mut counts = [0u32; 4];
+    let mut total = 0u64;
+    let mut unique = HashSet::new();
+    let mut new = HashSet::new();
+    for l in logs {
+        counts[l.rating.number() as usize - 1] += 1;
+        total = total.saturating_add(l.response_ms);
+        unique.insert(l.card_id.as_str());
+        if l.was_new {
+            new.insert(l.card_id.as_str());
+        }
+    }
+    check(
+        s.attempts as usize == logs.len()
+            && s.ratings == counts
+            && s.response_ms == total
+            && s.unique_card_ids
+                .iter()
+                .map(String::as_str)
+                .collect::<HashSet<_>>()
+                == unique
+            && s.new_card_ids
+                .iter()
+                .map(String::as_str)
+                .collect::<HashSet<_>>()
+                == new,
+    )
+}
+fn progress(c: &CardDetail, logs: &[&crate::domain::review::ReviewLog]) -> AppResult<()> {
+    check(
+        c.review_count as usize == logs.len()
+            && c.lapse_count as usize
+                == logs
+                    .iter()
+                    .filter(|l| l.rating.number() == 1 && !l.was_new)
+                    .count(),
+    )?;
+    if let Some(last) = logs
+        .iter()
+        .max_by_key(|l| chrono::DateTime::parse_from_rfc3339(&l.reviewed_at).ok())
+    {
+        check(
+            c.reviewed_at.as_deref() == Some(last.reviewed_at.as_str())
+                && c.due_at == last.next_due_at
+                && c.phase == last.phase,
+        )
+    } else {
+        check(c.phase == "new" && c.reviewed_at.is_none() && c.memory.is_none())
+    }
+}
 pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
     d.settings.validate()?;
     check(!d.library_revision.is_empty())?;
@@ -195,39 +246,39 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
         settings.max_interval_days = l.policy.max_interval_days;
         settings.validate()?;
     }
+    let mut by_card: HashMap<&str, Vec<&crate::domain::review::ReviewLog>> = HashMap::new();
+    let mut by_session: HashMap<&str, Vec<&crate::domain::review::ReviewLog>> = HashMap::new();
+    let logs_by_id = d
+        .reviews
+        .iter()
+        .map(|l| (l.id.as_str(), l))
+        .collect::<HashMap<_, _>>();
+    let actions_by_id = d
+        .actions
+        .iter()
+        .map(|a| (a.id.as_str(), a))
+        .collect::<HashMap<_, _>>();
+    for l in &d.reviews {
+        by_card.entry(&l.card_id).or_default().push(l);
+        by_session.entry(&l.session_id).or_default().push(l);
+    }
+    for c in &d.cards {
+        progress(
+            c,
+            by_card
+                .get(c.id.as_str())
+                .map(Vec::as_slice)
+                .unwrap_or_default(),
+        )?;
+    }
     // Session metrics are authoritative surviving-history aggregates, not caches.
     for s in &d.sessions {
-        let logs = d
-            .reviews
-            .iter()
-            .filter(|l| l.session_id == s.id)
-            .collect::<Vec<_>>();
-        let mut counts = [0u32; 4];
-        let mut total = 0u64;
-        let mut unique = HashSet::new();
-        let mut new = HashSet::new();
-        for l in &logs {
-            counts[l.rating.number() as usize - 1] += 1;
-            total = total.saturating_add(l.response_ms);
-            unique.insert(l.card_id.as_str());
-            if l.was_new {
-                new.insert(l.card_id.as_str());
-            }
-        }
-        check(
-            s.attempts as usize == logs.len()
-                && s.ratings == counts
-                && s.response_ms == total
-                && s.unique_card_ids
-                    .iter()
-                    .map(String::as_str)
-                    .collect::<HashSet<_>>()
-                    == unique
-                && s.new_card_ids
-                    .iter()
-                    .map(String::as_str)
-                    .collect::<HashSet<_>>()
-                    == new,
+        aggregates(
+            s,
+            by_session
+                .get(s.id.as_str())
+                .map(Vec::as_slice)
+                .unwrap_or_default(),
         )?;
     }
     for a in &d.actions {
@@ -251,6 +302,44 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
         )?;
         card(&u.card_before)?;
         check(cards.contains(u.card_before.id.as_str()))?;
+        let log = logs_by_id
+            .get(u.log_id.as_str())
+            .ok_or_else(|| AppError::new("invalidBackup"))?;
+        let current = card_map[u.card_before.id.as_str()];
+        check(
+            log.card_id == current.id
+                && log.session_id == u.session_id
+                && log.model_revision == u.model_revision
+                && u.card_before.deck_id == current.deck_id
+                && u.card_before.forms == current.forms
+                && u.card_before.created_at == current.created_at
+                && u.card_before.review_count.checked_add(1) == Some(current.review_count)
+                && u.card_before.memory == log.previous_memory
+                && u.card_before.due_at == log.previous_due_at
+                && u.card_before.phase == log.previous_phase
+                && u.session_before.status == "active"
+                && u.session_before.deck_id == current.deck_id,
+        )?;
+        progress(
+            &u.card_before,
+            &by_card
+                .get(current.id.as_str())
+                .into_iter()
+                .flatten()
+                .copied()
+                .filter(|l| l.id != u.log_id)
+                .collect::<Vec<_>>(),
+        )?;
+        aggregates(
+            &u.session_before,
+            &by_session
+                .get(u.session_id.as_str())
+                .into_iter()
+                .flatten()
+                .copied()
+                .filter(|l| l.id != u.log_id)
+                .collect::<Vec<_>>(),
+        )?;
         if let Some(c) = &u.next_card_before {
             card(c)?;
             check(cards.contains(c.id.as_str()))?;
@@ -261,12 +350,24 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
             before.insert(c.id.as_str(), c);
         }
         session(&u.session_before, &before)?;
-        let action = d
-            .actions
-            .iter()
-            .find(|a| a.id == u.action_id)
+        let action = actions_by_id
+            .get(u.action_id.as_str())
             .ok_or_else(|| AppError::new("invalidBackup"))?;
         check(action.status == "applied" && action.session_id == u.session_id)?;
+        let input: crate::contracts::review::RateInput = serde_json::from_str(&action.signature)?;
+        let p = u
+            .session_before
+            .current
+            .as_ref()
+            .ok_or_else(|| AppError::new("invalidBackup"))?;
+        check(
+            input.presentation_id == p.id
+                && input.expected_card_revision == u.card_before.revision
+                && p.card_id == log.card_id
+                && p.form_id == log.form_id
+                && p.answer_revealed
+                && input.rating == log.rating,
+        )?;
     }
     for j in &d.training_runs {
         check(

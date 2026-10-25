@@ -2,6 +2,13 @@ export function errorText(error: unknown): string {
   const code =
     typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : 'unknown';
   const messages: Record<string, string> = {
+    unsavedChanges: 'احفظ التعديلات غير المحفوظة أو تجاهلها أولًا.',
+    invalidBackup: 'محتويات النسخة الاحتياطية غير متسقة. اختر نسخة سليمة؛ لم تتغير مكتبتك الحالية.',
+    backupDigest: 'بصمة النسخة الاحتياطية لا تطابق محتوياتها. اختر نسخة سليمة.',
+    unsupportedBackup: 'صيغة النسخة الاحتياطية غير مدعومة بهذا الإصدار من التطبيق.',
+    unsupportedSchema: 'هذه النسخة أنشأها إصدار أحدث. حدّث التطبيق قبل استعادتها.',
+    backupTooLarge: 'حجم النسخة الاحتياطية يتجاوز الحد المدعوم (٢٥٦ ميبيبايت).',
+    unknownExport: 'ملف التصدير غير معروف أو لم يعد موجودًا. صدّر نسخة جديدة.',
     trainingFailed: 'تعذر إكمال التدريب. راجع الإعدادات وحاول مرة أخرى؛ الأوزان الحالية محفوظة.',
     trainingInterrupted: 'توقف التدريب قبل الاكتمال. لم تُطبق أوزان جديدة؛ يمكنك بدء تدريب جديد.',
     staleCandidate:

@@ -5,6 +5,8 @@ use openrecall_core::{
 };
 use std::sync::{Arc, Mutex};
 pub struct AppState {
+    pub lifecycle: Arc<crate::lifecycle::Lifecycle>,
+    pub backup_files: Arc<Mutex<crate::backup::BackupFiles>>,
     pub core: Arc<Mutex<App>>,
     pub paths: NativePaths,
 }
