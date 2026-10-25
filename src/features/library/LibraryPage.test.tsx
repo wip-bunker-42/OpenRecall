@@ -12,7 +12,9 @@ it('keeps optional details collapsed with a focusable native summary', async () 
   );
   expect(screen.getByText('بيانات المراجعة')).not.toBeVisible();
   await user.tab();
-  expect(screen.getByText('الإحصاءات')).toHaveFocus();
+  expect(
+    screen.getByRole('heading', { level: 2, name: 'الإحصاءات' }).closest('summary'),
+  ).toHaveFocus();
   await user.click(screen.getByText('الإحصاءات'));
   expect(screen.getByText('بيانات المراجعة')).toBeVisible();
 });

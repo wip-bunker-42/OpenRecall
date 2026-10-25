@@ -68,3 +68,18 @@ fn settings_validate_all_limits_and_persist_with_revision_conflicts() {
     f.reopen();
     assert_eq!(f.call("bootstrap", json!({}))["settings"], saved);
 }
+#[test]
+fn default_settings_are_read_only_and_independent_of_saved_preferences() {
+    let mut f = common::Fixture::new();
+    let before = f.call("bootstrap", serde_json::json!({}));
+    let mut settings = before["settings"].clone();
+    settings["desiredRetention"] = serde_json::json!(0.85);
+    f.call(
+        "saveSettings",
+        serde_json::json!({"settings":settings,"expectedRevision":before["settings"]["revision"]}),
+    );
+    let saved = f.call("bootstrap", serde_json::json!({}));
+    let defaults = f.call("getDefaultSettings", serde_json::json!({}));
+    assert_eq!(defaults["desiredRetention"], 0.9);
+    assert_eq!(f.call("bootstrap", serde_json::json!({})), saved);
+}

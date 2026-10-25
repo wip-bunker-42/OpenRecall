@@ -18,6 +18,8 @@ export function CardList({
   onEdit,
   onDelete,
   revision,
+  timezone = 'Africa/Cairo',
+  editingDisabled = false,
 }: {
   deckId: string;
   api: Api;
@@ -25,6 +27,8 @@ export function CardList({
   onEdit: (card: CardDetail) => void;
   onDelete: (card: CardDetail) => void;
   revision: number;
+  timezone?: string;
+  editingDisabled?: boolean;
 }) {
   const [query, setQuery] = useState('');
   const [input, setInput] = useState('');
@@ -104,7 +108,7 @@ export function CardList({
                   </p>
                   <p className="muted">
                     {phases[card.phase]}، {number(card.forms.length)} صيغة. الموعد:{' '}
-                    {dateTime(card.dueAt)}
+                    {dateTime(card.dueAt, timezone)}
                   </p>
                   <details>
                     <summary>عرض إجابات وصيغ البطاقة {ordinal}</summary>
@@ -128,12 +132,17 @@ export function CardList({
                     ))}
                   </details>
                   <div className="actions">
-                    <button aria-label={`تعديل البطاقة ${ordinal}`} onClick={() => onEdit(card)}>
+                    <button
+                      disabled={busy || editingDisabled}
+                      aria-label={`تعديل البطاقة ${ordinal}`}
+                      onClick={() => onEdit(card)}
+                    >
                       تعديل
                     </button>
                     <button
                       className="danger"
                       aria-label={`حذف البطاقة ${ordinal}`}
+                      disabled={busy || editingDisabled}
                       onClick={() => onDelete(card)}
                     >
                       حذف

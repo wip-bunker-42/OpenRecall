@@ -11,18 +11,22 @@ import { FormErrors } from '../../components/FormErrors';
 import { StatusRegion } from '../../components/StatusRegion';
 import { focusHeading } from '../../shared/focus';
 import { number } from '../../shared/format';
+import { DeckStatistics } from '../statistics/DeckStatistics';
+import { SchedulingSettings } from '../settings/SchedulingSettings';
 export function DeckPage({
   deckId,
   api,
   native,
   navigate,
   pageSize = 20,
+  timezone = 'Africa/Cairo',
 }: {
   deckId: string;
   api: Api;
   native: NativeApi;
   navigate: Navigate;
   pageSize?: number;
+  timezone?: string;
 }) {
   const [deck, setDeck] = useState<DeckDetail | null>(null);
   const [error, setError] = useState<unknown>(null);
@@ -33,6 +37,9 @@ export function DeckPage({
   const [open, setOpen] = useState(false);
   const [revision, setRevision] = useState(0);
   const [message, setMessage] = useState('');
+  const [statisticsOpen, setStatisticsOpen] = useState(false);
+  const [schedulingOpen, setSchedulingOpen] = useState(false);
+  const [policyDirty, setPolicyDirty] = useState(false);
   const refresh = useCallback(async () => {
     setDeck(await api.call('getDeck', { deckId }));
     setRevision((n) => n + 1);
@@ -91,15 +98,22 @@ export function DeckPage({
             {number(deck.newCards)} جديدة.
           </p>
         </div>
-        <button className="primary" disabled={busy} onClick={() => void start()}>
+        <button className="primary" disabled={busy || policyDirty} onClick={() => void start()}>
           بدء المراجعة
         </button>
       </div>
       <div className="actions">
-        <button onClick={() => setEditor({ card: null })}>إنشاء بطاقة</button>
-        <button onClick={() => setImporting(true)}>استيراد بطاقات JSON</button>
+        <button disabled={policyDirty} onClick={() => setEditor({ card: null })}>
+          إنشاء بطاقة
+        </button>
+        <button disabled={policyDirty} onClick={() => setImporting(true)}>
+          استيراد بطاقات JSON
+        </button>
       </div>
       <StatusRegion message={message} />
+      {policyDirty && (
+        <p>احفظ تعديلات الجدولة والتحسين أو تجاهلها قبل تعديل البطاقات أو بدء المراجعة.</p>
+      )}
       {!deleting && <FormErrors error={error} />}
       {error && (
         <button
@@ -113,7 +127,9 @@ export function DeckPage({
         </button>
       )}
       <details className="disclosure" onToggle={(e) => setOpen(e.currentTarget.open)}>
-        <summary>البطاقات</summary>
+        <summary>
+          <h2>البطاقات</h2>
+        </summary>
         <div className="disclosure-body">
           {open && (
             <CardList
@@ -123,6 +139,50 @@ export function DeckPage({
               onEdit={(card) => setEditor({ card })}
               onDelete={setDeleting}
               revision={revision}
+              timezone={timezone}
+              editingDisabled={policyDirty}
+            />
+          )}
+        </div>
+      </details>
+      <details
+        className="disclosure"
+        onToggle={(e) => {
+          if (e.currentTarget.open) setStatisticsOpen(true);
+        }}
+      >
+        <summary>
+          <h2>إحصاءات المجموعة</h2>
+        </summary>
+        <div className="disclosure-body">
+          {statisticsOpen && (
+            <DeckStatistics
+              deckId={deckId}
+              api={api}
+              timezone={timezone}
+              revision={deck.revision}
+            />
+          )}
+        </div>
+      </details>
+      <details
+        className="disclosure"
+        onToggle={(e) => {
+          if (e.currentTarget.open) setSchedulingOpen(true);
+        }}
+      >
+        <summary>
+          <h2>الجدولة والتحسين</h2>
+        </summary>
+        <div className="disclosure-body">
+          {schedulingOpen && (
+            <SchedulingSettings
+              key={deck.revision}
+              deck={deck}
+              api={api}
+              navigate={navigate}
+              onSaved={refresh}
+              onDirtyChange={setPolicyDirty}
             />
           )}
         </div>

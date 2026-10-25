@@ -43,6 +43,7 @@ export function fixtureApi(
     const response = await handler?.(r);
     if (response) return response;
     if (r.kind === 'bootstrap') return { kind: r.kind, payload: bootstrapFixture };
+      if(r.kind==='getDefaultSettings')return {kind:r.kind,payload:bootstrapFixture.settings};
     if (r.kind === 'listDecks') return { kind: r.kind, payload: [deckFixture] };
     throw new Error(`Missing fixture ${r.kind}`);
   });

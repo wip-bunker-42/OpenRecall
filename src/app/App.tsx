@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import type { Api, NativeApi } from '../shared/api';
 import type { Bootstrap } from '../shared/generated/Bootstrap';
 import type { Route } from './navigation';
@@ -9,11 +9,19 @@ import { DeckPage } from '../features/cards/DeckPage';
 import { Dialog } from '../components/Dialog';
 import { UnsavedContext } from './unsaved';
 import { ReviewPage } from '../features/review/ReviewPage';
+import { SettingsPage } from '../features/settings/SettingsPage';
+import { ProfilesPage } from '../features/profiles/ProfilesPage';
 export function App({ api, native }: { api: Api; native: NativeApi }) {
   const [bootstrap, setBootstrap] = useState<Bootstrap | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [route, setRoute] = useState<Route>({ page: 'library' });
-  const [dirty, setDirty] = useState(false);
+  const [dirty, setHasDirty] = useState(false);
+  const dirtySources = useRef(new Set<string>());
+  const setDirty = useCallback((value: boolean, source = 'default') => {
+    if (value) dirtySources.current.add(source);
+    else dirtySources.current.delete(source);
+    setHasDirty(dirtySources.current.size > 0);
+  }, []);
   const [pending, setPending] = useState<Route | null>(null);
   const [reviewBusy, setReviewBusy] = useState(false);
   const [navigationBusy, setNavigationBusy] = useState(false);
@@ -131,6 +139,7 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
                 native={native}
                 navigate={navigate}
                 pageSize={bootstrap.settings.pageSize}
+                timezone={bootstrap.settings.timezone}
               />
             ) : route.page === 'review' ? (
               <ReviewPage
@@ -144,8 +153,10 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
                 shortcutsEnabled={bootstrap.settings.shortcutsEnabled}
                 timezone={bootstrap.settings.timezone}
               />
+            ) : route.page === 'settings' ? (
+              <SettingsPage api={api} native={native} navigate={navigate} onSaved={refresh} />
             ) : (
-              <h1 tabIndex={-1}>{route.page === 'settings' ? 'الإعدادات' : 'نماذج التحسين'}</h1>
+              <ProfilesPage api={api} navigate={navigate} />
             )}
           </main>
         </div>
@@ -159,7 +170,8 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
               <button
                 className="danger"
                 onClick={() => {
-                  setDirty(false);
+                  dirtySources.current.clear();
+                  setHasDirty(false);
                   setPending(null);
                   go(pending);
                 }}

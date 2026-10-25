@@ -55,6 +55,9 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::GetDefaultSettings {} => Ok(Response::GetDefaultSettings(
+                crate::domain::settings::Settings::default(),
+            )),
             Request::GetDeckStatistics { deck_id } => {
                 Ok(Response::GetDeckStatistics(self.deck_statistics(&deck_id)?))
             }

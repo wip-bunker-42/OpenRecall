@@ -2,6 +2,13 @@ export function errorText(error: unknown): string {
   const code =
     typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : 'unknown';
   const messages: Record<string, string> = {
+    trainingFailed: 'تعذر إكمال التدريب. راجع الإعدادات وحاول مرة أخرى؛ الأوزان الحالية محفوظة.',
+    trainingInterrupted: 'توقف التدريب قبل الاكتمال. لم تُطبق أوزان جديدة؛ يمكنك بدء تدريب جديد.',
+    staleCandidate:
+      'تغيرت البيانات أو الإعدادات أو المجموعات المرتبطة منذ التدريب. النتيجة قديمة؛ ابدأ تدريبًا جديدًا.',
+    trainingNotReady: 'نتيجة التدريب غير جاهزة للتطبيق أو لم تجتز المقارنة.',
+    cancelled: 'أُلغيت العملية. البيانات المحفوظة لم تتغير.',
+    profileInUse: 'هذا النموذج مرتبط بمجموعات. افصلها أو انقلها إلى نموذج آخر قبل حذفه.',
     requiredCardFields: 'السؤال والإجابة مطلوبان في كل صيغة. أكمل الحقول الفارغة ثم احفظ البطاقة.',
     invalidJson: 'محتوى JSON غير صحيح. راجع علامات التنصيص والفواصل والأقواس ثم افحصه مرة أخرى.',
     arrayExpected: 'يجب أن يبدأ الملف بمصفوفة بطاقات بين قوسين مربعين [ ].',

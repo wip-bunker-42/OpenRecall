@@ -39,6 +39,7 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    GetDefaultSettings {},
     GetDeckStatistics {
         deck_id: String,
     },
@@ -176,6 +177,7 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    GetDefaultSettings(Settings),
     GetDeckStatistics(statistics::DeckStatistics),
     StartTraining(TrainingJob),
     GetTrainingJob(TrainingJob),

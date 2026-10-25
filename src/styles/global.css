@@ -455,3 +455,23 @@ kbd {
     min-height: 110px;
   }
 }
+summary > h2,
+summary > h3 {
+  display: inline;
+  margin: 0;
+  font: inherit;
+}
+.field-help {
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin-block: 0.3rem 1rem;
+}
+.field-error {
+  color: var(--danger);
+}
+.field {
+  margin-block: 1rem;
+}
+.field label {
+  margin-block-end: 0.2rem;
+}
