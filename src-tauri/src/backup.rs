@@ -117,6 +117,10 @@ pub async fn pick_backup_for_preview(
     tauri::async_runtime::spawn_blocking(move || {
         let mut core = core.lock().map_err(|_| AppError::new("storageBusy"))?;
         lifecycle.ensure_replace_allowed(&mut core)?;
+        #[cfg(feature = "automation")]
+        if let Some(path) = std::env::var_os("OPENRECALL_TEST_BACKUP_FILE") {
+            return Ok(Some(core.preview_restore(std::path::Path::new(&path))?));
+        }
         let Some(path) = app
             .dialog()
             .file()

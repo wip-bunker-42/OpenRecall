@@ -1,0 +1,23 @@
+{
+  "identifier": "org.wipbunker42.openrecall.automation",
+  "build": { "beforeBuildCommand": "pnpm build:automation" },
+  "app": {
+    "withGlobalTauri": true,
+    "security": {
+      "capabilities": [
+        "main-capability",
+        {
+          "identifier": "native-automation",
+          "windows": ["main"],
+          "permissions": [
+            "wdio:default",
+            "core:window:allow-hide",
+            "core:window:allow-show",
+            "core:window:allow-set-focus"
+          ]
+        }
+      ]
+    }
+  },
+  "bundle": { "active": false }
+}

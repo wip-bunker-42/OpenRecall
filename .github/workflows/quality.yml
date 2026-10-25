@@ -23,7 +23,17 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup
+      - run: pnpm exec playwright install --with-deps chromium
       - run: xvfb-run --auto-servernum pnpm verify
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: browser-runtime-evidence
+          path: |
+            target/playwright-report/
+            target/playwright-results/**/axe-*.json
+          if-no-files-found: ignore
+          retention-days: 7
   native-windows:
     name: native-windows
     runs-on: windows-2025
@@ -36,6 +46,18 @@ jobs:
         with:
           cache-key: windows-tests
       - run: cargo test --workspace --locked
+      - run: pnpm build:native-test
+      - run: pnpm test:native
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: native-runtime-evidence
+          path: |
+            target/native-tests/**/audits/*.json
+            target/native-tests/**/logs/*.log
+            target/native-tests/**/network-boundary.json
+          if-no-files-found: ignore
+          retention-days: 7
   bundle:
     name: ${{ matrix.name }}
     strategy:

@@ -194,7 +194,7 @@ export function ProfileEditor({
             <bdi>{d.name}</bdi>{' '}
             <button
               disabled={busy || hasDraft}
-              aria-label={`فصل ${d.name} عن النموذج`}
+              aria-label={`فصل المجموعة ${d.name} عن النموذج`}
               onClick={() => setConfirmation({ kind: 'detach', deck: d })}
             >
               فصل المجموعة

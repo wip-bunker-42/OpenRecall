@@ -29,6 +29,13 @@ pub fn read_import_file_with_limit(path: &Path, max_bytes: u64) -> AppResult<Pic
 #[tauri::command]
 pub async fn pick_import_file(app: tauri::AppHandle) -> AppResult<Option<PickedImportFile>> {
     tauri::async_runtime::spawn_blocking(move || {
+        #[cfg(feature = "automation")]
+        if let Some(path) = std::env::var_os("OPENRECALL_TEST_IMPORT_FILE") {
+            return Ok(Some(read_import_file_with_limit(
+                Path::new(&path),
+                50 * 1024 * 1024,
+            )?));
+        }
         let Some(path) = app
             .dialog()
             .file()

@@ -8,7 +8,12 @@ use std::sync::{Arc, Mutex};
 use tauri::Manager;
 use tauri_plugin_dialog::DialogExt;
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    #[cfg(feature = "automation")]
+    let builder = builder
+        .plugin(tauri_plugin_wdio::init())
+        .plugin(tauri_plugin_wdio_webdriver::init());
+    builder
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
@@ -23,7 +28,12 @@ pub fn run() {
             let data = std::env::var_os("OPENRECALL_TEST_DATA")
                 .map(std::path::PathBuf::from)
                 .unwrap_or(data);
-            let paths = paths::NativePaths::from_roots(data, app.path().download_dir().ok())?;
+            let downloads = app.path().download_dir().ok();
+            #[cfg(feature = "automation")]
+            let downloads = std::env::var_os("OPENRECALL_TEST_DOWNLOADS")
+                .map(std::path::PathBuf::from)
+                .or(downloads);
+            let paths = paths::NativePaths::from_roots(data, downloads)?;
             let core = openrecall_core::App::open(
                 &paths.database,
                 Arc::new(openrecall_core::SystemClock::default()),

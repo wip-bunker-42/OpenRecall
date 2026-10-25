@@ -1,6 +1,6 @@
 {
   "generator": "cargo-about 0.9.2; pnpm licenses --prod",
-  "cargoLockSha256": "a9c66afadffd20416e00e8bbce57c04efa581367f2b8210fe86933df212a1070",
+  "cargoLockSha256": "03dc09f380493a57e11a1be468f64fb7f2f8e7a22b2b92afba3271c1ac643d21",
   "rustCrates": [
     {
       "name": "adler2",
@@ -2574,27 +2574,37 @@
   "frontendPackages": [
     {
       "name": "@fontsource-variable/noto-sans-arabic",
-      "versions": ["5.3.0"],
+      "versions": [
+        "5.3.0"
+      ],
       "license": "OFL-1.1"
     },
     {
       "name": "@tauri-apps/api",
-      "versions": ["2.12.4"],
+      "versions": [
+        "2.12.4"
+      ],
       "license": "Apache-2.0 OR MIT"
     },
     {
       "name": "react",
-      "versions": ["19.3.1"],
+      "versions": [
+        "19.3.1"
+      ],
       "license": "MIT"
     },
     {
       "name": "react-dom",
-      "versions": ["19.3.1"],
+      "versions": [
+        "19.3.1"
+      ],
       "license": "MIT"
     },
     {
       "name": "scheduler",
-      "versions": ["0.28.0"],
+      "versions": [
+        "0.28.0"
+      ],
       "license": "MIT"
     }
   ],

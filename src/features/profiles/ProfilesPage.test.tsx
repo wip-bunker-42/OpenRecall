@@ -213,7 +213,7 @@ it('confirms shared membership and detaches by inheriting the current model', as
       expectedProfileRevision: 'profile-revision',
     },
   });
-  await user.click(await screen.findByRole('button', { name: 'فصل طب عن النموذج' }));
+  await user.click(await screen.findByRole('button', { name: 'فصل المجموعة طب عن النموذج' }));
   expect(screen.getByRole('dialog')).toHaveTextContent('يحتفظ بالأوزان والإعدادات الحالية');
   await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'تأكيد الفصل' }));
   expect(calls).toContainEqual(expect.objectContaining({ kind: 'detachProfile' }));

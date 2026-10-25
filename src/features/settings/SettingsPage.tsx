@@ -3,6 +3,7 @@ import type { Api, NativeApi } from '../../shared/api';
 import type { Navigate } from '../../app/navigation';
 import type { Settings } from '../../shared/generated/Settings';
 import type { SystemInfo } from '../../shared/generated/SystemInfo';
+import type { RestoreReport } from '../../shared/generated/RestoreReport';
 import { Field } from '../../components/Field';
 import { Disclosure } from '../../components/Disclosure';
 import { FormErrors } from '../../components/FormErrors';
@@ -215,7 +216,7 @@ export function SettingsPage({
   native: NativeApi;
   navigate: Navigate;
   onSaved?: () => void | Promise<void>;
-  onRestored?: () => void | Promise<void>;
+  onRestored?: (report: RestoreReport) => void | Promise<void>;
 }) {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [info, setInfo] = useState<SystemInfo | null>(null);

@@ -123,7 +123,7 @@ export function LibraryPage({
                   className="primary"
                   disabled={busy}
                   onClick={() => void review(d.id)}
-                  aria-label={`بدء مراجعة ${d.name}`}
+                  aria-label={`بدء المراجعة، ${d.name}`}
                 >
                   بدء المراجعة
                 </button>

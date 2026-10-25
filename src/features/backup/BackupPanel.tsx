@@ -2,6 +2,7 @@ import { useContext, useState } from 'react';
 import type { NativeApi } from '../../shared/api';
 import type { ExportReport } from '../../shared/generated/ExportReport';
 import type { RestorePreview } from '../../shared/generated/RestorePreview';
+import type { RestoreReport } from '../../shared/generated/RestoreReport';
 import { UnsavedContext } from '../../app/unsaved';
 import { Disclosure } from '../../components/Disclosure';
 import { FormErrors } from '../../components/FormErrors';
@@ -12,7 +13,7 @@ export function BackupPanel({
   onRestored,
 }: {
   native: NativeApi;
-  onRestored: () => void | Promise<void>;
+  onRestored: (report: RestoreReport) => void | Promise<void>;
 }) {
   const { dirty } = useContext(UnsavedContext);
   const [busy, setBusy] = useState(false),
@@ -98,7 +99,7 @@ export function BackupPanel({
               setExported(report.safetyBackup);
               setPreview(null);
               setMessage('تمت استعادة النسخة الاحتياطية.');
-              await onRestored();
+              await onRestored(report);
             })
           }
         />

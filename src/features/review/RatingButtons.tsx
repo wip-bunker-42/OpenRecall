@@ -34,13 +34,10 @@ export function RatingButtons({
               <button
                 onClick={() => onRate(rating)}
                 className={`rating rating-${rating}`}
-                aria-label={`${ratingLabels[rating]}، ${approximate}`}
                 aria-describedby={due ? `${id}-${rating}` : undefined}
               >
                 <span>{ratingLabels[rating]}</span>
-                <span className="rating-interval" aria-hidden="true">
-                  {approximate}
-                </span>
+                <span className="rating-interval">{approximate}</span>
                 <kbd aria-hidden="true">{i + 1}</kbd>
               </button>
               {due && (

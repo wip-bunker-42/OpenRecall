@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from 'react';
 import type { Api, NativeApi } from '../shared/api';
 import type { Bootstrap } from '../shared/generated/Bootstrap';
+import type { RestoreReport } from '../shared/generated/RestoreReport';
 import type { Route } from './navigation';
 import { LibraryPage } from '../features/library/LibraryPage';
 import { FormErrors } from '../components/FormErrors';
@@ -11,9 +12,11 @@ import { UnsavedContext } from './unsaved';
 import { ReviewPage } from '../features/review/ReviewPage';
 import { SettingsPage } from '../features/settings/SettingsPage';
 import { ProfilesPage } from '../features/profiles/ProfilesPage';
+import { StatusRegion } from '../components/StatusRegion';
 export function App({ api, native }: { api: Api; native: NativeApi }) {
   const [bootstrap, setBootstrap] = useState<Bootstrap | null>(null);
   const [error, setError] = useState<unknown>(null);
+  const [restored, setRestored] = useState<RestoreReport | null>(null);
   const [route, setRoute] = useState<Route>({ page: 'library' });
   const [dirty, setHasDirty] = useState(false);
   const dirtySources = useRef(new Set<string>());
@@ -124,6 +127,23 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
           </aside>
           <main id="main" tabIndex={-1}>
             <FormErrors error={error} />
+            <StatusRegion message={restored ? 'تمت استعادة النسخة الاحتياطية.' : ''} />
+            {restored && (
+              <div className="result">
+                <p>حُفظت نسخة أمان من المكتبة السابقة قبل الاستعادة.</p>
+                <p dir="auto">{restored.safetyBackup.path}</p>
+                <button
+                  onClick={() =>
+                    void native
+                      .revealExport({ exportId: restored.safetyBackup.exportId })
+                      .catch(setError)
+                  }
+                >
+                  إظهار نسخة الأمان السابقة للاستعادة
+                </button>
+                <button onClick={() => setRestored(null)}>إغلاق إشعار الاستعادة</button>
+              </div>
+            )}
             {!bootstrap ? (
               <>
                 <h1 tabIndex={-1}>OpenRecall</h1>
@@ -162,7 +182,8 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
                 native={native}
                 navigate={navigate}
                 onSaved={refresh}
-                onRestored={async () => {
+                onRestored={async (report) => {
+                  setRestored(report);
                   await refresh();
                   go({ page: 'library' });
                 }}

@@ -20,7 +20,7 @@ it('locks review actions while navigation waits for the durable session close', 
   });
   const user = userEvent.setup();
   render(<App api={api} native={nativeFixture} />);
-  await user.click(await screen.findByRole('button', { name: 'بدء مراجعة طب' }));
+  await user.click(await screen.findByRole('button', { name: 'بدء المراجعة، طب' }));
   await screen.findByRole('heading', { name: 'السؤال' });
   await user.click(screen.getByRole('button', { name: 'المجموعات' }));
   expect(screen.getByRole('button', { name: 'عرض الإجابة' })).toBeDisabled();
@@ -45,7 +45,7 @@ it.each(['library', 'deck'])(
     if (origin === 'deck') {
       await user.click(await screen.findByRole('button', { name: 'طب' }));
       await user.click(await screen.findByRole('button', { name: 'بدء المراجعة' }));
-    } else await user.click(await screen.findByRole('button', { name: 'بدء مراجعة طب' }));
+    } else await user.click(await screen.findByRole('button', { name: 'بدء المراجعة، طب' }));
     await screen.findByRole('heading', { name: 'السؤال' });
     expect(screen.getByLabelText('كل البطاقات المستحقة')).toBeChecked();
     await user.click(screen.getByRole('button', { name: 'المجموعات' }));
