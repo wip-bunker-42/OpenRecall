@@ -50,6 +50,29 @@ export function fixtureApi(
   });
 }
 export const nativeFixture: NativeApi = {
+  async getUpdateStatus() {
+    return {
+      phase: 'idle',
+      currentVersion: '0.1.0',
+      availableVersion: null,
+      notes: null,
+      downloadedBytes: 0,
+      totalBytes: null,
+      errorCode: null,
+    };
+  },
+  async onUpdateStatus() {
+    return () => {};
+  },
+  async checkForUpdate() {
+    return { ...(await this.getUpdateStatus()), phase: 'upToDate' };
+  },
+  async downloadUpdate() {
+    throw { code: 'updateNotReady' };
+  },
+  async installUpdate() {
+    throw { code: 'updateNotReady' };
+  },
   async setEditState() {},
   async exportBackup() {
     throw { code: 'fileAccess' };

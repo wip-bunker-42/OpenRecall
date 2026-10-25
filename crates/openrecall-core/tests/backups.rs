@@ -58,6 +58,47 @@ fn read(path: &std::path::Path) -> Value {
     serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
 }
 #[test]
+fn invalid_header_dates_and_corrupted_next_card_undo_snapshots_are_rejected() {
+    use openrecall_core::backup::format::{BackupEnvelope, digest};
+    let mut f = Fixture::new();
+    let deck = f.deck("next undo");
+    f.card(&deck, "one", "answer");
+    f.card(&deck, "two", "answer");
+    let start = f.call("startSession", json!({"deckId":deck}));
+    let sid = start["payload"]["sessionId"].clone();
+    let frame = f.call("revealAnswer", json!({"sessionId":sid}))["payload"].clone();
+    f.call("rateCard",json!({"sessionId":sid,"presentationId":frame["presentationId"],"rating":"easy","actionId":uuid::Uuid::new_v4(),"expectedCardRevision":frame["cardRevision"]}));
+    let source = f.dir.path().join("next.json");
+    f.app.export_snapshot(&source).unwrap();
+    let original: BackupEnvelope = serde_json::from_value(read(&source)).unwrap();
+    for mode in 0..4 {
+        let mut bad = original.clone();
+        if mode == 0 {
+            bad.exported_at = "invalid timestamp".into()
+        } else {
+            let next = bad.data.undo_records[0].next_card_before.as_mut().unwrap();
+            match mode {
+                1 => next.due_at = "2030-01-01T00:00:00Z".into(),
+                2 => next.forms[0].front = "changed question".into(),
+                _ => next.deck_id = uuid::Uuid::new_v4().to_string(),
+            }
+        }
+        bad.payload_sha256 = digest(&bad.data).unwrap();
+        let file = f.dir.path().join(format!("invalid-next-{mode}.json"));
+        std::fs::write(
+            &file,
+            serde_json::to_vec(&serde_json::to_value(bad).unwrap()).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(
+            f.app.preview_restore(&file).unwrap_err().code,
+            "invalidBackup",
+            "mode {mode}"
+        );
+    }
+    assert!(f.app.preview_restore(&source).is_ok());
+}
+#[test]
 fn trained_shared_profiles_detached_models_reports_cycles_and_live_undo_round_trip() {
     let mut f = Fixture::new();
     let (profile, decks, _) = common::training::seed_profile(&mut f);

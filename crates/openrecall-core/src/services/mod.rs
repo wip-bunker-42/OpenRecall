@@ -3,6 +3,7 @@ mod cards;
 mod import;
 mod library;
 mod profiles;
+mod restart;
 mod reviews;
 mod sessions;
 mod statistics;

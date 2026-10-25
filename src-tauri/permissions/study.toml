@@ -14,3 +14,7 @@ commands.allow = ["pick_import_file"]
 identifier = "allow-backup"
 description = "Export complete snapshots and restore a selected, revision-bound preview"
 commands.allow = ["export_backup", "pick_backup_for_preview", "restore_backup", "reveal_export", "set_edit_state"]
+[[permission]]
+identifier = "allow-updates"
+description = "Explicit signed updates with native lifecycle and verification guards"
+commands.allow = ["get_update_status", "check_for_update", "download_update", "install_update"]

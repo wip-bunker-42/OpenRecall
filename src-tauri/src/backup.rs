@@ -97,6 +97,7 @@ pub async fn export_backup(
             return Err(AppError::new("unsavedChanges"));
         }
         let mut core = core.lock().map_err(|_| AppError::new("storageBusy"))?;
+        lifecycle.ensure_available()?;
         let mut files = files.lock().map_err(|_| AppError::new("storageBusy"))?;
         let filename = name("backup");
         files.export(&mut core, &paths, &filename, || {

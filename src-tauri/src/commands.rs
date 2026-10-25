@@ -5,6 +5,7 @@ use openrecall_core::{
 };
 use std::sync::{Arc, Mutex};
 pub struct AppState {
+    pub updates: Arc<crate::updates::UpdateManager<tauri_plugin_updater::Update>>,
     pub lifecycle: Arc<crate::lifecycle::Lifecycle>,
     pub backup_files: Arc<Mutex<crate::backup::BackupFiles>>,
     pub core: Arc<Mutex<App>>,
@@ -13,10 +14,11 @@ pub struct AppState {
 #[tauri::command]
 pub async fn execute(request: Request, state: tauri::State<'_, AppState>) -> AppResult<Response> {
     let core = state.core.clone();
+    let lifecycle = state.lifecycle.clone();
     tauri::async_runtime::spawn_blocking(move || {
-        core.lock()
-            .map_err(|_| AppError::new("storageBusy"))?
-            .execute(request)
+        let mut core = core.lock().map_err(|_| AppError::new("storageBusy"))?;
+        lifecycle.ensure_available()?;
+        core.execute(request)
     })
     .await
     .map_err(|_| AppError::new("nativeWorker"))?

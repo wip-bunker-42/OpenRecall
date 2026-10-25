@@ -3,11 +3,14 @@ mod commands;
 pub mod files;
 pub mod lifecycle;
 pub mod paths;
+pub mod updates;
 use std::sync::{Arc, Mutex};
 use tauri::Manager;
+use tauri_plugin_dialog::DialogExt;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
             if let Some(window) = app.get_webview_window("main") {
                 let _ = window.show();
@@ -27,12 +30,45 @@ pub fn run() {
                 Box::new(openrecall_core::SystemRandom::default()),
             )?;
             app.manage(commands::AppState {
+                updates: Arc::new(updates::UpdateManager::new(env!("CARGO_PKG_VERSION"))),
                 lifecycle: Arc::new(Default::default()),
                 backup_files: Arc::new(Mutex::new(Default::default())),
                 core: Arc::new(Mutex::new(core)),
                 paths,
             });
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                let state = window.state::<commands::AppState>();
+                if state.lifecycle.ensure_available().is_err() {
+                    api.prevent_close();
+                    return;
+                }
+                if state.lifecycle.is_dirty() {
+                    api.prevent_close();
+                    if state.lifecycle.begin_close_prompt() {
+                        let window = window.clone();
+                        let lifecycle = state.lifecycle.clone();
+                        window
+                            .app_handle()
+                            .dialog()
+                            .message("لديك تغييرات غير محفوظة. هل تريد تجاهلها وإغلاق التطبيق؟")
+                            .title("تغييرات غير محفوظة")
+                            .buttons(tauri_plugin_dialog::MessageDialogButtons::OkCancelCustom(
+                                "تجاهل وإغلاق".into(),
+                                "متابعة التعديل".into(),
+                            ))
+                            .show(move |discard| {
+                                lifecycle.finish_close_prompt();
+                                if discard {
+                                    lifecycle.set_dirty(false);
+                                    let _ = window.close();
+                                }
+                            });
+                    }
+                }
+            }
         })
         .invoke_handler(tauri::generate_handler![
             commands::execute,
@@ -42,7 +78,11 @@ pub fn run() {
             backup::export_backup,
             backup::pick_backup_for_preview,
             backup::restore_backup,
-            backup::reveal_export
+            backup::reveal_export,
+            updates::get_update_status,
+            updates::check_for_update,
+            updates::download_update,
+            updates::install_update
         ])
         .run(tauri::generate_context!())
         .expect("Unable to start OpenRecall");

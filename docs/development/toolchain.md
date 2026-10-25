@@ -7,3 +7,11 @@ Frontend compatibility check (2026-10-25): Node 24.21, pnpm 12.15, React/React D
 Tauri JavaScript API/CLI 2.12.4, native Tauri 2.12.5 and tauri-build 2.7.4 are the compatible current stable releases queried from their official registries. The standard Windows host uses system WebView2 and NSIS. Cross-platform prerequisites are documented by [Tauri](https://v2.tauri.app/start/prerequisites/).
 
 SQLite is embedded through rusqlite 0.41. The native FSRS dependency will be pinned to the approved upstream commit. Rand 0.9 is selected to match that engine's supported dependency line. Cargo.lock records exact resolved versions. Users do not need a separately installed Rust, Node or database runtime to run release installers.
+
+Packaging uses tauri-plugin-updater 2.14.0 with signed-version enforcement and
+tauri-plugin-opener 2.7.2 for revealing only exports recorded by native state.
+Restart uses Tauri's core AppHandle API, so no JavaScript process permission or
+additional process plugin is needed. The desktop library emits an rlib used by
+the executable; unused mobile static/dynamic library outputs are omitted.
+Windows release builds explicitly retain Tauri's static Visual C++ runtime.
+The offline NSIS variant embeds the WebView2 runtime installer.

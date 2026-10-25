@@ -7,6 +7,7 @@ pub mod cards;
 pub mod import;
 pub mod statistics;
 pub mod system;
+pub mod updates;
 use import::{CommitImportInput, ImportPreview, ImportReport};
 pub mod profiles;
 pub mod training;
@@ -232,5 +233,6 @@ pub fn export(output: &Path) -> AppResult<()> {
     backup::ExportReport::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     backup::RestorePreview::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     backup::RestoreReport::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
+    updates::UpdateStatus::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     Ok(())
 }

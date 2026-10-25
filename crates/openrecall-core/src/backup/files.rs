@@ -26,6 +26,8 @@ pub(crate) fn read(path: &Path, limits: BackupLimits) -> AppResult<BackupEnvelop
     if envelope.schema_version > crate::storage::SCHEMA_VERSION {
         return Err(AppError::new("unsupportedSchema"));
     }
+    chrono::DateTime::parse_from_rfc3339(&envelope.exported_at)
+        .map_err(|_| AppError::new("invalidBackup"))?;
     if envelope.payload_sha256 != digest(&envelope.data)? {
         return Err(AppError::new("backupDigest"));
     }

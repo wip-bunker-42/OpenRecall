@@ -343,6 +343,17 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
         if let Some(c) = &u.next_card_before {
             card(c)?;
             check(cards.contains(c.id.as_str()))?;
+            let current = card_map[c.id.as_str()];
+            let mut learning_before = c.clone();
+            // Reserving the next presentation may shuffle its bag, but cannot
+            // change its content, owner or learning state.
+            learning_before.bag = current.bag.clone();
+            learning_before.revision = current.revision.clone();
+            check(
+                learning_before == *current
+                    && c.deck_id == u.card_before.deck_id
+                    && c.id != u.card_before.id,
+            )?;
         }
         let mut before = card_map.clone();
         before.insert(u.card_before.id.as_str(), &u.card_before);

@@ -10,6 +10,7 @@ import { StatusRegion } from '../../components/StatusRegion';
 import { numeric, validation } from '../../shared/forms';
 import { useUnsaved } from '../../app/unsaved';
 import { BackupPanel } from '../backup/BackupPanel';
+import { UpdatePanel } from '../updates/UpdatePanel';
 function SettingsForm({
   settings,
   api,
@@ -266,6 +267,7 @@ export function SettingsPage({
         native={native}
         onRestored={onRestored ?? (() => navigate({ page: 'library' }))}
       />
+      <UpdatePanel native={native} />
       <Disclosure title="معلومات التطبيق">
         {info ? (
           <>

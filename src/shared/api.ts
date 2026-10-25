@@ -1,4 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
+import type { UpdateStatus } from './generated/UpdateStatus';
 import type { Request } from './generated/Request';
 import type { Response } from './generated/Response';
 import type { SystemInfo } from './generated/SystemInfo';
@@ -32,6 +34,11 @@ export function createTauriApi(): Api {
   return createApi((request) => invoke('execute', { request }));
 }
 export interface NativeApi {
+  getUpdateStatus(): Promise<UpdateStatus>;
+  onUpdateStatus(listener: (status: UpdateStatus) => void): Promise<() => void>;
+  checkForUpdate(): Promise<UpdateStatus>;
+  downloadUpdate(): Promise<UpdateStatus>;
+  installUpdate(): Promise<void>;
   setEditState(input: { unsavedChanges: boolean }): Promise<void>;
   exportBackup(): Promise<ExportReport>;
   pickBackupForPreview(): Promise<RestorePreview | null>;
@@ -45,6 +52,12 @@ export interface NativeApi {
 }
 export function createNativeApi(): NativeApi {
   return {
+    getUpdateStatus: () => invoke('get_update_status'),
+    onUpdateStatus: (listener) =>
+      listen<UpdateStatus>('openrecall-update', (event) => listener(event.payload)),
+    checkForUpdate: () => invoke('check_for_update'),
+    downloadUpdate: () => invoke('download_update'),
+    installUpdate: () => invoke('install_update'),
     setEditState: (input) => invoke('set_edit_state', { input }),
     exportBackup: () => invoke('export_backup'),
     pickBackupForPreview: () => invoke('pick_backup_for_preview'),

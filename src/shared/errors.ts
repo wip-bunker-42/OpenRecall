@@ -2,6 +2,17 @@ export function errorText(error: unknown): string {
   const code =
     typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : 'unknown';
   const messages: Record<string, string> = {
+    updateCheckFailed:
+      'تعذر التحقق من التحديثات. تحقق من الاتصال وحاول مرة أخرى؛ المذاكرة متاحة دون إنترنت.',
+    updateDownloadFailed: 'تعذر تنزيل التحديث. يمكنك إعادة المحاولة؛ بيانات المذاكرة محفوظة.',
+    updateVerificationFailed:
+      'تعذر التحقق من توقيع حزمة التحديث. لم تُثبت الحزمة؛ أعد تنزيلها من المصدر الرسمي.',
+    updateInstallFailed:
+      'تعذر تثبيت التحديث. بياناتك محفوظة؛ أعد المحاولة أو استخدم المثبّت الرسمي.',
+    updateNotReady: 'نزّل تحديثًا صالحًا قبل طلب التثبيت.',
+    updateBusy: 'هناك عملية تحديث قيد التنفيذ. انتظر اكتمالها.',
+    updateInProgress: 'جارٍ تثبيت تحديث التطبيق. انتظر إعادة التشغيل.',
+    trainingInProgress: 'أكمل تدريب نموذج التحسين أو ألغِه قبل تثبيت التحديث.',
     unsavedChanges: 'احفظ التعديلات غير المحفوظة أو تجاهلها أولًا.',
     invalidBackup: 'محتويات النسخة الاحتياطية غير متسقة. اختر نسخة سليمة؛ لم تتغير مكتبتك الحالية.',
     backupDigest: 'بصمة النسخة الاحتياطية لا تطابق محتوياتها. اختر نسخة سليمة.',
