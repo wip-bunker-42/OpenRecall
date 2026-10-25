@@ -1,6 +1,23 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { pnpmSync } from '../../scripts/tool-process.mjs';
+import { pnpmSync, pnpmInvocation } from '../../scripts/tool-process.mjs';
+import { mkdtempSync, writeFileSync, rmSync, realpathSync } from 'node:fs';
+import { join, dirname, resolve } from 'node:path';
+import { tmpdir } from 'node:os';
+test('resolves extensionless pnpm native executables installed by Actions on POSIX', () => {
+  const folder = mkdtempSync(join(tmpdir(), 'openrecall-pnpm-'));
+  try {
+    const binary = join(folder, 'pnpm');
+    writeFileSync(binary, 'synthetic native executable');
+    assert.deepEqual(pnpmInvocation({ PATH: folder }, 'linux'), {
+      command: realpathSync(binary),
+      prefix: [],
+    });
+  } finally {
+    assert.equal(dirname(resolve(folder)), resolve(tmpdir()));
+    rmSync(folder, { recursive: true });
+  }
+});
 test('pinned pnpm runs directly without cmd shell argument concatenation', () => {
   const version = pnpmSync(['--version'], { encoding: 'utf8' });
   assert.equal(version.status, 0);
