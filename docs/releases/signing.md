@@ -68,6 +68,14 @@ Verify an artifact without installing or accessing the network:
 cargo run -p openrecall-desktop --example verify_update -- PACKAGE PACKAGE.sig 0.1.0 windows-x86_64
 ```
 
+Release compilation always checks out the immutable, validated tag. Publisher
+policy uses the trusted workflow revision, so a manual dispatch from reviewed
+main can repair publication behavior without moving an existing tag or changing
+its application source. The publisher discovers owned drafts in the authenticated
+release list when the published-release-by-tag endpoint returns 404; ambiguous,
+unrelated or already published releases fail closed. Official artifact signature
+and version verification remains required before publication.
+
 The helper uses Tauri's official `Update::verify`, the public key embedded in the
 checked-out configuration, and signed-version enforcement. Release automation
 verifies every updater package before creating `latest.json` with

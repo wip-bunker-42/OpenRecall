@@ -15,6 +15,15 @@ validateManifest(manifest);
 assert.equal(manifest.version, version);
 const marker = `<!-- openrecall-release:${tag}:${sha} -->`;
 let release = await github(`repos/${REPOSITORY}/releases/tags/${tag}`, { allowMissing: true });
+if (!release) {
+  // The tag endpoint exposes published releases; drafts must be found in the
+  // authenticated release list before deciding to create a new release.
+  const drafts = (await pages(`repos/${REPOSITORY}/releases`)).filter(
+    (candidate) => candidate.tag_name === tag,
+  );
+  assert.ok(drafts.length <= 1, 'Release tag has ambiguous drafts; inspect before publication');
+  release = drafts[0] ?? null;
+}
 if (release) {
   assert.equal(release.draft, true, 'Published releases are immutable; refuse to overwrite');
   assert.ok(release.body?.includes(marker), 'Refuse to replace an unrelated draft');
