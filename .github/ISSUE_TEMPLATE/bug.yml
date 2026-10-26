@@ -1,0 +1,28 @@
+name: Bug report
+description: Report a reproducible application problem using synthetic data
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: App version and operating system
+      placeholder: OpenRecall 0.1.0, Windows 11 x64
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps, expected result and actual result
+      description: Include a minimal synthetic card example. Omit personal backups, study records and credentials.
+    validations:
+      required: true
+  - type: textarea
+    id: persistence
+    attributes:
+      label: Persistence or scheduling details
+      description: If relevant, describe rating/filter/undo actions, clock changes, restart, import or restore. Include error codes without private data.
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: Accessibility observations
+      description: Distinguish automated keyboard/axe/focus results from a human's screen-reader observations. Agents must not operate a screen reader.

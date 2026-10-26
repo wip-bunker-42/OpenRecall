@@ -1,0 +1,11 @@
+name: Feature request
+description: Explain a study workflow improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Study workflow and desired outcome
+      description: Explain the concrete situation, expected behavior, and keyboard/accessibility needs.
+    validations:
+      required: true

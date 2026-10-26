@@ -1,0 +1,20 @@
+[[permission]]
+identifier = "allow-execute"
+description = "Execute validated local study requests"
+commands.allow = ["execute"]
+[[permission]]
+identifier = "allow-get-system-info"
+description = "Read application version and resolved data directory"
+commands.allow = ["get_system_info"]
+[[permission]]
+identifier = "allow-pick-import-file"
+description = "Select and read a bounded UTF-8 JSON file using a native dialog"
+commands.allow = ["pick_import_file"]
+[[permission]]
+identifier = "allow-backup"
+description = "Export complete snapshots and restore a selected, revision-bound preview"
+commands.allow = ["export_backup", "pick_backup_for_preview", "restore_backup", "reveal_export", "set_edit_state"]
+[[permission]]
+identifier = "allow-updates"
+description = "Explicit signed updates with native lifecycle and verification guards"
+commands.allow = ["get_update_status", "check_for_update", "download_update", "install_update"]

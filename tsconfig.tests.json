@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "node",
+      "vite/client",
+      "@wdio/globals/types",
+      "@wdio/tauri-service",
+      "@wdio/mocha-framework"
+    ]
+  },
+  "include": ["tests/**/*.ts", "tests/**/*.tsx", "playwright.config.ts", "wdio.conf.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
+}

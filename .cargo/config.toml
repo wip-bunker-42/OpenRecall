@@ -1,0 +1,5 @@
+[env]
+TS_RS_LARGE_INT = "number"
+
+[build]
+jobs = 4

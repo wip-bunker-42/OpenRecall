@@ -1,0 +1,7 @@
+{
+  "source": "Official upstream inference.rs next_states documentation, commit 0fd59949e9168af7194418c2dba99836b5548e87, lines 346-349; 0.90 retention, new card",
+  "again": { "days": 0.000038275626, "stability": 0.1104, "stabilityFast": 0.08832, "difficulty": 6.1686 },
+  "hard": { "days": 0.5974598, "stability": 2.2395, "stabilityFast": 1.7916001, "difficulty": 5.261278 },
+  "good": { "days": 4.7777247, "stability": 3.9221, "stabilityFast": 3.13768, "difficulty": 3.5307243 },
+  "easy": { "days": 53.869392, "stability": 11.7841, "stabilityFast": 9.427279, "difficulty": 1.0 }
+}

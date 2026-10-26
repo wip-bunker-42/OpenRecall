@@ -1,0 +1,17 @@
+/target/
+/node_modules/
+/dist/
+/.superpowers/
+/test-results/
+/playwright-report/
+/release-assets/
+/fsrs-result.json
+/watch-result/
+/src-tauri/gen/
+/src-tauri/icons/android/
+/src-tauri/icons/ios/
+*.sqlite3*
+*.key
+*.pem
+.env*
+!.env.example

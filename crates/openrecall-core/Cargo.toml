@@ -1,0 +1,21 @@
+[package]
+name = "openrecall-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+chrono-tz = "0.10"
+fsrs = { git = "https://github.com/open-spaced-repetition/fsrs-rs", rev = "0fd59949e9168af7194418c2dba99836b5548e87" }
+rand = "0.9"
+rusqlite = { version = "0.41", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["float_roundtrip"] }
+sha2 = "0.11"
+unicode-normalization = "0.1"
+ts-rs = { version = "12", features = ["serde-json-impl"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+
+tempfile = "3"

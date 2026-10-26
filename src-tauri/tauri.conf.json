@@ -1,0 +1,70 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "OpenRecall",
+  "version": "0.1.0",
+  "identifier": "org.wipbunker42.openrecall",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist",
+    "windows": { "staticVCRuntime": true }
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "OpenRecall",
+        "width": 1180,
+        "height": 820,
+        "minWidth": 620,
+        "minHeight": 520,
+        "backgroundColor": "#101d30",
+        "dragDropEnabled": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src ipc: http://ipc.localhost; object-src 'none'; frame-src 'none'; base-uri 'self'; form-action 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+    "shortDescription": "Offline accessible spaced repetition",
+    "category": "Education",
+    "licenseFile": "../LICENSE",
+    "resources": {
+      "../LICENSE": "licenses/OpenRecall-LICENSE.txt",
+      "../THIRD_PARTY_NOTICES.md": "licenses/THIRD_PARTY_NOTICES.md",
+      "../licenses/": "licenses/"
+    },
+    "createUpdaterArtifacts": true,
+    "windows": {
+      "nsis": {
+        "displayLanguageSelector": true,
+        "installMode": "currentUser",
+        "languages": ["Arabic", "English"]
+      },
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      }
+    },
+    "macOS": {
+      "signingIdentity": "-",
+      "minimumSystemVersion": "11.0"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/wip-bunker-42/OpenRecall/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEI0MkQ3NDA2NTAwMTE3RTkKUldUcEZ3RlFCblF0dEQ3USt0Q21kbXh5Z3N5bzh1NEtmMEVYSFhTZm5hSEEzVHU5YTY2SDlaRWUK",
+      "requireSignedVersion": true,
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}
