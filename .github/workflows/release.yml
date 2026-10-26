@@ -128,7 +128,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          ref: ${{ needs.prepare.outputs.sha }}
+          # Manual retries use the reviewed policy of the selected main workflow.
+          # Build jobs still compile the immutable, checked release tag above.
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: ./.github/actions/setup
         with:
