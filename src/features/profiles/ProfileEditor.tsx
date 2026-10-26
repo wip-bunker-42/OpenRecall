@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Api } from '../../shared/api';
 import type { ProfileDetail } from '../../shared/generated/ProfileDetail';
 import type { TrainingConfig } from '../../shared/generated/TrainingConfig';
@@ -41,6 +41,10 @@ export function ProfileEditor({
   const [renameChanged, setRenameChanged] = useState(false);
   const [configChanged, setConfigChanged] = useState(false);
   const [draftKey, setDraftKey] = useState(0);
+  const renameBaseline = useRef(profile);
+  const configBaseline = useRef(profile);
+  const nameView = renameChanged ? renameBaseline.current : profile;
+  const configView = configChanged ? configBaseline.current : profile;
   const hasDraft = renameChanged || configChanged;
   const { setDirty: renameDirty } = useUnsaved();
   const { setDirty: configDirty } = useUnsaved();
@@ -162,9 +166,10 @@ export function ProfileEditor({
       <FormErrors error={error} />
       <StatusRegion message={message} />
       <form
-        key={`name-${draftKey}`}
+        key={`name-${nameView.revision}-${draftKey}`}
         noValidate
         onInput={() => {
+          if (!renameChanged) renameBaseline.current = profile;
           renameDirty(true);
           setRenameChanged(true);
         }}
@@ -177,7 +182,7 @@ export function ProfileEditor({
           name="name"
           disabled={busy || configChanged}
           label="اسم نموذج التحسين"
-          defaultValue={profile.name}
+          defaultValue={nameView.name}
           required
           maxLength={256}
           dir="auto"
@@ -222,9 +227,10 @@ export function ProfileEditor({
           تلقائيًا.
         </p>
         <form
-          key={`${profile.revision}-${draftKey}`}
+          key={`${configView.revision}-${draftKey}`}
           noValidate
           onInput={() => {
+            if (!configChanged) configBaseline.current = profile;
             configDirty(true);
             setConfigChanged(true);
           }}
@@ -239,7 +245,7 @@ export function ProfileEditor({
               <input
                 type="checkbox"
                 name="schedulePenalties"
-                defaultChecked={profile.config.schedulePenalties}
+                defaultChecked={configView.config.schedulePenalties}
               />
               تفعيل Schedule Penalties
             </label>
@@ -251,7 +257,7 @@ export function ProfileEditor({
               min={1}
               max={100}
               step={1}
-              defaultValue={profile.config.numEpochs ?? ''}
+              defaultValue={configView.config.numEpochs ?? ''}
               help="من ١ إلى ١٠٠. اتركه فارغًا لاختيار المحرك الافتراضي."
               error={error}
             />
@@ -262,7 +268,7 @@ export function ProfileEditor({
               min={16}
               max={4096}
               step={1}
-              defaultValue={profile.config.batchSize}
+              defaultValue={configView.config.batchSize}
               error={error}
             />
             <Field
@@ -272,7 +278,7 @@ export function ProfileEditor({
               min={0.00001}
               max={0.1}
               step="any"
-              defaultValue={profile.config.learningRate ?? ''}
+              defaultValue={configView.config.learningRate ?? ''}
               help="من 0.00001 إلى 0.1. القيمة الفارغة تستخدم افتراضي المحرك."
               error={error}
             />
@@ -283,7 +289,7 @@ export function ProfileEditor({
               min={0}
               max={4294967295}
               step={1}
-              defaultValue={profile.config.seed}
+              defaultValue={configView.config.seed}
               error={error}
             />
             <Field
@@ -293,7 +299,7 @@ export function ProfileEditor({
               min={32}
               max={4096}
               step={1}
-              defaultValue={profile.config.maxSeqLen}
+              defaultValue={configView.config.maxSeqLen}
               help="من ٣٢ إلى ٤٠٩٦ تقييمًا في المثال الواحد. قد يستبعد الحد المنخفض بعض السجلات الطويلة من التدريب."
               error={error}
             />
@@ -304,7 +310,7 @@ export function ProfileEditor({
               min={0.1}
               max={5}
               step="any"
-              defaultValue={profile.config.gamma}
+              defaultValue={configView.config.gamma}
               help="من 0.1 إلى 5. يضبط قوة الانتظام في التدريب، ولا يغيّر وزن المراجعات حسب حداثتها."
               error={error}
             />
@@ -319,6 +325,7 @@ export function ProfileEditor({
         <div className="disclosure-body">
           {trainingOpen && (
             <TrainingPanel
+              key={profile.revision}
               profileId={profile.id}
               api={api}
               configurationDirty={hasDraft}

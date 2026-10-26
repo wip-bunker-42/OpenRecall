@@ -7,6 +7,7 @@ import { Dialog } from '../../components/Dialog';
 import { FormErrors } from '../../components/FormErrors';
 import { StatusRegion } from '../../components/StatusRegion';
 import { number } from '../../shared/format';
+import { useMountedView } from '../../shared/useMountedView';
 type Editing = { action: 'create' } | { action: 'rename' | 'delete'; deck: DeckDetail };
 export function LibraryPage({
   bootstrap,
@@ -24,6 +25,7 @@ export function LibraryPage({
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const mounted = useMountedView();
   function edit(value: Editing) {
     setError(null);
     setName(value.action === 'create' ? '' : value.deck.name);
@@ -66,6 +68,7 @@ export function LibraryPage({
     setError(null);
     try {
       const view = await api.call('startSession', { deckId });
+      if (!mounted.current) return;
       navigate({ page: 'review', sessionId: view.payload.sessionId, deckId });
     } catch (e) {
       setError(e);
@@ -80,7 +83,7 @@ export function LibraryPage({
           <h1 tabIndex={-1}>مجموعاتي</h1>
           <p className="muted">مساحة للمذاكرة، على إيقاعك.</p>
         </div>
-        <button className="primary" onClick={() => edit({ action: 'create' })}>
+        <button className="primary" disabled={busy} onClick={() => edit({ action: 'create' })}>
           إنشاء مجموعة
         </button>
       </div>

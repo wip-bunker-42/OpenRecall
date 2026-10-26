@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState, useRef } from 'react';
 import type { Api, NativeApi } from '../shared/api';
 import type { Bootstrap } from '../shared/generated/Bootstrap';
 import type { RestoreReport } from '../shared/generated/RestoreReport';
@@ -48,9 +48,14 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
     })();
   }
   function navigate(next: Route) {
-    if (dirty) setPending(next);
+    if (dirtySources.current.size > 0) setPending(next);
     else go(next);
   }
+  const navigation = useRef(navigate);
+  useLayoutEffect(() => {
+    navigation.current = navigate;
+  });
+  const requestNavigation = useCallback((next: Route) => navigation.current(next), []);
   const refresh = useCallback(async () => {
     setBootstrap(await api.call('bootstrap', {}));
   }, [api]);
@@ -153,14 +158,19 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
                 )}
               </>
             ) : route.page === 'library' ? (
-              <LibraryPage bootstrap={bootstrap} api={api} navigate={navigate} refresh={refresh} />
+              <LibraryPage
+                bootstrap={bootstrap}
+                api={api}
+                navigate={requestNavigation}
+                refresh={refresh}
+              />
             ) : route.page === 'deck' ? (
               <DeckPage
                 key={route.deckId}
                 deckId={route.deckId}
                 api={api}
                 native={native}
-                navigate={navigate}
+                navigate={requestNavigation}
                 pageSize={bootstrap.settings.pageSize}
                 timezone={bootstrap.settings.timezone}
               />
@@ -170,7 +180,7 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
                 sessionId={route.sessionId}
                 deckId={route.deckId}
                 api={api}
-                navigate={navigate}
+                navigate={requestNavigation}
                 onBusyChange={setReviewBusy}
                 externalBusy={navigationBusy}
                 shortcutsEnabled={bootstrap.settings.shortcutsEnabled}
@@ -180,7 +190,7 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
               <SettingsPage
                 api={api}
                 native={native}
-                navigate={navigate}
+                navigate={requestNavigation}
                 onSaved={refresh}
                 onRestored={async (report) => {
                   setRestored(report);
@@ -189,7 +199,7 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
                 }}
               />
             ) : (
-              <ProfilesPage api={api} navigate={navigate} />
+              <ProfilesPage api={api} navigate={requestNavigation} />
             )}
           </main>
         </div>

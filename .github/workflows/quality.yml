@@ -56,6 +56,7 @@ jobs:
             target/native-tests/**/audits/*.json
             target/native-tests/**/logs/*.log
             target/native-tests/**/network-boundary.json
+            target/startup-tests/**/result.json
           if-no-files-found: ignore
           retention-days: 7
   bundle:

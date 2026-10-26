@@ -13,6 +13,7 @@ import { focusHeading } from '../../shared/focus';
 import { number } from '../../shared/format';
 import { DeckStatistics } from '../statistics/DeckStatistics';
 import { SchedulingSettings } from '../settings/SchedulingSettings';
+import { useMountedView } from '../../shared/useMountedView';
 export function DeckPage({
   deckId,
   api,
@@ -40,6 +41,7 @@ export function DeckPage({
   const [statisticsOpen, setStatisticsOpen] = useState(false);
   const [schedulingOpen, setSchedulingOpen] = useState(false);
   const [policyDirty, setPolicyDirty] = useState(false);
+  const mounted = useMountedView();
   const refresh = useCallback(async () => {
     setDeck(await api.call('getDeck', { deckId }));
     setRevision((n) => n + 1);
@@ -54,6 +56,7 @@ export function DeckPage({
     setError(null);
     try {
       const view = await api.call('startSession', { deckId });
+      if (!mounted.current) return;
       navigate({ page: 'review', sessionId: view.payload.sessionId, deckId });
     } catch (e) {
       setError(e);

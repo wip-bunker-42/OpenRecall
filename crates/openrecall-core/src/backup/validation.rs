@@ -5,7 +5,7 @@ use crate::{
         card::{CardDetail, MemoryState},
         session::{Presentation, Session},
     },
-    scheduling::fsrs::FsrsScheduler,
+    scheduling::fsrs::{FsrsScheduler, valid_memory},
 };
 use std::collections::{HashMap, HashSet};
 fn check(valid: bool) -> AppResult<()> {
@@ -26,14 +26,7 @@ fn ids<'a>(values: impl Iterator<Item = &'a str>) -> AppResult<HashSet<&'a str>>
     Ok(set)
 }
 fn memory(m: &MemoryState) -> AppResult<()> {
-    check(
-        m.stability.is_finite()
-            && m.stability > 0.0
-            && m.stability_fast.is_finite()
-            && m.stability_fast >= 0.0
-            && m.difficulty.is_finite()
-            && (1.0..=10.0).contains(&m.difficulty),
-    )
+    check(valid_memory(m))
 }
 fn card(c: &CardDetail) -> AppResult<()> {
     at(&c.due_at)?;

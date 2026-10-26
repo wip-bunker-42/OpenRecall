@@ -106,19 +106,28 @@ export function TrainingPanel({
   const [confirm, setConfirm] = useState(false);
   const sequence = useRef(0);
   const load = useCallback(async () => {
-    const [eligibility, runs, profile] = await Promise.all([
-      api.call('getTrainingEligibility', { profileId }),
-      api.call('listTrainingRuns', { profileId }),
-      api.call('getProfile', { profileId }),
-    ]);
-    setEligibility(eligibility);
-    setProfile(profile);
-    setHistory(runs);
-    const latest =
-      runs.slice().sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt))[0] ?? null;
-    setJob(
-      latest?.status === 'ready' ? await api.call('getTrainingJob', { jobId: latest.id }) : latest,
-    );
+    const version = ++sequence.current;
+    try {
+      const [eligibility, runs, profile] = await Promise.all([
+        api.call('getTrainingEligibility', { profileId }),
+        api.call('listTrainingRuns', { profileId }),
+        api.call('getProfile', { profileId }),
+      ]);
+      if (version !== sequence.current) return;
+      setEligibility(eligibility);
+      const latest =
+        runs.slice().sort((a, b) => Date.parse(b.startedAt) - Date.parse(a.startedAt))[0] ?? null;
+      const refreshed =
+        latest?.status === 'ready'
+          ? await api.call('getTrainingJob', { jobId: latest.id })
+          : latest;
+      if (version !== sequence.current) return;
+      setProfile(profile);
+      setHistory(runs);
+      setJob(refreshed);
+    } catch (error) {
+      if (version === sequence.current) throw error;
+    }
   }, [api, profileId]);
   useEffect(() => {
     let mounted = true;

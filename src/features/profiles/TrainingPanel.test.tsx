@@ -3,6 +3,44 @@ import userEvent from '@testing-library/user-event';
 import { TrainingPanel } from './TrainingPanel';
 import { fixtureApi } from '../../test/mockApi';
 import { profileFixture, eligibilityFixture, readyJobFixture } from '../../test/profileFixtures';
+it.each(['ready', 'failure'])(
+  'keeps the new job cancellable when an older %s load arrives late',
+  async (result) => {
+    let release!: (value: unknown) => void;
+    const pending = new Promise<unknown>((resolve) => {
+      release = resolve;
+    });
+    const queued = {
+      ...readyJobFixture,
+      id: 'new-job',
+      status: 'queued',
+      candidateParameters: null,
+    };
+    const api = fixtureApi(async (r) => {
+      if (r.kind === 'getTrainingEligibility')
+        return { kind: r.kind, payload: readyJobFixture.eligibility };
+      if (r.kind === 'getProfile') return { kind: r.kind, payload: profileFixture };
+      if (r.kind === 'listTrainingRuns') return { kind: r.kind, payload: [readyJobFixture] };
+      if (r.kind === 'getTrainingJob') {
+        if (r.payload.jobId === readyJobFixture.id) {
+          await pending;
+          if (result === 'failure') throw { code: 'staleCandidate' };
+          return { kind: r.kind, payload: readyJobFixture };
+        }
+        return { kind: r.kind, payload: queued };
+      }
+      if (r.kind === 'startTraining') return { kind: r.kind, payload: queued };
+    });
+    const user = userEvent.setup();
+    render(<TrainingPanel profileId="profile-1" api={api} />);
+    await user.click(await screen.findByRole('button', { name: 'بدء التحسين' }));
+    expect(await screen.findByRole('button', { name: 'إلغاء التدريب' })).toBeEnabled();
+    await act(async () => release(undefined));
+    expect(screen.getByRole('button', { name: 'إلغاء التدريب' })).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'تطبيق النموذج المحسن' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  },
+);
 it('revalidates a persisted ready candidate before presenting it as applicable', async () => {
   const api = fixtureApi((r) => {
     if (r.kind === 'getTrainingEligibility')

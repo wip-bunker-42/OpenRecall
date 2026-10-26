@@ -34,10 +34,10 @@ await new Promise((resolve, reject) => {
   proxy.once('error', reject);
   proxy.listen(4459, '127.0.0.1', resolve);
 });
-async function run(args) {
+async function invoke(args) {
   const { command, prefix } = pnpmInvocation();
   const status = await new Promise((resolve, reject) => {
-    const child = spawn(command, [...prefix, 'exec', 'wdio', 'run', 'wdio.conf.ts', ...args], {
+    const child = spawn(command, [...prefix, ...args], {
       stdio: 'inherit',
       shell: false,
       env: { ...process.env, OPENRECALL_NATIVE_ROOT: root },
@@ -46,6 +46,9 @@ async function run(args) {
     child.once('exit', resolve);
   });
   if (status !== 0) throw new Error(`Native suite exited with ${status}`);
+}
+async function run(args) {
+  await invoke(['exec', 'wdio', 'run', 'wdio.conf.ts', ...args]);
 }
 try {
   if (process.argv.length > 2) await run(process.argv.slice(2));
@@ -88,6 +91,12 @@ try {
       )
     )
       throw new Error('No real native updater connection reached the rejecting proxy.');
+    await invoke([
+      'exec',
+      process.execPath,
+      'scripts/test-startup.mjs',
+      join(root, 'data/openrecall.sqlite3'),
+    ]);
   }
 } finally {
   writeFileSync(

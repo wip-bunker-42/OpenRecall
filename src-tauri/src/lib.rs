@@ -3,6 +3,7 @@ mod commands;
 pub mod files;
 pub mod lifecycle;
 pub mod paths;
+mod startup;
 pub mod updates;
 use std::sync::{Arc, Mutex};
 use tauri::Manager;
@@ -23,22 +24,37 @@ pub fn run() {
             }
         }))
         .setup(|app| {
-            let data = app.path().app_data_dir()?;
-            #[cfg(feature = "automation")]
-            let data = std::env::var_os("OPENRECALL_TEST_DATA")
-                .map(std::path::PathBuf::from)
-                .unwrap_or(data);
-            let downloads = app.path().download_dir().ok();
-            #[cfg(feature = "automation")]
-            let downloads = std::env::var_os("OPENRECALL_TEST_DOWNLOADS")
-                .map(std::path::PathBuf::from)
-                .or(downloads);
-            let paths = paths::NativePaths::from_roots(data, downloads)?;
-            let core = openrecall_core::App::open(
-                &paths.database,
-                Arc::new(openrecall_core::SystemClock::default()),
-                Box::new(openrecall_core::SystemRandom::default()),
-            )?;
+            let opened = (|| -> openrecall_core::AppResult<_> {
+                let data = app
+                    .path()
+                    .app_data_dir()
+                    .map_err(|_| openrecall_core::AppError::new("fileAccess"))?;
+                #[cfg(feature = "automation")]
+                let data = std::env::var_os("OPENRECALL_TEST_DATA")
+                    .map(std::path::PathBuf::from)
+                    .unwrap_or(data);
+                let downloads = app.path().download_dir().ok();
+                #[cfg(feature = "automation")]
+                let downloads = std::env::var_os("OPENRECALL_TEST_DOWNLOADS")
+                    .map(std::path::PathBuf::from)
+                    .or(downloads);
+                let paths = paths::NativePaths::from_roots(data, downloads)?;
+                let core = openrecall_core::App::open(
+                    &paths.database,
+                    Arc::new(openrecall_core::SystemClock::default()),
+                    Box::new(openrecall_core::SystemRandom::default()),
+                )?;
+                Ok((paths, core))
+            })();
+            let (paths, core) = match opened {
+                Ok(opened) => opened,
+                Err(error) => {
+                    // No AppState is installed: study/file/update commands cannot
+                    // accidentally operate on a substitute empty library.
+                    startup::show_recovery(app.handle(), &error);
+                    return Ok(());
+                }
+            };
             app.manage(commands::AppState {
                 updates: Arc::new(updates::UpdateManager::new(env!("CARGO_PKG_VERSION"))),
                 lifecycle: Arc::new(Default::default()),
@@ -50,7 +66,9 @@ pub fn run() {
         })
         .on_window_event(|window, event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                let state = window.state::<commands::AppState>();
+                let Some(state) = window.try_state::<commands::AppState>() else {
+                    return;
+                };
                 if state.lifecycle.ensure_available().is_err() {
                     api.prevent_close();
                     return;

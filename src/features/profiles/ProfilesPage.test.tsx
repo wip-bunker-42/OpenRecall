@@ -5,6 +5,67 @@ import { fixtureApi, deckFixture } from '../../test/mockApi';
 import { profileFixture, linkedDecks } from '../../test/profileFixtures';
 import { App } from '../../app/App';
 import { nativeFixture } from '../../test/mockApi';
+it.each(['name', 'config'])(
+  'preserves a %s draft when another profile takes one of its decks',
+  async (draft) => {
+    let assigned = false;
+    const first = { ...profileFixture, name: 'النموذج الأول', memberDeckIds: ['deck-1'] };
+    const second = {
+      ...profileFixture,
+      id: 'profile-2',
+      name: 'النموذج الثاني',
+      revision: 'second',
+      memberDeckIds: ['deck-2'],
+    };
+    const api = fixtureApi((r) => {
+      const one = assigned ? { ...first, revision: 'first-after', memberDeckIds: [] } : first;
+      const two = assigned
+        ? { ...second, revision: 'second-after', memberDeckIds: ['deck-1', 'deck-2'] }
+        : second;
+      if (r.kind === 'listProfiles') return { kind: r.kind, payload: [one, two] };
+      if (r.kind === 'listDecks')
+        return {
+          kind: r.kind,
+          payload: [
+            { ...linkedDecks[0], profileId: assigned ? 'profile-2' : first.id },
+            { ...linkedDecks[1], profileId: 'profile-2' },
+          ],
+        };
+      if (r.kind === 'getProfile') return { kind: r.kind, payload: two };
+      if (r.kind === 'assignProfile') {
+        assigned = true;
+        return { kind: r.kind, payload: two };
+      }
+    });
+    const user = userEvent.setup();
+    render(<App api={api} native={nativeFixture} />);
+    await user.click(await screen.findByRole('button', { name: 'نماذج التحسين' }));
+    await user.click(await screen.findByText(first.name));
+    await user.click(screen.getByText(second.name));
+    const one = screen.getByText(first.name).closest('details')!;
+    const two = screen.getByText(second.name).closest('details')!;
+    if (draft === 'name') {
+      await user.clear(within(one).getByLabelText('اسم نموذج التحسين'));
+      await user.type(within(one).getByLabelText('اسم نموذج التحسين'), 'مسودة لا تضيع');
+    } else {
+      await user.click(within(one).getByText('إعدادات التدريب المتقدمة'));
+      await user.clear(within(one).getByLabelText('حجم الدفعة'));
+      await user.type(within(one).getByLabelText('حجم الدفعة'), '256');
+    }
+    await user.selectOptions(within(two).getByLabelText('مجموعة لإضافتها إلى النموذج'), 'deck-1');
+    await user.click(within(two).getByRole('button', { name: 'ربط المجموعة بالنموذج' }));
+    await user.click(
+      within(await screen.findByRole('dialog')).getByRole('button', { name: 'تأكيد الربط' }),
+    );
+    await screen.findByRole('button', { name: 'فصل المجموعة طب عن النموذج' });
+    const current = screen.getByText(first.name).closest('details')!;
+    if (draft === 'name')
+      expect(within(current).getByLabelText('اسم نموذج التحسين')).toHaveValue('مسودة لا تضيع');
+    else expect(within(current).getByLabelText('حجم الدفعة')).toHaveValue(256);
+    await user.click(screen.getByRole('button', { name: 'المجموعات' }));
+    expect(screen.getByRole('dialog', { name: 'تغييرات غير محفوظة' })).toBeVisible();
+  },
+);
 it('keeps unsaved changes in another expanded profile after saving one profile', async () => {
   let renamed = false;
   const first = { ...profileFixture, name: 'النموذج الأول', memberDeckIds: ['deck-1'] };

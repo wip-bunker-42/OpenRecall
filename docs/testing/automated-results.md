@@ -2,7 +2,7 @@
 
 The release gate is `pnpm verify`, followed by `pnpm build:native-test` and `pnpm test:native` on Windows. The final GitHub Quality run must pass on the exact reviewed revision. Release preflight additionally requires all six checks on the tagged main commit.
 
-Local verification on 2026-10-25 passed: 68 Rust workspace tests, the additional seven backup feature-compatibility cases, 45 frontend unit tests, 13 maintenance tests, seven browser scenarios and five native runtime cases. The browser and native suites audited 25 and 11 UI states respectively with zero detected axe violations. Native audits executed 22–46 passing rules per state.
+The final review fix suite includes 71 Rust workspace tests, the additional seven backup feature-compatibility cases, 53 frontend unit tests, 13 maintenance tests, seven browser scenarios, five native study-flow cases and two native startup-recovery probes. The browser and native study suites audit 25 and 11 UI states respectively and require zero detected axe violations. Every audit requires a nonzero number of passing rules.
 
 ## Environments and test boundaries
 
@@ -25,6 +25,10 @@ Seven Playwright scenarios audit 25 named UI states: library/create/delete dialo
 The native suite exercises real create/import/duplicate exclusion, process restart, mixed-language cards, all/new/previous filters, due arrival while another question stays reserved, nonrepeating alternative forms, interval descriptions, summary undo, card edit/delete, profile assignment/detachment/training gate, portable export/delete/restore with safety backup, failed offline updater check, keyboard dialog return and Windows native blur/refocus. Native axe reports are retained under `target/native-tests/run-*/audits`.
 
 Meaningful regressions were observed failing before repair: restore feedback lost on route unmount; accessible names differing from visible button text; stale updater status overwriting a newer event; feature-dependent backup digests; corrupt backup timestamps/undo snapshots; POSIX native pnpm detection; missing AppImage icon configuration.
+
+The final independent GPT-6.1 Sol review identified six Important findings. The retained regression suite covers deleted form references in ended/parked sessions and undo before-images; drafts surviving cross-profile membership changes; late review-start responses preserving later drafts; old training loads preserving the newer job and its cancellation control; backup memory satisfying the same FSRS invariant used during review; and Arabic native recovery when a future-schema or inaccessible library cannot open. The startup probes inspect only the test process's own native window captions, verify a retry control and retained file digest, and never operate a screen reader. They do not initialize a substitute empty study library.
+
+Two Minor review items remain deferred: adding start/end timestamps, final filter and an explicit observed-recall definition to the session summary; and expanding Arabic Log loss/RMSE and pooled-versus-per-deck improvement explanations. Existing durations/counts/ratings and per-deck metric tables remain available.
 
 ## Limits
 

@@ -35,7 +35,7 @@ function ProfileRow({
       <div className="disclosure-body">
         {open && (
           <ProfileEditor
-            key={profile.revision}
+            key={profile.id}
             profile={profile}
             decks={decks}
             api={api}
