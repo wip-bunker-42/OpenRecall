@@ -1,7 +1,7 @@
 # OpenRecall spelling practice, question titles and daily completion
 
 Date: 2026-10-29 (Africa/Cairo)
-Status: Draft for user approval. Approach 1 approved; implementation is not approved yet.
+Status: Approved by the user on 2026-10-29, after the disposable-input clarification.
 Builder check: Independent GPT-6.1 Sol returned "nothing important left" on 2026-10-29.
 Subsequent user clarification: practice input is discarded on leaving a card;
 there is no typing retention for navigation, undo or session resume.
@@ -463,8 +463,8 @@ than silently suppressing its alert.
   spelling subset in global totals.
 - Schema 9 / backup format 2, with a real backward reader for format 1, and v0.2.0.
 
-These are proposals, not additional user decisions. They become the working
-design only after the user approves this document.
+These builder proposals were presented with the document and are part of the
+approved working design. They are not independently originated user requirements.
 
 The disposable practice-input requirement in section 6 is an explicit user
 decision, not a builder proposal: input must not survive leaving the card.
