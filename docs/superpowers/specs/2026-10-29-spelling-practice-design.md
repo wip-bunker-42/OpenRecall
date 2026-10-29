@@ -3,6 +3,8 @@
 Date: 2026-10-29 (Africa/Cairo)
 Status: Draft for user approval. Approach 1 approved; implementation is not approved yet.
 Builder check: Independent GPT-6.1 Sol returned "nothing important left" on 2026-10-29.
+Subsequent user clarification: practice input is discarded on leaving a card;
+there is no typing retention for navigation, undo or session resume.
 Baseline: main `81a301aad06f5e9dbf04cc149dad67bd23ef2f08`, released application v0.1.0.
 Product language: Arabic. Development language: English.
 Intended release: v0.2.0, through the existing protected PR and signed release workflow.
@@ -29,6 +31,9 @@ The user explicitly requested:
   reset their schedules, history or progress.
 - Keep the last saved source context after the live source is deleted, so
   `عرض البطاقة الأصلية` still explains where the word came from.
+- Practice input exists only inside the currently displayed card's text field.
+  Leaving that card discards it immediately, including when returning through
+  undo, filter changes or a resumed session. Never save the user's typing.
 - Let ordinary cards customize the review question heading through JSON.
 - Show daily completed-for-today counts per deck and for the whole library.
 - Continue offline study, accessible Arabic UI, genuine FSRS-7 scheduling,
@@ -232,22 +237,30 @@ also contain the word and thus have their own provenance entry.
   headings stay below the review H1. Reset disclosure on a new word, and keep it
   stable on polling. Pending or failed grading cannot clear the typed attempt.
 
-### Scratchpad lifetime and undo (builder decision)
+### Disposable practice input (explicit user requirement)
 
-The textarea is a temporary scratchpad. It never enters Rust grading requests,
-review logs, model training, backups or analytics. State is keyed by session and
-presentation in the current application runtime. Polling, filter parking,
-returning to a resumable session during that runtime, and context refresh retain
-text and selection without remounting the same presentation's field.
+Use an ordinary uncontrolled textarea whose value lives only in the currently
+mounted card's DOM. The application does not read or copy its text or selection
+into React draft state, session/presentation caches, undo snapshots, browser
+storage, native requests, logs, training, backups or analytics. Normal native
+text editing, including text undo, works only while that field remains open.
 
-A successful grade gives the next presentation an empty field. Retain the prior
-attempt text, selection and disclosure state for the one native undo. Undo
-restores that UI state alongside the native learning state, including from the
-summary, and returns focus to the textarea. Prune state when its undo becomes
-unavailable. Closing the application discards scratchpad text; resuming after a
-restart preserves scheduled progress but starts with an empty scratchpad. Explain
-the temporary lifetime in field help. A full library restore clears runtime
-scratchpads so old text cannot leak into restored presentations.
+Leaving the card destroys the field and its content. This includes advancing to
+another presentation after a successful grade, going to the summary or another
+page, parking a card through a filter change, ending the session, restoring the
+library, or closing/reloading the application. Every later return starts with
+an empty field, even if the word/presentation is the same or native review undo
+returns to the previous card. Do not retain a draft or caret position for undo,
+navigation or session resume. Native review undo still restores scheduling,
+history and counters; the user's explicit disposable-input rule governs typing.
+
+Moving focus to another control inside the same displayed card is not leaving
+the card. Do not erase text on textarea blur. Opening/closing source context,
+ordinary polling or rerendering, and a failed/pending grade leave the same DOM
+field intact while the same card remains displayed. A changed presentation or
+unmounted review view starts empty. Practice typing is not an unsaved-data source
+and must not add a discard-draft navigation prompt. Field help states that the
+text disappears as soon as the user leaves the card.
 
 ### Ordinary question titles
 
@@ -403,8 +416,11 @@ Plan behavioral RED-to-GREEN coverage for:
 - Spelling FSRS progress independent of sources; direct ratings/previews without
   normal reveal; unchanged normal reveal guard; retries, filters, due arrivals,
   restart and native one-step undo.
-- Plain textarea behavior, caret/text survival on polling, keybindings inside and
-  outside input, rollback on failed grade, summary undo and runtime-only lifetime.
+- Plain textarea behavior, stable DOM text/caret while the card stays displayed,
+  keyboard editing and no erasure on blur/source disclosure/polling/failed grade.
+  Advancing, leaving/resuming, filter parking, summary undo and restart must all
+  return to an empty field. Assert typed practice text never enters native
+  requests, persisted state, undo records or backup data.
 - Old JSON and title inheritance/default/error cases, editor round-trip, dynamic
   H1 headings and unaffected ordinary duplicate identity.
 - Day-boundary/DST, several reviews/forms per card, future untouched cards,
@@ -442,8 +458,6 @@ than silently suppressing its alert.
   no dictionary, language-model or input-correction gate.
 - Managed word forms, explicit deletion plus durable exclusions, and ordinary
   rename/delete behavior for the singleton.
-- Temporary scratchpad retained for current-runtime navigation/undo, not persisted
-  typing history or backup content.
 - Per-form `questionTitle`, with import-time variant inheritance only.
 - Logical-card counts in ordinary decks, word counts in spelling, and an explicit
   spelling subset in global totals.
@@ -451,6 +465,9 @@ than silently suppressing its alert.
 
 These are proposals, not additional user decisions. They become the working
 design only after the user approves this document.
+
+The disposable practice-input requirement in section 6 is an explicit user
+decision, not a builder proposal: input must not survive leaving the card.
 
 ## Research references
 
