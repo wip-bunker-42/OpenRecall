@@ -41,6 +41,16 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    ListSpellingExclusions {
+        deck_id: String,
+        page: u32,
+        page_size: u16,
+    },
+    AllowSpellingWord {
+        deck_id: String,
+        canonical: String,
+        expected_revision: String,
+    },
     CreateSpellingDeck {
         source_deck_id: String,
     },
@@ -194,6 +204,8 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    ListSpellingExclusions(Page<crate::domain::spelling::SpellingExclusion>),
+    AllowSpellingWord(spelling::SpellingDeckResult),
     CreateSpellingDeck(spelling::SpellingDeckResult),
     GetSpellingConfig(crate::domain::spelling::SpellingConfig),
     SetSpellingSource(spelling::SpellingDeckResult),

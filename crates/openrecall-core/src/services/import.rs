@@ -4,7 +4,6 @@ use crate::{
     contracts::{
         cards::{CardDraft, FormDraft},
         import::*,
-        library::DeckDetail,
     },
 };
 use serde_json::Value;
@@ -125,7 +124,7 @@ fn mark_duplicate(form: &mut ImportForm, seen: &mut HashMap<String, DuplicateRef
 impl App {
     fn existing_forms(&self) -> AppResult<HashMap<String, DuplicateRef>> {
         let mut result = HashMap::new();
-        let mut stmt=self.store.conn.prepare("SELECT c.id,c.deck_id,json_extract(f.value,'$.id'),json_extract(f.value,'$.front'),json_extract(f.value,'$.back') FROM cards c,json_each(c.payload,'$.forms') f")?;
+        let mut stmt=self.store.conn.prepare("SELECT c.id,c.deck_id,json_extract(f.value,'$.id'),json_extract(f.value,'$.front'),json_extract(f.value,'$.back') FROM cards c JOIN decks d ON d.id=c.deck_id,json_each(c.payload,'$.forms') f WHERE d.kind='standard'")?;
         let rows = stmt.query_map([], |r| {
             Ok((
                 r.get::<_, String>(0)?,
@@ -154,7 +153,7 @@ impl App {
         deck_id: String,
         text: String,
     ) -> AppResult<ImportPreview> {
-        let _: DeckDetail = self.store.get("decks", &deck_id)?;
+        self.require_manual_card_deck(&deck_id)?;
         if text.len() > 50 * 1024 * 1024 {
             return Err(AppError::new("importTooLarge"));
         }
@@ -249,6 +248,7 @@ impl App {
             .get(&input.preview_id)
             .cloned()
             .ok_or_else(|| AppError::new("previewExpired"))?;
+        self.require_manual_card_deck(&preview.deck_id)?;
         if input.library_revision != preview.library_revision
             || self.store.revision()? != preview.library_revision
         {

@@ -9,6 +9,13 @@ use crate::{
 };
 use chrono::DateTime;
 impl App {
+    pub(crate) fn require_manual_card_deck(&self, deck_id: &str) -> AppResult<()> {
+        let deck: DeckDetail = self.store.get("decks", deck_id)?;
+        if deck.kind == crate::domain::spelling::DeckKind::Spelling {
+            return Err(AppError::new("managedSpellingDeck"));
+        }
+        Ok(())
+    }
     pub(crate) fn form_drafts(
         &self,
         draft: CardDraft,
@@ -103,7 +110,7 @@ impl App {
         draft: CardDraft,
         at: chrono::DateTime<chrono::Utc>,
     ) -> AppResult<CardDetail> {
-        let _: DeckDetail = self.store.get("decks", &deck_id)?;
+        self.require_manual_card_deck(&deck_id)?;
         let forms = self.form_drafts(draft, None)?;
         let now = at.to_rfc3339();
         let card = CardDetail {
@@ -132,6 +139,7 @@ impl App {
         expected: String,
     ) -> AppResult<CardDetail> {
         let mut card: CardDetail = self.store.get("cards", &card_id)?;
+        self.require_manual_card_deck(&card.deck_id)?;
         if card.revision != expected {
             return Err(AppError::new("conflict"));
         }
@@ -157,11 +165,13 @@ impl App {
         if card.revision != expected {
             return Err(AppError::new("conflict"));
         }
+        self.exclude_deleted_spelling_word(&card)?;
         self.retain_spelling_before_source_delete(std::slice::from_ref(&card.id))?;
         self.clear_deck_undos(std::slice::from_ref(&card.deck_id))?;
         self.store
             .conn
             .execute("DELETE FROM cards WHERE id=?1", [&card_id])?;
+        crate::spelling::storage::prune_snapshots(&self.store.conn)?;
         self.refresh_session_counts(&card.deck_id)?;
         self.touch_deck(&card.deck_id)?;
         Ok(DeleteReport { id: card_id })

@@ -11,6 +11,86 @@ use crate::{
 use rusqlite::{OptionalExtension, params};
 
 impl App {
+    pub(crate) fn exclude_deleted_spelling_word(&self, card: &CardDetail) -> AppResult<()> {
+        let deck: DeckDetail = self.store.get("decks", &card.deck_id)?;
+        if deck.kind != DeckKind::Spelling {
+            return Ok(());
+        }
+        let canonical: String = self.store.conn.query_row(
+            "SELECT canonical FROM spelling_words WHERE card_id=?1",
+            [&card.id],
+            |row| row.get(0),
+        )?;
+        let mut config = self.get_spelling_config(&card.deck_id)?;
+        storage::save_exclusion(
+            &self.store.conn,
+            &crate::domain::spelling::SpellingExclusion {
+                deck_id: card.deck_id.clone(),
+                canonical,
+                excluded_at: self.clock.now().to_rfc3339(),
+            },
+        )?;
+        config.revision = id();
+        storage::save_config(&self.store.conn, &config)?;
+        Ok(())
+    }
+    pub(crate) fn list_spelling_exclusions(
+        &self,
+        deck_id: &str,
+        page: u32,
+        page_size: u16,
+    ) -> AppResult<crate::contracts::cards::Page<crate::domain::spelling::SpellingExclusion>> {
+        self.get_spelling_config(deck_id)?;
+        if page == 0 || ![10, 20, 50, 100].contains(&page_size) {
+            return Err(AppError::field("page", "range"));
+        }
+        let total = self.store.conn.query_row(
+            "SELECT count(*) FROM spelling_exclusions WHERE deck_id=?1",
+            [deck_id],
+            |row| row.get(0),
+        )?;
+        let items=self.store.conn.prepare("SELECT canonical,excluded_at FROM spelling_exclusions WHERE deck_id=?1 ORDER BY excluded_at,canonical LIMIT ?2 OFFSET ?3")?
+            .query_map(params![deck_id,page_size,(page as i64-1)*page_size as i64],|row|Ok(crate::domain::spelling::SpellingExclusion {deck_id:deck_id.into(),canonical:row.get(0)?,excluded_at:row.get(1)?}))?.collect::<Result<_,_>>()?;
+        Ok(crate::contracts::cards::Page {
+            items,
+            total,
+            page,
+            page_size,
+        })
+    }
+    pub(crate) fn allow_spelling_word(
+        &mut self,
+        deck_id: String,
+        canonical: String,
+        expected_revision: String,
+    ) -> AppResult<SpellingDeckResult> {
+        let mut config = self.get_spelling_config(&deck_id)?;
+        if config.revision != expected_revision {
+            return Err(AppError::new("conflict"));
+        }
+        if crate::spelling::extract::canonical_word(&canonical).as_deref()
+            != Some(canonical.as_str())
+        {
+            return Err(AppError::field("canonical", "invalidSpellingWord"));
+        }
+        let before = self.store.conn.total_changes();
+        if self.store.conn.execute(
+            "DELETE FROM spelling_exclusions WHERE deck_id=?1 AND canonical=?2",
+            params![deck_id, canonical],
+        )? == 0
+        {
+            return Err(AppError::new("notFound"));
+        }
+        config.revision = id();
+        storage::save_config(&self.store.conn, &config)?;
+        let added = if let Some(source) = &config.source_deck_id {
+            self.backfill_spelling_source(source)?
+        } else {
+            0
+        };
+        self.finish_spelling_collection(&deck_id, added, before)?;
+        self.spelling_result(config, added)
+    }
     pub(crate) fn sync_spelling_for_content_change(&mut self, card: &CardDetail) -> AppResult<()> {
         let Some(config) = storage::config(&self.store.conn)? else {
             return Ok(());

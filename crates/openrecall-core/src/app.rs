@@ -55,6 +55,22 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::ListSpellingExclusions {
+                deck_id,
+                page,
+                page_size,
+            } => Ok(Response::ListSpellingExclusions(
+                self.list_spelling_exclusions(&deck_id, page, page_size)?,
+            )),
+            Request::AllowSpellingWord {
+                deck_id,
+                canonical,
+                expected_revision,
+            } => Ok(Response::AllowSpellingWord(self.allow_spelling_word(
+                deck_id,
+                canonical,
+                expected_revision,
+            )?)),
             Request::CreateSpellingDeck { source_deck_id } => Ok(Response::CreateSpellingDeck(
                 self.create_spelling_deck(source_deck_id)?,
             )),
