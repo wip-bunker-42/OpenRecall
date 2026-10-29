@@ -36,6 +36,7 @@ fn issue(field: String, code: &str) -> FieldError {
 }
 fn parse_form(value: &Value, path: &str, key: String, variant: bool) -> ImportForm {
     let mut form = ImportForm {
+        question_title: None,
         key,
         front: String::new(),
         back: String::new(),
@@ -77,8 +78,22 @@ fn parse_form(value: &Value, path: &str, key: String, variant: bool) -> ImportFo
         form.issues
             .push(issue(format!("{path}.variants"), "nestedVariants"));
     }
+    let title = match object.get("questionTitle") {
+        Some(Value::String(text)) => {
+            crate::domain::card::normalize_question_title(Some(text.clone()))
+                .map_err(|_| "invalidQuestionTitle")
+        }
+        None | Some(Value::Null) => Ok(None),
+        _ => Err("stringExpected"),
+    };
+    match title {
+        Ok(title) => form.question_title = title,
+        Err(code) => form
+            .issues
+            .push(issue(format!("{path}.questionTitle"), code)),
+    }
     for name in object.keys() {
-        if !["front", "back", "notes", "variants"].contains(&name.as_str()) {
+        if !["front", "back", "notes", "variants", "questionTitle"].contains(&name.as_str()) {
             form.warnings
                 .push(issue(format!("{path}.{name}"), "unknownField"));
         }
@@ -178,6 +193,12 @@ impl App {
                         format!("{key}-variant-{v}"),
                         true,
                     );
+                    if item
+                        .as_object()
+                        .is_some_and(|o| !o.contains_key("questionTitle"))
+                    {
+                        form.question_title = primary.question_title.clone();
+                    }
                     mark_duplicate(&mut form, &mut seen, valid);
                     variants.push(form);
                 }
@@ -283,6 +304,7 @@ impl App {
                     },
                 );
                 forms.push(FormDraft {
+                    question_title: form.question_title.clone(),
                     id: None,
                     front: form.front.clone(),
                     back: form.back.clone(),

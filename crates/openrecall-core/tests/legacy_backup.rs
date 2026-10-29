@@ -39,7 +39,17 @@ fn legacy_checksum_precedes_defaults_and_nested_undo_survives() {
         restored["data"]["cards"][0]["dueAt"],
         raw["data"]["cards"][0]["dueAt"]
     );
-    assert_eq!(restored["data"]["undoRecords"], raw["data"]["undoRecords"]);
+    let mut upgraded_undo = raw["data"]["undoRecords"].clone();
+    for undo in upgraded_undo.as_array_mut().unwrap() {
+        for key in ["cardBefore", "nextCardBefore"] {
+            if let Some(forms) = undo[key]["forms"].as_array_mut() {
+                for form in forms {
+                    form["questionTitle"] = Value::Null;
+                }
+            }
+        }
+    }
+    assert_eq!(restored["data"]["undoRecords"], upgraded_undo);
     let undo = &raw["data"]["undoRecords"][0];
     let view = f.call("undoReview", json!({"sessionId":undo["sessionId"]}));
     assert_eq!(

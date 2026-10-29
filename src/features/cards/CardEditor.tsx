@@ -8,6 +8,7 @@ import { number } from '../../shared/format';
 import { useUnsaved } from '../../app/unsaved';
 type EditForm = FormDraft & { key: string };
 const empty = (): EditForm => ({
+  questionTitle: null,
   key: crypto.randomUUID(),
   id: null,
   front: '',

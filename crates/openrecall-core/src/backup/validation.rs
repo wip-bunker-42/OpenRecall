@@ -47,6 +47,10 @@ fn card(c: &CardDetail) -> AppResult<()> {
     let form_ids = ids(c.forms.iter().map(|f| f.id.as_str()))?;
     for f in &c.forms {
         check(!f.front.trim().is_empty() && !f.back.trim().is_empty())?;
+        check(
+            crate::domain::card::normalize_question_title(f.question_title.clone())
+                .is_ok_and(|title| title == f.question_title),
+        )?;
     }
     let remaining = ids(c.bag.remaining.iter().map(String::as_str))?;
     let consumed = ids(c.bag.consumed.iter().map(String::as_str))?;

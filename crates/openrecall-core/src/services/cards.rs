@@ -42,6 +42,13 @@ impl App {
                     return Err(AppError::field("forms", "duplicateId"));
                 }
                 Ok(CardForm {
+                    question_title: crate::domain::card::normalize_question_title(f.question_title)
+                        .map_err(|mut error| {
+                            for field in &mut error.fields {
+                                field.field = format!("forms.{i}.questionTitle");
+                            }
+                            error
+                        })?,
                     id: form_id,
                     front: f.front,
                     back: f.back,

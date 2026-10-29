@@ -3,6 +3,8 @@ use ts_rs::TS;
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct FormDraft {
+    #[serde(default)]
+    pub question_title: Option<String>,
     pub id: Option<String>,
     pub front: String,
     pub back: String,

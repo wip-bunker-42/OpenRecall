@@ -13,6 +13,7 @@ pub struct DuplicateRef {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ImportForm {
+    pub question_title: Option<String>,
     pub key: String,
     pub front: String,
     pub back: String,
