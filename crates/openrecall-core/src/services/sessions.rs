@@ -15,6 +15,13 @@ use crate::{
 };
 use chrono::{DateTime, Utc};
 impl App {
+    pub(crate) fn review_mode(&self, deck: &str) -> AppResult<ReviewMode> {
+        let deck: DeckDetail = self.store.get("decks", deck)?;
+        Ok(match deck.kind {
+            crate::domain::spelling::DeckKind::Standard => ReviewMode::Standard,
+            crate::domain::spelling::DeckKind::Spelling => ReviewMode::Spelling,
+        })
+    }
     pub(crate) fn save_session(&self, s: &Session) -> AppResult<()> {
         self.store.conn.execute("INSERT INTO sessions(id,deck_id,status,payload) VALUES(?1,?2,?3,?4) ON CONFLICT(id) DO UPDATE SET status=excluded.status,payload=excluded.payload",rusqlite::params![s.id,s.deck_id,s.status,serde_json::to_string(s)?])?;
         self.store.touch()
@@ -164,6 +171,9 @@ impl App {
     }
     pub(crate) fn reveal_answer(&mut self, session_id: String) -> AppResult<ReviewView> {
         let mut s: Session = self.store.get("sessions", &session_id)?;
+        if self.review_mode(&s.deck_id)? == ReviewMode::Spelling {
+            return Err(AppError::new("spellingRevealNotApplicable"));
+        }
         self.checkpoint(&mut s);
         s.current
             .as_mut()
@@ -267,12 +277,16 @@ impl App {
                 .cloned()
                 .ok_or_else(|| AppError::new("noForms"))?;
             let preview_time = self.clock.now();
-            let previews = if p.answer_revealed {
+            let mode = self.review_mode(&s.deck_id)?;
+            let can_rate = mode == ReviewMode::Spelling || p.answer_revealed;
+            let previews = if can_rate {
                 Some(self.card_previews(&card, preview_time)?)
             } else {
                 None
             };
             let frame = ReviewFrame {
+                mode,
+                can_rate,
                 preview_due_at: previews.as_ref().map(|previews| {
                     let due = |seconds: f64| {
                         (preview_time

@@ -11,6 +11,70 @@ use crate::{
 use rusqlite::{OptionalExtension, params};
 
 impl App {
+    pub(crate) fn list_spelling_sources(
+        &self,
+        card_id: &str,
+        page: u32,
+        page_size: u16,
+    ) -> AppResult<crate::contracts::cards::Page<crate::contracts::spelling::SpellingSourceView>>
+    {
+        use crate::{
+            contracts::spelling::{SourceAvailability, SpellingSourceView},
+            domain::spelling::SourceSnapshot,
+        };
+        let card: CardDetail = self.store.get("cards", card_id)?;
+        self.get_spelling_config(&card.deck_id)?;
+        if page == 0 || ![10, 20, 50, 100].contains(&page_size) {
+            return Err(AppError::field("page", "range"));
+        }
+        let total = self.store.conn.query_row(
+            "SELECT count(*) FROM spelling_origins WHERE spelling_card_id=?1",
+            [card_id],
+            |row| row.get(0),
+        )?;
+        let raw:Vec<String>=self.store.conn.prepare("SELECT s.payload FROM spelling_origins o JOIN spelling_snapshots s ON s.id=o.snapshot_id WHERE o.spelling_card_id=?1 ORDER BY o.first_seen_at,o.source_card_id,o.source_form_id LIMIT ?2 OFFSET ?3")?
+            .query_map(params![card_id,page_size,(page as i64-1)*page_size as i64],|row|row.get(0))?.collect::<Result<_,_>>()?;
+        let mut items = Vec::with_capacity(raw.len());
+        for raw in raw {
+            let snapshot: SourceSnapshot = serde_json::from_str(&raw)?;
+            let live: Option<String> = self
+                .store
+                .conn
+                .query_row(
+                    "SELECT payload FROM cards WHERE id=?1",
+                    [&snapshot.source_card_id],
+                    |row| row.get(0),
+                )
+                .optional()?;
+            let availability = if let Some(raw) = live {
+                let source: CardDetail = serde_json::from_str(&raw)?;
+                if source.forms.iter().any(|form| {
+                    form.id == snapshot.source_form_id
+                        && form.front == snapshot.front
+                        && form.back == snapshot.back
+                        && form.notes == snapshot.notes
+                        && form.question_title == snapshot.question_title
+                        && form.language == snapshot.language
+                }) {
+                    SourceAvailability::Current
+                } else {
+                    SourceAvailability::Changed
+                }
+            } else {
+                SourceAvailability::Deleted
+            };
+            items.push(SpellingSourceView {
+                snapshot,
+                availability,
+            });
+        }
+        Ok(crate::contracts::cards::Page {
+            items,
+            total,
+            page,
+            page_size,
+        })
+    }
     pub(crate) fn exclude_deleted_spelling_word(&self, card: &CardDetail) -> AppResult<()> {
         let deck: DeckDetail = self.store.get("decks", &card.deck_id)?;
         if deck.kind != DeckKind::Spelling {

@@ -4,6 +4,8 @@ import type { SessionSummary } from '../shared/generated/SessionSummary';
 import { cardFixture } from './cardFixtures';
 const memory = { stability: 1, stabilityFast: 0, difficulty: 5 };
 export const frameFixture: ReviewFrame = {
+  mode: 'standard',
+  canRate: false,
   lastReview: null,
   sessionId: 'session-1',
   filter: 'all',
@@ -26,6 +28,7 @@ export const revealedFixture: Extract<ReviewView, { state: 'question' }> = {
   state: 'question',
   payload: {
     ...frameFixture,
+    canRate: true,
     answerRevealed: true,
     previews: {
       again: { memory, intervalSeconds: 60 },

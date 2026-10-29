@@ -55,6 +55,13 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::ListSpellingSources {
+                card_id,
+                page,
+                page_size,
+            } => Ok(Response::ListSpellingSources(
+                self.list_spelling_sources(&card_id, page, page_size)?,
+            )),
             Request::ListSpellingExclusions {
                 deck_id,
                 page,

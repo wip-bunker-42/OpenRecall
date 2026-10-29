@@ -126,6 +126,13 @@ fn title_edit_retains_memory_and_form_identity() {
     use openrecall_core::backup::format::{BackupEnvelope, digest};
     let mut typed: BackupEnvelope = serde_json::from_value(corrupt).unwrap();
     typed.payload_sha256 = digest(&typed.data).unwrap();
-    std::fs::write(&path, serde_json::to_vec(&typed).unwrap()).unwrap();
-    assert!(f.app.preview_restore(&path).is_err());
+    std::fs::write(
+        &path,
+        serde_json::to_vec(&serde_json::to_value(&typed).unwrap()).unwrap(),
+    )
+    .unwrap();
+    assert_eq!(
+        f.app.preview_restore(&path).unwrap_err().code,
+        "invalidBackup"
+    );
 }

@@ -150,7 +150,9 @@ impl App {
         if presentation.id != input.presentation_id {
             return Err(AppError::new("invalidPresentation"));
         }
-        if !presentation.answer_revealed {
+        if !presentation.answer_revealed
+            && self.review_mode(&session.deck_id)? == crate::contracts::review::ReviewMode::Standard
+        {
             return Err(AppError::new("answerHidden"));
         }
         let mut card: CardDetail = self.store.get("cards", &presentation.card_id)?;

@@ -374,7 +374,11 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
                 && input.expected_card_revision == u.card_before.revision
                 && p.card_id == log.card_id
                 && p.form_id == log.form_id
-                && p.answer_revealed
+                && (p.answer_revealed
+                    || d.decks.iter().any(|deck| {
+                        deck.id == u.card_before.deck_id
+                            && deck.kind == crate::domain::spelling::DeckKind::Spelling
+                    }))
                 && input.rating == log.rating,
         )?;
     }
