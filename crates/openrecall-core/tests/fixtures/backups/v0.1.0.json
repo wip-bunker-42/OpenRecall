@@ -1,0 +1,461 @@
+{
+  "appVersion": "0.1.0",
+  "data": {
+    "actions": [
+      {
+        "id": "c5160e21-35d5-49ab-b474-579c3788cb09",
+        "session_id": "eaf772af-eaee-4102-89d8-68d18df6a485",
+        "signature": "{\"sessionId\":\"eaf772af-eaee-4102-89d8-68d18df6a485\",\"presentationId\":\"d5caab2b-b4fe-4d67-84db-7a5b75c1a472\",\"rating\":\"easy\",\"actionId\":\"c5160e21-35d5-49ab-b474-579c3788cb09\",\"expectedCardRevision\":\"dab7b972-7b50-44f7-ae8c-704918a70226\"}",
+        "status": "applied"
+      }
+    ],
+    "cards": [
+      {
+        "bag": {
+          "consumed": [
+            "a1232b39-4333-4061-9df2-9be9a3ff9025"
+          ],
+          "cycle": 1,
+          "lastConsumed": "a1232b39-4333-4061-9df2-9be9a3ff9025",
+          "remaining": [
+            "143f3db1-52f4-422c-bc3b-6e7c25b779eb"
+          ],
+          "reserved": null
+        },
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "deckId": "0d6a0220-913c-48eb-9b1c-f2305cd55593",
+        "dueAt": "2026-12-16T20:52:12.503+00:00",
+        "forms": [
+          {
+            "back": "مرحبا",
+            "front": "Hello عالم",
+            "id": "143f3db1-52f4-422c-bc3b-6e7c25b779eb",
+            "language": null,
+            "notes": "Synthetic context only"
+          },
+          {
+            "back": "صباح الخير",
+            "front": "Good morning",
+            "id": "a1232b39-4333-4061-9df2-9be9a3ff9025",
+            "language": null,
+            "notes": "日本語"
+          }
+        ],
+        "hasGraduated": true,
+        "id": "c6d95b7a-3280-4af0-970a-2c6d3c287b78",
+        "lapseCount": 0,
+        "memory": {
+          "difficulty": 1.0,
+          "stability": 11.784099578857422,
+          "stabilityFast": 9.427279472351074
+        },
+        "phase": "review",
+        "reviewCount": 1,
+        "reviewedAt": "2026-10-24T00:00:17+00:00",
+        "revision": "ffba6bb5-dfbb-4120-b5f4-d00e407927fe"
+      },
+      {
+        "bag": {
+          "consumed": [],
+          "cycle": 1,
+          "lastConsumed": null,
+          "remaining": [
+            "937ca5b0-d79c-473d-9078-ee5279617c7b"
+          ],
+          "reserved": "937ca5b0-d79c-473d-9078-ee5279617c7b"
+        },
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "deckId": "0d6a0220-913c-48eb-9b1c-f2305cd55593",
+        "dueAt": "2026-10-24T00:00:00+00:00",
+        "forms": [
+          {
+            "back": "Second answer",
+            "front": "Second question",
+            "id": "937ca5b0-d79c-473d-9078-ee5279617c7b",
+            "language": null,
+            "notes": ""
+          }
+        ],
+        "hasGraduated": false,
+        "id": "cce16273-944f-43fd-9bfd-ea50febb4b58",
+        "lapseCount": 0,
+        "memory": null,
+        "phase": "new",
+        "reviewCount": 0,
+        "reviewedAt": null,
+        "revision": "18b8eea2-520e-4215-be79-a7b3e3b7e3a5"
+      }
+    ],
+    "decks": [
+      {
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "dataRevision": "a4d64833-ef03-446a-8fe5-2ea19d070af9",
+        "desiredRetention": null,
+        "dueNow": 0,
+        "id": "0d6a0220-913c-48eb-9b1c-f2305cd55593",
+        "logicalCards": 0,
+        "maxIntervalDays": null,
+        "minIntervalSeconds": null,
+        "name": "Synthetic legacy عربي 日本語",
+        "newCards": 0,
+        "profileId": "b699967f-3ecd-494a-808c-d2a4c291936e",
+        "revision": "11300585-5357-4b03-acc9-f5e3fc097fd3"
+      }
+    ],
+    "libraryRevision": "9134ec0b-8e84-485f-b6e2-3be26d4ae536",
+    "models": [
+      {
+        "contributingDeckIds": [],
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "engineRevision": "0fd59949e9168af7194418c2dba99836b5548e87",
+        "id": "2227bae8-f825-4eba-a604-9eabae185b8d",
+        "modelVersion": "FSRS-7",
+        "origin": "default",
+        "parameters": [
+          0.1103999987244606,
+          2.239500045776367,
+          3.922100067138672,
+          11.784099578857422,
+          6.168600082397461,
+          0.6456999778747559,
+          3.6807000637054443,
+          1.9795000553131104,
+          0.0,
+          1.382599949836731,
+          0.7024000287055969,
+          0.5999000072479248,
+          0.8145999908447266,
+          0.6398000121116638,
+          1.0,
+          1.3207000494003296,
+          0.6707000136375427,
+          3.86680006980896,
+          0.4415999948978424,
+          0.0934000015258789,
+          1.8631000518798828,
+          0.6161999702453613,
+          1.086899995803833,
+          0.156700000166893,
+          0.08009999990463257,
+          0.24210000038146973,
+          0.946399986743927,
+          0.14329999685287476,
+          0.7145000100135803,
+          0.0,
+          0.5666999816894531,
+          0.3734000027179718,
+          0.53329998254776,
+          0.30480000376701355
+        ],
+        "trainingRunId": null
+      }
+    ],
+    "profiles": [
+      {
+        "activeModelRevision": "2227bae8-f825-4eba-a604-9eabae185b8d",
+        "config": {
+          "batchSize": 512,
+          "gamma": 1.0,
+          "learningRate": null,
+          "maxSeqLen": 256,
+          "numEpochs": null,
+          "schedulePenalties": true,
+          "seed": 2023
+        },
+        "id": "b699967f-3ecd-494a-808c-d2a4c291936e",
+        "memberDeckIds": [
+          "0d6a0220-913c-48eb-9b1c-f2305cd55593"
+        ],
+        "modelOrigin": "default",
+        "modelRevision": {
+          "contributingDeckIds": [],
+          "createdAt": "2026-10-24T00:00:00+00:00",
+          "engineRevision": "0fd59949e9168af7194418c2dba99836b5548e87",
+          "id": "2227bae8-f825-4eba-a604-9eabae185b8d",
+          "modelVersion": "FSRS-7",
+          "origin": "default",
+          "parameters": [
+            0.1103999987244606,
+            2.239500045776367,
+            3.922100067138672,
+            11.784099578857422,
+            6.168600082397461,
+            0.6456999778747559,
+            3.6807000637054443,
+            1.9795000553131104,
+            0.0,
+            1.382599949836731,
+            0.7024000287055969,
+            0.5999000072479248,
+            0.8145999908447266,
+            0.6398000121116638,
+            1.0,
+            1.3207000494003296,
+            0.6707000136375427,
+            3.86680006980896,
+            0.4415999948978424,
+            0.0934000015258789,
+            1.8631000518798828,
+            0.6161999702453613,
+            1.086899995803833,
+            0.156700000166893,
+            0.08009999990463257,
+            0.24210000038146973,
+            0.946399986743927,
+            0.14329999685287476,
+            0.7145000100135803,
+            0.0,
+            0.5666999816894531,
+            0.3734000027179718,
+            0.53329998254776,
+            0.30480000376701355
+          ],
+          "trainingRunId": null
+        },
+        "name": "تحسين — Synthetic legacy عربي 日本語",
+        "parameters": [
+          0.1103999987244606,
+          2.239500045776367,
+          3.922100067138672,
+          11.784099578857422,
+          6.168600082397461,
+          0.6456999778747559,
+          3.6807000637054443,
+          1.9795000553131104,
+          0.0,
+          1.382599949836731,
+          0.7024000287055969,
+          0.5999000072479248,
+          0.8145999908447266,
+          0.6398000121116638,
+          1.0,
+          1.3207000494003296,
+          0.6707000136375427,
+          3.86680006980896,
+          0.4415999948978424,
+          0.0934000015258789,
+          1.8631000518798828,
+          0.6161999702453613,
+          1.086899995803833,
+          0.156700000166893,
+          0.08009999990463257,
+          0.24210000038146973,
+          0.946399986743927,
+          0.14329999685287476,
+          0.7145000100135803,
+          0.0,
+          0.5666999816894531,
+          0.3734000027179718,
+          0.53329998254776,
+          0.30480000376701355
+        ],
+        "revision": "6baccf39-8c3e-4b96-b596-87c81799370b"
+      }
+    ],
+    "reviews": [
+      {
+        "cardId": "c6d95b7a-3280-4af0-970a-2c6d3c287b78",
+        "deckId": "0d6a0220-913c-48eb-9b1c-f2305cd55593",
+        "elapsedDays": 0.0,
+        "formId": "a1232b39-4333-4061-9df2-9be9a3ff9025",
+        "id": "26db7475-38af-400a-a2a4-b9911ebe3718",
+        "memory": {
+          "difficulty": 1.0,
+          "stability": 11.784099578857422,
+          "stabilityFast": 9.427279472351074
+        },
+        "modelRevision": "2227bae8-f825-4eba-a604-9eabae185b8d",
+        "nextDueAt": "2026-12-16T20:52:12.503+00:00",
+        "phase": "review",
+        "policy": {
+          "desiredRetention": 0.9,
+          "maxIntervalDays": 36500,
+          "minIntervalSeconds": 60
+        },
+        "previousDueAt": "2026-10-24T00:00:00+00:00",
+        "previousMemory": null,
+        "previousPhase": "new",
+        "rating": "easy",
+        "responseMs": 17000,
+        "reviewedAt": "2026-10-24T00:00:17+00:00",
+        "sessionId": "eaf772af-eaee-4102-89d8-68d18df6a485",
+        "wasNew": true
+      }
+    ],
+    "sessions": [
+      {
+        "activeMs": 17000,
+        "attempts": 1,
+        "clockCheckpoint": 17000,
+        "current": {
+          "activeMs": 0,
+          "answerRevealed": false,
+          "cardId": "cce16273-944f-43fd-9bfd-ea50febb4b58",
+          "cardRevision": "18b8eea2-520e-4215-be79-a7b3e3b7e3a5",
+          "formId": "937ca5b0-d79c-473d-9078-ee5279617c7b",
+          "id": "0ebdd9dc-9fcf-4578-ac31-59158bfa3b46"
+        },
+        "deckId": "0d6a0220-913c-48eb-9b1c-f2305cd55593",
+        "endedAt": null,
+        "filter": "all",
+        "filterChanges": [],
+        "id": "eaf772af-eaee-4102-89d8-68d18df6a485",
+        "isActive": true,
+        "keepEmptyFilter": false,
+        "lastReview": {
+          "cardId": "c6d95b7a-3280-4af0-970a-2c6d3c287b78",
+          "dueAt": "2026-12-16T20:52:12.503+00:00",
+          "intervalSeconds": 4654315.5029296875,
+          "rating": "easy"
+        },
+        "newCardIds": [
+          "c6d95b7a-3280-4af0-970a-2c6d3c287b78"
+        ],
+        "parked": [],
+        "ratings": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "responseMs": 17000,
+        "runtimeId": "fb962052-f718-44f1-874d-bef9b7022441",
+        "startedAt": "2026-10-24T00:00:00+00:00",
+        "status": "active",
+        "undoId": "a36879ff-ddb8-4324-984d-2ff59b97ecfe",
+        "uniqueCardIds": [
+          "c6d95b7a-3280-4af0-970a-2c6d3c287b78"
+        ]
+      }
+    ],
+    "settings": {
+      "dayStartMinute": 60,
+      "desiredRetention": 0.9,
+      "maxIntervalDays": 36500,
+      "minIntervalSeconds": 60,
+      "pageSize": 20,
+      "reducedMotion": "followSystem",
+      "revision": "f5447e08-579d-49d8-85db-2de37297ff15",
+      "shortcutsEnabled": true,
+      "textScale": 1.0,
+      "timezone": "Africa/Cairo"
+    },
+    "trainingRuns": [],
+    "undoRecords": [
+      {
+        "actionId": "c5160e21-35d5-49ab-b474-579c3788cb09",
+        "cardBefore": {
+          "bag": {
+            "consumed": [],
+            "cycle": 1,
+            "lastConsumed": null,
+            "remaining": [
+              "a1232b39-4333-4061-9df2-9be9a3ff9025",
+              "143f3db1-52f4-422c-bc3b-6e7c25b779eb"
+            ],
+            "reserved": "a1232b39-4333-4061-9df2-9be9a3ff9025"
+          },
+          "createdAt": "2026-10-24T00:00:00+00:00",
+          "deckId": "0d6a0220-913c-48eb-9b1c-f2305cd55593",
+          "dueAt": "2026-10-24T00:00:00+00:00",
+          "forms": [
+            {
+              "back": "مرحبا",
+              "front": "Hello عالم",
+              "id": "143f3db1-52f4-422c-bc3b-6e7c25b779eb",
+              "language": null,
+              "notes": "Synthetic context only"
+            },
+            {
+              "back": "صباح الخير",
+              "front": "Good morning",
+              "id": "a1232b39-4333-4061-9df2-9be9a3ff9025",
+              "language": null,
+              "notes": "日本語"
+            }
+          ],
+          "hasGraduated": false,
+          "id": "c6d95b7a-3280-4af0-970a-2c6d3c287b78",
+          "lapseCount": 0,
+          "memory": null,
+          "phase": "new",
+          "reviewCount": 0,
+          "reviewedAt": null,
+          "revision": "dab7b972-7b50-44f7-ae8c-704918a70226"
+        },
+        "id": "a36879ff-ddb8-4324-984d-2ff59b97ecfe",
+        "logId": "26db7475-38af-400a-a2a4-b9911ebe3718",
+        "modelRevision": "2227bae8-f825-4eba-a604-9eabae185b8d",
+        "nextCardBefore": {
+          "bag": {
+            "consumed": [],
+            "cycle": 0,
+            "lastConsumed": null,
+            "remaining": [],
+            "reserved": null
+          },
+          "createdAt": "2026-10-24T00:00:00+00:00",
+          "deckId": "0d6a0220-913c-48eb-9b1c-f2305cd55593",
+          "dueAt": "2026-10-24T00:00:00+00:00",
+          "forms": [
+            {
+              "back": "Second answer",
+              "front": "Second question",
+              "id": "937ca5b0-d79c-473d-9078-ee5279617c7b",
+              "language": null,
+              "notes": ""
+            }
+          ],
+          "hasGraduated": false,
+          "id": "cce16273-944f-43fd-9bfd-ea50febb4b58",
+          "lapseCount": 0,
+          "memory": null,
+          "phase": "new",
+          "reviewCount": 0,
+          "reviewedAt": null,
+          "revision": "18b8eea2-520e-4215-be79-a7b3e3b7e3a5"
+        },
+        "sessionBefore": {
+          "activeMs": 17000,
+          "attempts": 0,
+          "clockCheckpoint": 17000,
+          "current": {
+            "activeMs": 17000,
+            "answerRevealed": true,
+            "cardId": "c6d95b7a-3280-4af0-970a-2c6d3c287b78",
+            "cardRevision": "dab7b972-7b50-44f7-ae8c-704918a70226",
+            "formId": "a1232b39-4333-4061-9df2-9be9a3ff9025",
+            "id": "d5caab2b-b4fe-4d67-84db-7a5b75c1a472"
+          },
+          "deckId": "0d6a0220-913c-48eb-9b1c-f2305cd55593",
+          "endedAt": null,
+          "filter": "all",
+          "filterChanges": [],
+          "id": "eaf772af-eaee-4102-89d8-68d18df6a485",
+          "isActive": true,
+          "keepEmptyFilter": false,
+          "lastReview": null,
+          "newCardIds": [],
+          "parked": [],
+          "ratings": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "responseMs": 0,
+          "runtimeId": "fb962052-f718-44f1-874d-bef9b7022441",
+          "startedAt": "2026-10-24T00:00:00+00:00",
+          "status": "active",
+          "undoId": null,
+          "uniqueCardIds": []
+        },
+        "sessionId": "eaf772af-eaee-4102-89d8-68d18df6a485"
+      }
+    ]
+  },
+  "exportedAt": "2026-10-24T00:00:17+00:00",
+  "formatVersion": 1,
+  "payloadSha256": "a6112d4af79f34c24155946ac9ef18e2347668824432242ea25751522c1c7b7d",
+  "schemaVersion": 8
+}
