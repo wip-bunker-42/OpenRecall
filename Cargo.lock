@@ -2344,6 +2344,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "linkify"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "92f9ae2f3d31697697311f016320fe984127e636b45cf5eb5c175b7eb103dadb"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "linux-raw-sys"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2860,6 +2869,7 @@ dependencies = [
  "chrono",
  "chrono-tz",
  "fsrs",
+ "linkify",
  "rand",
  "rusqlite",
  "serde",
@@ -2868,6 +2878,8 @@ dependencies = [
  "tempfile",
  "ts-rs",
  "unicode-normalization",
+ "unicode-script",
+ "unicode-segmentation",
  "uuid",
 ]
 
@@ -5149,6 +5161,12 @@ checksum = "75cd3fb03d5288b3ba9a1ee103ac7e9cbb59f0b03d64f8ddfcc04dd42758a85d"
 dependencies = [
  "tinyvec",
 ]
+
+[[package]]
+name = "unicode-script"
+version = "0.5.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "383ad40bb927465ec0ce7720e033cb4ca06912855fc35db31b5755d0de75b1ee"
 
 [[package]]
 name = "unicode-segmentation"
