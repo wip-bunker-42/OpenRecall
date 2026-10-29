@@ -51,6 +51,7 @@ impl App {
             None => self.create_default_profile(format!("تحسين — {name}"))?,
         };
         let deck = DeckDetail {
+            kind: Default::default(),
             id: id(),
             name,
             profile_id: profile.id.clone(),
@@ -72,7 +73,7 @@ impl App {
         Ok(deck)
     }
     pub(crate) fn save_deck(&self, deck: &DeckDetail) -> AppResult<()> {
-        self.store.conn.execute("INSERT INTO decks(id,profile_id,payload) VALUES(?1,?2,?3) ON CONFLICT(id) DO UPDATE SET profile_id=excluded.profile_id,payload=excluded.payload",rusqlite::params![deck.id,deck.profile_id,serde_json::to_string(deck)?])?;
+        self.store.conn.execute("INSERT INTO decks(id,profile_id,kind,payload) VALUES(?1,?2,?3,?4) ON CONFLICT(id) DO UPDATE SET profile_id=excluded.profile_id,kind=excluded.kind,payload=excluded.payload",rusqlite::params![deck.id,deck.profile_id,deck.kind.as_str(),serde_json::to_string(deck)?])?;
         Ok(())
     }
     pub(crate) fn rename_deck(

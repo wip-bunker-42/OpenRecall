@@ -5,6 +5,7 @@ use ts_rs::TS;
 pub mod backup;
 pub mod cards;
 pub mod import;
+pub mod spelling;
 pub mod statistics;
 pub mod system;
 pub mod updates;
@@ -234,5 +235,15 @@ pub fn export(output: &Path) -> AppResult<()> {
     backup::RestorePreview::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     backup::RestoreReport::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     updates::UpdateStatus::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
+    spelling::SpellingDeckResult::export_all(&config)
+        .map_err(|_| AppError::new("contractExport"))?;
+    spelling::SpellingSourceView::export_all(&config)
+        .map_err(|_| AppError::new("contractExport"))?;
+    crate::domain::spelling::SpellingWord::export_all(&config)
+        .map_err(|_| AppError::new("contractExport"))?;
+    crate::domain::spelling::WordOrigin::export_all(&config)
+        .map_err(|_| AppError::new("contractExport"))?;
+    crate::domain::spelling::SpellingExclusion::export_all(&config)
+        .map_err(|_| AppError::new("contractExport"))?;
     Ok(())
 }

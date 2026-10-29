@@ -88,5 +88,8 @@ pub(super) fn upgrade(raw: serde_json::Value) -> AppResult<super::format::Backup
     let old: LegacyData = serde_json::from_value(raw)?;
     // Only frozen fields survive this boundary. New optional fields receive their
     // current documented defaults after the original checksum has been verified.
-    Ok(serde_json::from_value(serde_json::to_value(old)?)?)
+    let mut upgraded = serde_json::to_value(old)?;
+    upgraded["spelling"] =
+        serde_json::to_value(crate::domain::spelling::SpellingBackupData::default())?;
+    Ok(serde_json::from_value(upgraded)?)
 }

@@ -23,6 +23,7 @@ pub struct BackupEnvelope {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BackupData {
+    pub spelling: crate::domain::spelling::SpellingBackupData,
     pub settings: Settings,
     pub library_revision: String,
     pub models: Vec<ModelRevision>,
