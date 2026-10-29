@@ -4,6 +4,42 @@ import { ImportDialog } from './ImportDialog';
 import { fixtureApi, nativeFixture } from '../../test/mockApi';
 import { importFixture } from '../../test/cardFixtures';
 import { ImportPreview } from './ImportPreview';
+it('shows_resolved_titles_and_default_resets_as_plain_text', () => {
+  const primary = { ...importFixture.cards[0].primary, questionTitle: 'ترجم' };
+  const preview = {
+    ...importFixture,
+    cards: [
+      {
+        ...importFixture.cards[0],
+        primary,
+        variants: [
+          { ...primary, key: 'inherited', front: 'second' },
+          { ...primary, key: 'reset', questionTitle: null, front: 'third' },
+          { ...primary, key: 'custom', questionTitle: '<b>أكمل</b>', front: 'fourth' },
+          {
+            ...primary,
+            key: 'invalid',
+            valid: false,
+            issues: [{ field: '$[0].variants[3].questionTitle', code: 'invalidQuestionTitle' }],
+          },
+        ],
+      },
+    ],
+  };
+  render(
+    <ImportPreview
+      preview={preview}
+      onCommit={vi.fn()}
+      onBack={vi.fn()}
+      onCancel={vi.fn()}
+      busy={false}
+    />,
+  );
+  expect(screen.getAllByText('ترجم', { exact: true })).toHaveLength(3);
+  expect(screen.getByText('السؤال', { exact: true })).toBeVisible();
+  expect(screen.getByText('<b>أكمل</b>', { exact: true }).querySelector('b')).toBeNull();
+  expect(screen.getByText(/يلزم عنوان من ١٦٠ حرفًا/)).toBeVisible();
+});
 it('resets selection to the fresh preview after a conflict', async () => {
   let inspections = 0;
   const updated = {

@@ -6,6 +6,43 @@ import { questionFixture, revealedFixture, completedFixture } from '../../test/r
 import type { Request } from '../../shared/generated/Request';
 import type { Response } from '../../shared/generated/Response';
 import { App } from '../../app/App';
+import { ReviewQuestion } from './ReviewQuestion';
+it('review_uses_custom_h1_with_default_fallback', async () => {
+  const user = userEvent.setup();
+  const form = { ...revealedFixture.payload.form, questionTitle: 'ترجم', front: 'unpredictable' };
+  const props = {
+    frame: { ...revealedFixture.payload, form },
+    onReveal: vi.fn(),
+    onRate: vi.fn(),
+    disabled: false,
+    timezone: 'Africa/Cairo',
+  };
+  const { rerender } = render(<ReviewQuestion {...props} />);
+  expect(screen.getByRole('heading', { level: 1, name: 'ترجم' })).toHaveAttribute('dir', 'auto');
+  expect(screen.queryByRole('heading', { name: 'unpredictable' })).not.toBeInTheDocument();
+  expect(screen.getByText('unpredictable')).toBeVisible();
+  expect(screen.getByRole('heading', { level: 2, name: 'الإجابة' })).toBeVisible();
+  expect(screen.getByRole('heading', { level: 3, name: 'الملاحظات' })).toBeVisible();
+  await user.click(screen.getByRole('button', { name: /افتكرتها بسهولة/ }));
+  expect(props.onRate).toHaveBeenCalledWith('easy');
+  rerender(
+    <ReviewQuestion
+      {...props}
+      frame={{ ...props.frame, form: { ...form, questionTitle: null } }}
+    />,
+  );
+  expect(screen.getByRole('heading', { level: 1, name: 'السؤال' })).toBeVisible();
+  rerender(
+    <ReviewQuestion
+      {...props}
+      frame={{ ...props.frame, form: { ...form, questionTitle: '<b>أكمل</b>' } }}
+    />,
+  );
+  expect(screen.getByRole('heading', { level: 1, name: '<b>أكمل</b>' })).toHaveTextContent(
+    '<b>أكمل</b>',
+  );
+  expect(screen.getByRole('heading', { level: 1 }).querySelector('b')).toBeNull();
+});
 it('locks review actions while navigation waits for the durable session close', async () => {
   let release!: () => void;
   const api = fixtureApi(async (r) => {

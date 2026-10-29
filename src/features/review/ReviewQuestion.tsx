@@ -25,8 +25,8 @@ export function ReviewQuestion({
   return (
     <div className="study-column">
       <section aria-labelledby={`${id}-question`}>
-        <h1 ref={question} id={`${id}-question`} tabIndex={-1}>
-          السؤال
+        <h1 ref={question} id={`${id}-question`} tabIndex={-1} dir="auto">
+          {frame.form.questionTitle ?? 'السؤال'}
         </h1>
         <p className="study-text question-text" dir="auto" lang={frame.form.language ?? undefined}>
           {frame.form.front}
