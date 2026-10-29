@@ -1,6 +1,7 @@
 ALTER TABLE decks ADD COLUMN kind TEXT NOT NULL DEFAULT 'standard'
     CHECK(kind IN ('standard','spelling') AND kind=coalesce(json_extract(payload,'$.kind'),'standard'));
 CREATE UNIQUE INDEX one_spelling_deck ON decks(kind) WHERE kind='spelling';
+CREATE INDEX cards_created ON cards(deck_id,created_ms,id);
 CREATE TRIGGER deck_kind_immutable BEFORE UPDATE OF kind ON decks
     WHEN NEW.kind<>OLD.kind BEGIN SELECT RAISE(ABORT,'immutable deck kind'); END;
 

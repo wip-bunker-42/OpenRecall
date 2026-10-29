@@ -41,6 +41,21 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    CreateSpellingDeck {
+        source_deck_id: String,
+    },
+    GetSpellingConfig {
+        deck_id: String,
+    },
+    SetSpellingSource {
+        deck_id: String,
+        source_deck_id: String,
+        expected_revision: String,
+    },
+    RescanSpellingSource {
+        deck_id: String,
+        expected_revision: String,
+    },
     GetDefaultSettings {},
     GetDeckStatistics {
         deck_id: String,
@@ -179,6 +194,10 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    CreateSpellingDeck(spelling::SpellingDeckResult),
+    GetSpellingConfig(crate::domain::spelling::SpellingConfig),
+    SetSpellingSource(spelling::SpellingDeckResult),
+    RescanSpellingSource(spelling::SpellingDeckResult),
     GetDefaultSettings(Settings),
     GetDeckStatistics(statistics::DeckStatistics),
     StartTraining(TrainingJob),

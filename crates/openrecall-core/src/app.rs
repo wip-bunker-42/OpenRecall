@@ -55,6 +55,27 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::CreateSpellingDeck { source_deck_id } => Ok(Response::CreateSpellingDeck(
+                self.create_spelling_deck(source_deck_id)?,
+            )),
+            Request::GetSpellingConfig { deck_id } => Ok(Response::GetSpellingConfig(
+                self.get_spelling_config(&deck_id)?,
+            )),
+            Request::SetSpellingSource {
+                deck_id,
+                source_deck_id,
+                expected_revision,
+            } => Ok(Response::SetSpellingSource(self.set_spelling_source(
+                deck_id,
+                source_deck_id,
+                expected_revision,
+            )?)),
+            Request::RescanSpellingSource {
+                deck_id,
+                expected_revision,
+            } => Ok(Response::RescanSpellingSource(
+                self.rescan_spelling_source(deck_id, expected_revision)?,
+            )),
             Request::GetDefaultSettings {} => Ok(Response::GetDefaultSettings(
                 crate::domain::settings::Settings::default(),
             )),

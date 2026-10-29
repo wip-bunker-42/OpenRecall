@@ -45,13 +45,25 @@ impl App {
         requested_name: String,
         profile_id: Option<String>,
     ) -> AppResult<DeckDetail> {
+        self.create_deck_kind(
+            requested_name,
+            profile_id,
+            crate::domain::spelling::DeckKind::Standard,
+        )
+    }
+    pub(crate) fn create_deck_kind(
+        &mut self,
+        requested_name: String,
+        profile_id: Option<String>,
+        kind: crate::domain::spelling::DeckKind,
+    ) -> AppResult<DeckDetail> {
         let name = name(requested_name)?;
         let mut profile: ProfileDetail = match profile_id {
             Some(p) => self.store.get("profiles", &p)?,
             None => self.create_default_profile(format!("تحسين — {name}"))?,
         };
         let deck = DeckDetail {
-            kind: Default::default(),
+            kind,
             id: id(),
             name,
             profile_id: profile.id.clone(),
