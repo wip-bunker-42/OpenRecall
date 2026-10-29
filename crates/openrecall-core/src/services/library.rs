@@ -114,6 +114,21 @@ impl App {
             return Err(AppError::new("conflict"));
         }
         let mut profile: ProfileDetail = self.store.get("profiles", &deck.profile_id)?;
+        let card_ids: Vec<String> = self
+            .store
+            .conn
+            .prepare("SELECT id FROM cards WHERE deck_id=?1")?
+            .query_map([&deck_id], |row| row.get(0))?
+            .collect::<Result<_, _>>()?;
+        self.retain_spelling_before_source_delete(&card_ids)?;
+        if let Some(mut config) = crate::spelling::storage::config(&self.store.conn)?
+            && config.source_deck_id.as_deref() == Some(deck_id.as_str())
+        {
+            config.source_deck_id = None;
+            config.source_deck_name = Some(deck.name.clone());
+            config.revision = id();
+            crate::spelling::storage::save_config(&self.store.conn, &config)?;
+        }
         profile.member_deck_ids.retain(|d| d != &deck_id);
         profile.revision = id();
         self.store.put("profiles", &profile.id, &profile)?;

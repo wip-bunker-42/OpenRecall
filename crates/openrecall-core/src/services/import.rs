@@ -317,8 +317,18 @@ impl App {
         }
         let now = self.clock.now();
         let inserted_cards = drafts.len() as u32;
+        let spelling = crate::spelling::storage::config(&self.store.conn)?
+            .filter(|config| config.source_deck_id.as_deref() == Some(preview.deck_id.as_str()));
+        let before = self.store.conn.total_changes();
+        let mut collected = 0;
         for draft in drafts {
-            self.create_card_at(preview.deck_id.clone(), draft, now)?;
+            let card = self.create_card_at(preview.deck_id.clone(), draft, now)?;
+            if spelling.is_some() {
+                collected += self.collect_spelling_content(&card, true)?;
+            }
+        }
+        if let Some(config) = spelling {
+            self.finish_spelling_collection(&config.deck_id, collected, before)?;
         }
         self.import_previews.remove(&input.preview_id);
         Ok(ImportReport {

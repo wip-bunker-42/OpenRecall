@@ -93,6 +93,13 @@ pub(crate) fn prune_snapshots(db: &Connection) -> AppResult<()> {
     db.execute("DELETE FROM spelling_snapshots WHERE NOT EXISTS(SELECT 1 FROM spelling_origins WHERE snapshot_id=spelling_snapshots.id)",[])?;
     Ok(())
 }
+pub(crate) fn observed_card(db: &Connection, card: &str) -> AppResult<bool> {
+    Ok(db.query_row(
+        "SELECT EXISTS(SELECT 1 FROM spelling_origins WHERE source_card_id=?1)",
+        [card],
+        |row| row.get(0),
+    )?)
+}
 pub(crate) fn save_exclusion(db: &Connection, x: &SpellingExclusion) -> AppResult<()> {
     db.execute("INSERT INTO spelling_exclusions(deck_id,canonical,excluded_at) VALUES(?1,?2,?3) ON CONFLICT(deck_id,canonical) DO NOTHING",params![x.deck_id,x.canonical,x.excluded_at])?;
     Ok(())

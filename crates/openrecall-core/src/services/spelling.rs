@@ -11,6 +11,34 @@ use crate::{
 use rusqlite::{OptionalExtension, params};
 
 impl App {
+    pub(crate) fn sync_spelling_for_content_change(&mut self, card: &CardDetail) -> AppResult<()> {
+        let Some(config) = storage::config(&self.store.conn)? else {
+            return Ok(());
+        };
+        let active = config.source_deck_id.as_deref() == Some(card.deck_id.as_str());
+        if !active && !storage::observed_card(&self.store.conn, &card.id)? {
+            return Ok(());
+        }
+        let before = self.store.conn.total_changes();
+        let added = self.collect_spelling_content(card, active)?;
+        self.finish_spelling_collection(&config.deck_id, added, before)
+    }
+    pub(crate) fn retain_spelling_before_source_delete(
+        &mut self,
+        card_ids: &[String],
+    ) -> AppResult<()> {
+        let Some(config) = storage::config(&self.store.conn)? else {
+            return Ok(());
+        };
+        let before = self.store.conn.total_changes();
+        for card_id in card_ids {
+            if storage::observed_card(&self.store.conn, card_id)? {
+                let card: CardDetail = self.store.get("cards", card_id)?;
+                self.collect_spelling_content(&card, false)?;
+            }
+        }
+        self.finish_spelling_collection(&config.deck_id, 0, before)
+    }
     fn ordinary_spelling_source(&self, source: &str) -> AppResult<DeckDetail> {
         let deck: DeckDetail = self.store.get("decks", source)?;
         if deck.kind != DeckKind::Standard {

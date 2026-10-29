@@ -93,7 +93,9 @@ impl App {
         deck_id: String,
         draft: CardDraft,
     ) -> AppResult<CardDetail> {
-        self.create_card_at(deck_id, draft, self.clock.now())
+        let card = self.create_card_at(deck_id, draft, self.clock.now())?;
+        self.sync_spelling_for_content_change(&card)?;
+        Ok(card)
     }
     pub(crate) fn create_card_at(
         &mut self,
@@ -133,7 +135,9 @@ impl App {
         if card.revision != expected {
             return Err(AppError::new("conflict"));
         }
-        card.forms = self.form_drafts(draft, Some(&card))?;
+        let forms = self.form_drafts(draft, Some(&card))?;
+        self.retain_spelling_before_source_delete(std::slice::from_ref(&card.id))?;
+        card.forms = forms;
         self.invalidate_card_undo(&card.id)?;
         let ids = card.forms.iter().map(|f| f.id.clone()).collect::<Vec<_>>();
         crate::scheduling::forms::reconcile_forms(&mut card.bag, &ids, self.random.as_mut())?;
@@ -141,6 +145,7 @@ impl App {
         self.save_card(&card)?;
         self.reconcile_card_presentations(&card)?;
         self.touch_deck(&card.deck_id)?;
+        self.sync_spelling_for_content_change(&card)?;
         Ok(card)
     }
     pub(crate) fn delete_card(
@@ -152,6 +157,7 @@ impl App {
         if card.revision != expected {
             return Err(AppError::new("conflict"));
         }
+        self.retain_spelling_before_source_delete(std::slice::from_ref(&card.id))?;
         self.clear_deck_undos(std::slice::from_ref(&card.deck_id))?;
         self.store
             .conn
