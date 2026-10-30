@@ -72,6 +72,29 @@ zero violations and one incomplete decorative-mark color-contrast check. The
 versioned project acceptance uses axe 4.14 rather than that tool's bundled 4.12.1.
 These are automated accessibility results; no screen reader was run.
 
+## 0.2.0 production packaging preflight
+
+The three product version sources and two workspace lockfile entries agree on
+0.2.0. The third-party graph remains 430 Rust crates, five npm packages and five
+MPL source archives; notices were regenerated for the new lockfile hash.
+`pnpm verify` also passed after the version bump with the same 115 Rust workspace,
+seven extra backup, 82 frontend, 16 maintenance and nine browser case counts.
+
+The production Windows x64 binary was compiled without signing credentials or
+the automation feature. All four native test-override strings are absent before
+and after bundling. Official Tauri bundling produced a 5,431,735-byte normal NSIS
+installer and a 223,217,644-byte WebView2-inclusive offline installer from that
+existing production build. Both passed Tauri's official signature and signed
+version verification for 0.2.0. Credentials were loaded only during bundling and
+removed in `finally`; no new secret or key was created. Local candidates and
+hash evidence are preserved outside this worktree under the primary checkout's
+`target/delivery/v0.2.0/local-preflight` directory.
+
+The local feature-flow acceptance above used the automation build before the
+routine product-version bump. Production packaging was built and cryptographically
+verified without launching it against a real study library. These preflight
+artifacts are distinct from the final immutable-tag CI release artifacts.
+
 ## Limits
 
 No screen reader was launched, operated or configured. [Human NVDA checks](human-nvda-checklist.md) remain for the owner. The native focus test hides, shows and refocuses only its own test window and verifies real blur/focus events and retained DOM focus. Global Alt+Tab was not sent to unrelated user applications; the Alt+Tab-specific check remains in the human checklist.

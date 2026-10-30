@@ -41,13 +41,31 @@ signed for version `0.0.0`; it contains no private key or executable update.
 ## Build and verify
 
 Use the pinned Node, pnpm, Rust and Tauri versions documented in
-`../development/toolchain.md`. Set the two signing environment variables in the
-current build process, then run:
+`../development/toolchain.md`. Compile the production binary with no signing
+credentials in its environment. Supply the two protected secrets only to each
+subsequent `tauri bundle` invocation, then remove them in `finally` before staging
+or verification. The release workflow uses the same split.
 
 ```powershell
-pnpm tauri build --bundles nsis
-pnpm tauri build --config src-tauri/tauri.offline.conf.json --bundles nsis
+Remove-Item Env:TAURI_SIGNING_PRIVATE_KEY -ErrorAction SilentlyContinue
+Remove-Item Env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD -ErrorAction SilentlyContinue
+pnpm tauri build --ci --target x86_64-pc-windows-msvc --no-bundle
 ```
+
+After successful compilation, load the existing encrypted key and password from
+the protected directory only around bundling. Bundle the normal NSIS package,
+preserve it and its signature, then bundle with the offline configuration from
+the same existing production binary:
+
+```powershell
+pnpm tauri bundle --ci --target x86_64-pc-windows-msvc --bundles nsis
+# Preserve the normal installer and signature before the following command.
+pnpm tauri bundle --ci --target x86_64-pc-windows-msvc --config src-tauri/tauri.offline.conf.json --bundles nsis
+```
+
+Both bundle invocations need the two signing variables; staging and signature
+verification do not. Always clear the variables on success and failure. No new
+key or repository secret is needed for 0.2.0.
 
 Preserve the normal installer and its `.sig` before building the offline variant,
 because both use the same default output basename. Rename the offline copy for
@@ -65,7 +83,8 @@ normal/offline installers so updates retain the same study data.
 Verify an artifact without installing or accessing the network:
 
 ```powershell
-cargo run -p openrecall-desktop --example verify_update -- PACKAGE PACKAGE.sig 0.1.0 windows-x86_64
+$releaseVersion = (Get-Content package.json -Raw | ConvertFrom-Json).version
+cargo run -p openrecall-desktop --example verify_update -- PACKAGE PACKAGE.sig $releaseVersion windows-x86_64
 ```
 
 Release compilation always checks out the immutable, validated tag. Publisher
