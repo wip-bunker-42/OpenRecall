@@ -141,7 +141,7 @@ fn progress(c: &CardDetail, logs: &[&crate::domain::review::ReviewLog]) -> AppRe
     }
 }
 pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
-    spelling_ownership(d)?;
+    crate::spelling::validate::validate(d)?;
     d.settings.validate()?;
     check(!d.library_revision.is_empty())?;
     let models = ids(d.models.iter().map(|m| m.id.as_str()))?;
@@ -419,81 +419,6 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
                     && (0.0..=1.0).contains(&metric.rmse),
             )?;
         }
-    }
-    Ok(())
-}
-
-fn spelling_ownership(d: &BackupData) -> AppResult<()> {
-    use crate::domain::spelling::DeckKind;
-    let owned: HashSet<_> = d
-        .decks
-        .iter()
-        .filter(|v| v.kind == DeckKind::Spelling)
-        .map(|v| v.id.as_str())
-        .collect();
-    check(owned.len() <= 1)?;
-    let data = &d.spelling;
-    let configs = ids(data.configs.iter().map(|v| v.deck_id.as_str()))?;
-    check(configs == owned)?;
-    for c in &data.configs {
-        check(c.extraction_policy_version == crate::spelling::extract::EXTRACTION_POLICY_VERSION)?;
-        if let Some(source) = &c.source_deck_id {
-            check(
-                d.decks
-                    .iter()
-                    .any(|v| v.id == *source && v.kind == DeckKind::Standard),
-            )?;
-        }
-    }
-    let words = ids(data.words.iter().map(|v| v.card_id.as_str()))?;
-    let actual: HashSet<_> = d
-        .cards
-        .iter()
-        .filter(|v| owned.contains(v.deck_id.as_str()))
-        .map(|v| v.id.as_str())
-        .collect();
-    check(words == actual)?;
-    let mut keys = HashSet::new();
-    for w in &data.words {
-        check(
-            owned.contains(w.deck_id.as_str())
-                && d.cards
-                    .iter()
-                    .any(|v| v.id == w.card_id && v.deck_id == w.deck_id)
-                && keys.insert((w.deck_id.as_str(), w.canonical.as_str()))
-                && !w.canonical.is_empty()
-                && !w.display.trim().is_empty(),
-        )?;
-    }
-    ids(data.snapshots.iter().map(|v| v.id.as_str()))?;
-    for s in &data.snapshots {
-        check(owned.contains(s.spelling_deck_id.as_str()))?;
-    }
-    let mut edges = HashSet::new();
-    for o in &data.origins {
-        let word = data
-            .words
-            .iter()
-            .find(|v| v.card_id == o.spelling_card_id)
-            .ok_or_else(|| AppError::new("invalidBackup"))?;
-        check(
-            data.snapshots.iter().any(|s| {
-                s.id == o.snapshot_id
-                    && s.spelling_deck_id == word.deck_id
-                    && s.source_card_id == o.source_card_id
-                    && s.source_form_id == o.source_form_id
-            }) && edges.insert((&o.spelling_card_id, &o.source_card_id, &o.source_form_id)),
-        )?;
-        at(&o.first_seen_at)?;
-    }
-    let mut excluded = HashSet::new();
-    for x in &data.exclusions {
-        check(
-            owned.contains(x.deck_id.as_str())
-                && !keys.contains(&(x.deck_id.as_str(), x.canonical.as_str()))
-                && excluded.insert((&x.deck_id, &x.canonical)),
-        )?;
-        at(&x.excluded_at)?;
     }
     Ok(())
 }
