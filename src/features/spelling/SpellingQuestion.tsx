@@ -17,15 +17,16 @@ export function SpellingQuestion({
   disabled: boolean;
   timezone: string;
 }) {
-  const heading = useRef<HTMLHeadingElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
   const id = useId();
   useEffect(() => {
-    heading.current?.focus();
+    input.current?.focus();
+    input.current?.setSelectionRange(0, 0);
   }, [frame.presentationId]);
   return (
     <div className="study-column">
       <section aria-labelledby={`${id}-word`}>
-        <h1 id={`${id}-word`} tabIndex={-1} ref={heading}>
+        <h1 id={`${id}-word`} tabIndex={-1}>
           الكلمة
         </h1>
         <p className="study-text spelling-word" lang="en" dir="ltr">
@@ -34,6 +35,8 @@ export function SpellingQuestion({
       </section>
       <label htmlFor={`${id}-practice`}>مساحة الكتابة</label>
       <textarea
+        ref={input}
+        defaultValue={`${frame.form.front}\n`}
         id={`${id}-practice`}
         aria-describedby={`${id}-help`}
         lang="en"
@@ -44,8 +47,8 @@ export function SpellingQuestion({
         autoCapitalize="off"
       />
       <p className="field-help" id={`${id}-help`}>
-        كتابة حرة دون تصحيح أو مقارنة. تختفي الكتابة بمجرد مغادرة البطاقة، حتى عند التراجع عن
-        التقييم.
+        الكلمة في السطر الأول، وتحته سطر للكتابة الحرة دون تصحيح أو مقارنة. تختفي الكتابة بمجرد
+        مغادرة البطاقة؛ عند العودة يبدأ الحقل بالكلمة من جديد.
       </p>
       <RatingButtons
         frame={frame}

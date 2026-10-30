@@ -9,6 +9,14 @@ import type { Response } from '../../shared/generated/Response';
 import type { ReviewView } from '../../shared/generated/ReviewView';
 import { App } from '../../app/App';
 const marker = 'private-attempt-marker';
+it('starts with the target on the first line and focuses its first character without selecting it', async () => {
+  render(<ReviewPage sessionId="session-1" api={reviewApi()} navigate={() => {}} />);
+  const field = await screen.findByRole('textbox', { name: 'مساحة الكتابة' });
+  expect(field).toHaveValue('English\n');
+  expect(field).toHaveFocus();
+  expect((field as HTMLTextAreaElement).selectionStart).toBe(0);
+  expect((field as HTMLTextAreaElement).selectionEnd).toBe(0);
+});
 function reviewApi(
   handler?: (r: Request) => Response | undefined | Promise<Response | undefined>,
   calls: Request[] = [],
@@ -25,7 +33,7 @@ function reviewApi(
       return { kind: r.kind, payload: { items: [sourceContext], total: 1, page: 1, pageSize: 20 } };
   });
 }
-it('shows a manually readable whole word, focused label, plain field and direct intervals', async () => {
+it('shows a manually readable whole word, focused prefilled field and direct intervals', async () => {
   const calls: Request[] = [];
   const user = userEvent.setup();
   const api = reviewApi(
@@ -34,8 +42,8 @@ it('shows a manually readable whole word, focused label, plain field and direct 
   );
   render(<ReviewPage sessionId="session-1" api={api} navigate={() => {}} />);
   const field = await screen.findByRole('textbox', { name: 'مساحة الكتابة' });
-  expect(screen.getByRole('heading', { level: 1, name: 'الكلمة' })).toHaveFocus();
-  const word = screen.getByText('English', { exact: true });
+  expect(field).toHaveFocus();
+  const word = screen.getByText('English', { exact: true, selector: 'p' });
   expect(word.childNodes).toHaveLength(1);
   expect(word.firstChild?.nodeType).toBe(Node.TEXT_NODE);
   expect(word).toHaveAttribute('lang', 'en');
@@ -75,6 +83,7 @@ it('retains only the same DOM field across blur, context, polling and pending or
   try {
     render(<ReviewPage sessionId="session-1" api={api} navigate={() => {}} />);
     const field = await screen.findByRole('textbox', { name: 'مساحة الكتابة' });
+    await user.clear(field);
     await user.type(field, marker);
     await user.click(screen.getByText('عرض البطاقة الأصلية'));
     await screen.findByText('معنى محفوظ');
@@ -98,7 +107,7 @@ it('retains only the same DOM field across blur, context, polling and pending or
 });
 
 it.each(['advance', 'summary'])(
-  'destroys attempts after %s and restores an empty field on undo',
+  'destroys attempts after %s and restores only the target on undo',
   async (next) => {
     const user = userEvent.setup();
     const calls: Request[] = [];
@@ -122,6 +131,7 @@ it.each(['advance', 'summary'])(
     }, calls);
     render(<ReviewPage sessionId="session-1" api={api} navigate={() => {}} />);
     const first = await screen.findByRole('textbox', { name: 'مساحة الكتابة' });
+    await user.clear(first);
     await user.type(first, marker);
     await user.click(screen.getByRole('button', { name: /افتكرتها بسهولة/ }));
     if (next === 'summary') await screen.findByRole('heading', { name: 'ملخص الجلسة' });
@@ -129,10 +139,10 @@ it.each(['advance', 'summary'])(
       await waitFor(() =>
         expect(screen.getByRole('textbox', { name: 'مساحة الكتابة' })).not.toBe(first),
       );
-      expect(screen.getByRole('textbox', { name: 'مساحة الكتابة' })).toHaveValue('');
+      expect(screen.getByRole('textbox', { name: 'مساحة الكتابة' })).toHaveValue('English\n');
     }
     await user.click(screen.getByRole('button', { name: 'التراجع عن آخر تقييم' }));
-    expect(await screen.findByRole('textbox', { name: 'مساحة الكتابة' })).toHaveValue('');
+    expect(await screen.findByRole('textbox', { name: 'مساحة الكتابة' })).toHaveValue('English\n');
     expect(JSON.stringify(calls)).not.toContain(marker);
   },
 );
@@ -161,6 +171,7 @@ it('preserves input for a same-card filter but destroys it when parked and retur
   });
   render(<ReviewPage sessionId="session-1" api={api} navigate={() => {}} />);
   const field = await screen.findByRole('textbox', { name: 'مساحة الكتابة' });
+  await user.clear(field);
   await user.type(field, marker);
   await user.click(screen.getByLabelText('البطاقات الجديدة فقط'));
   expect(screen.getByRole('textbox', { name: 'مساحة الكتابة' })).toBe(field);
@@ -169,7 +180,7 @@ it('preserves input for a same-card filter but destroys it when parked and retur
   await screen.findByRole('heading', { name: 'لا توجد بطاقات مطابقة الآن' });
   expect(screen.queryByRole('textbox', { name: 'مساحة الكتابة' })).not.toBeInTheDocument();
   await user.click(screen.getByLabelText('كل البطاقات المستحقة'));
-  expect(await screen.findByRole('textbox', { name: 'مساحة الكتابة' })).toHaveValue('');
+  expect(await screen.findByRole('textbox', { name: 'مساحة الكتابة' })).toHaveValue('English\n');
 });
 
 it('leaves textarea editing shortcuts intact and rates outside it without revealing', async () => {
@@ -208,15 +219,17 @@ it('discards practice text on navigation and resume without treating it as unsav
   await user.click(
     await screen.findByRole('button', { name: `بدء المراجعة، ${spellingDeck.name}` }),
   );
-  await user.type(await screen.findByRole('textbox', { name: 'مساحة الكتابة' }), marker);
+  await user.clear(await screen.findByRole('textbox', { name: 'مساحة الكتابة' }));
+  await user.type(screen.getByRole('textbox', { name: 'مساحة الكتابة' }), marker);
   await user.click(screen.getByRole('button', { name: 'المجموعات' }));
   await screen.findByRole('heading', { name: 'مجموعاتي' });
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: `بدء المراجعة، ${spellingDeck.name}` }));
-  expect(await screen.findByRole('textbox', { name: 'مساحة الكتابة' })).toHaveValue('');
+  expect(await screen.findByRole('textbox', { name: 'مساحة الكتابة' })).toHaveValue('English\n');
+  await user.clear(screen.getByRole('textbox', { name: 'مساحة الكتابة' }));
   await user.type(screen.getByRole('textbox', { name: 'مساحة الكتابة' }), marker);
   page.unmount();
   render(<ReviewPage sessionId="session-1" api={api} navigate={() => {}} />);
-  expect(await screen.findByRole('textbox', { name: 'مساحة الكتابة' })).toHaveValue('');
+  expect(await screen.findByRole('textbox', { name: 'مساحة الكتابة' })).toHaveValue('English\n');
   expect(JSON.stringify(calls)).not.toContain(marker);
 });

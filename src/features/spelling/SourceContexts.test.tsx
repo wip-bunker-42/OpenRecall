@@ -73,7 +73,7 @@ it('never shows a previous word source when its deferred response resolves after
   await user.click(await screen.findByText('عرض البطاقة الأصلية'));
   await screen.findByText('جارٍ تحميل السياقات…');
   await user.click(screen.getByRole('button', { name: /افتكرتها بسهولة/ }));
-  await screen.findByText('Next');
+  await screen.findByText('Next', { selector: 'p' });
   await act(async () =>
     resolve({
       kind: 'listSpellingSources',
