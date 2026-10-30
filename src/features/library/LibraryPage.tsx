@@ -9,6 +9,7 @@ import { StatusRegion } from '../../components/StatusRegion';
 import { number } from '../../shared/format';
 import { useMountedView } from '../../shared/useMountedView';
 import { SpellingSetup } from '../spelling/SpellingSetup';
+import { LibraryStatistics } from '../statistics/LibraryStatistics';
 type Editing = { action: 'create' } | { action: 'rename' | 'delete'; deck: DeckDetail };
 export function LibraryPage({
   bootstrap,
@@ -27,6 +28,7 @@ export function LibraryPage({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [spellingSetup, setSpellingSetup] = useState(false);
+  const [statisticsOpen, setStatisticsOpen] = useState(false);
   const spelling = bootstrap.decks.find((d) => d.kind === 'spelling');
   const sources = bootstrap.decks.filter((d) => d.kind === 'standard');
   const mounted = useMountedView();
@@ -106,6 +108,20 @@ export function LibraryPage({
         <p>أنشئ مجموعة عادية أولًا لتكون مصدر الكلمات الإنجليزية للتدرب على الكتابة.</p>
       )}
       <StatusRegion message={message} />
+      <details className="disclosure" onToggle={(e) => setStatisticsOpen(e.currentTarget.open)}>
+        <summary>
+          <h2>إحصاءات المكتبة</h2>
+        </summary>
+        <div className="disclosure-body">
+          {statisticsOpen && (
+            <LibraryStatistics
+              api={api}
+              revision={bootstrap.libraryRevision}
+              timezone={bootstrap.settings.timezone}
+            />
+          )}
+        </div>
+      </details>
       {!editing && <FormErrors error={error} />}
       {bootstrap.resumableSessions.length > 0 && (
         <section aria-label="جلسات غير مكتملة">

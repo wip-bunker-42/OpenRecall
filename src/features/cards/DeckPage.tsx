@@ -171,7 +171,7 @@ export function DeckPage({
       <details
         className="disclosure"
         onToggle={(e) => {
-          if (e.currentTarget.open) setStatisticsOpen(true);
+          setStatisticsOpen(e.currentTarget.open);
         }}
       >
         <summary>
@@ -184,6 +184,7 @@ export function DeckPage({
               api={api}
               timezone={timezone}
               revision={deck.revision}
+              deckKind={deck.kind}
             />
           )}
         </div>
