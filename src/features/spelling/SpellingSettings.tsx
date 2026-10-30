@@ -13,10 +13,14 @@ export function SpellingSettings({
   api,
   deck,
   onChanged,
+  onBlockedChange,
+  disabled = false,
 }: {
   api: Api;
   deck: DeckDetail;
   onChanged: () => Promise<void>;
+  onBlockedChange?: (value: boolean) => void;
+  disabled?: boolean;
 }) {
   const [config, setConfig] = useState<SpellingConfig | null>(null);
   const [sources, setSources] = useState<DeckDetail[]>([]);
@@ -26,6 +30,7 @@ export function SpellingSettings({
   const [message, setMessage] = useState('');
   const [draft, setDraft] = useState(false);
   const [excludedOpen, setExcludedOpen] = useState(false);
+  const [excludedBusy, setExcludedBusy] = useState(false);
   const dirty = useRef(false);
   const readVersion = useRef(0);
   const mounted = useMountedView();
@@ -53,12 +58,17 @@ export function SpellingSettings({
     });
   }, [load, deck.dataRevision, mounted]);
   useEffect(() => () => setDirty(false), [setDirty]);
+  useEffect(() => {
+    onBlockedChange?.(draft || busy || excludedBusy);
+  }, [draft, busy, excludedBusy, onBlockedChange]);
+  useEffect(() => () => onBlockedChange?.(false), [onBlockedChange]);
+  const actionBusy = busy || excludedBusy || disabled;
   async function changed() {
     await onChanged();
     await load();
   }
   async function save(rescan: boolean) {
-    if (!config) return;
+    if (!config || actionBusy) return;
     setBusy(true);
     setError(null);
     ++readVersion.current;
@@ -132,7 +142,7 @@ export function SpellingSettings({
               المجموعة المصدر
               <select
                 value={source}
-                disabled={busy}
+                disabled={actionBusy}
                 onChange={(e) => {
                   setSource(e.target.value);
                   dirty.current = true;
@@ -149,12 +159,12 @@ export function SpellingSettings({
               </select>
             </label>
             <div className="actions">
-              <button type="submit" disabled={busy || !source || !draft}>
+              <button type="submit" disabled={actionBusy || !source || !draft}>
                 حفظ المصدر
               </button>
               <button
                 type="button"
-                disabled={busy || draft || !config.sourceDeckId}
+                disabled={actionBusy || draft || !config.sourceDeckId}
                 onClick={() => void save(true)}
               >
                 فحص المصدر مجددًا
@@ -162,7 +172,7 @@ export function SpellingSettings({
               {(draft || Boolean(error)) && (
                 <button
                   type="button"
-                  disabled={busy}
+                  disabled={actionBusy}
                   onClick={() => {
                     dirty.current = false;
                     setDraft(false);
@@ -186,7 +196,15 @@ export function SpellingSettings({
               <h3>الكلمات المستبعدة</h3>
             </summary>
             <div className="disclosure-body">
-              {excludedOpen && <ExcludedWords api={api} config={config} onChanged={changed} />}
+              {excludedOpen && (
+                <ExcludedWords
+                  api={api}
+                  config={config}
+                  onChanged={changed}
+                  disabled={draft || busy || disabled}
+                  onBusyChange={setExcludedBusy}
+                />
+              )}
             </div>
           </details>
         </>

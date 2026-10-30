@@ -43,6 +43,8 @@ export function DeckPage({
   const [schedulingOpen, setSchedulingOpen] = useState(false);
   const [policyDirty, setPolicyDirty] = useState(false);
   const [sourceOpen, setSourceOpen] = useState(false);
+  const [sourceBlocked, setSourceBlocked] = useState(false);
+  const actionsBlocked = policyDirty || sourceBlocked;
   const mounted = useMountedView();
   const refresh = useCallback(async () => {
     setDeck(await api.call('getDeck', { deckId }));
@@ -54,6 +56,7 @@ export function DeckPage({
       .catch(setError);
   }, [refresh]);
   async function start() {
+    if (actionsBlocked) return;
     setBusy(true);
     setError(null);
     try {
@@ -103,7 +106,7 @@ export function DeckPage({
             {number(deck.newCards)} جديدة.
           </p>
         </div>
-        <button className="primary" disabled={busy || policyDirty} onClick={() => void start()}>
+        <button className="primary" disabled={busy || actionsBlocked} onClick={() => void start()}>
           بدء المراجعة
         </button>
       </div>
@@ -119,7 +122,16 @@ export function DeckPage({
       )}
       <StatusRegion message={message} />
       {policyDirty && (
-        <p>احفظ تعديلات الجدولة والتحسين أو تجاهلها قبل تعديل البطاقات أو بدء المراجعة.</p>
+        <p>
+          احفظ تعديلات الجدولة والتحسين أو تجاهلها قبل تعديل البطاقات أو مصدر الكلمات أو بدء
+          المراجعة.
+        </p>
+      )}
+      {sourceBlocked && (
+        <p>
+          احفظ اختيار المصدر أو تجاهله، وانتظر اكتمال عمليته قبل تعديل الجدولة أو بدء المراجعة أو
+          حذف كلمة.
+        </p>
       )}
       {!deleting && <FormErrors error={error} />}
       {error && (
@@ -147,7 +159,7 @@ export function DeckPage({
               onDelete={setDeleting}
               revision={revision}
               timezone={timezone}
-              editingDisabled={policyDirty}
+              editingDisabled={actionsBlocked}
               managed={deck.kind === 'spelling'}
             />
           )}
@@ -164,7 +176,15 @@ export function DeckPage({
             <h2>مصدر كلمات الكتابة</h2>
           </summary>
           <div className="disclosure-body">
-            {sourceOpen && <SpellingSettings api={api} deck={deck} onChanged={refresh} />}
+            {sourceOpen && (
+              <SpellingSettings
+                api={api}
+                deck={deck}
+                onChanged={refresh}
+                onBlockedChange={setSourceBlocked}
+                disabled={policyDirty}
+              />
+            )}
           </div>
         </details>
       )}
@@ -207,6 +227,7 @@ export function DeckPage({
               navigate={navigate}
               onSaved={refresh}
               onDirtyChange={setPolicyDirty}
+              disabled={sourceBlocked}
             />
           )}
         </div>

@@ -67,6 +67,35 @@ from all rating buttons at the user's request. Approximate interval names and
 actual committed due feedback remain. First-line prefill/focus and removal of the
 extra accessible description each have an observed failing-then-passing regression.
 
+Two independent GPT-6.1 Sol whole-branch reviews were completed, the second at
+Max effort at the owner's explicit request. Neither found a Critical issue.
+The first Important finding concerned review creation before resolving an unsaved
+source selection; three App regressions were observed failing, then passing after
+blocking conflicting native actions through source saving and dependent refreshes.
+The second Important finding concerned spelling collection remounting scheduling
+settings and discarding an unsaved policy. Four additional cases failed before
+coordinating the two settings sections, then all seven action-guard cases passed.
+They cover existing scheduling drafts and new policy editing during pending source
+save, rescan and reallow. Source drafts also retain the navigation confirmation.
+
+After both Important fixes, `pnpm build:native-test` and `pnpm test:native`
+passed all seven native study cases and both startup-recovery probes again.
+The fresh isolated root is `target/native-tests/run-E5qrZb`, with startup roots
+`run-SmGhfC` and `run-oQrM2v`. All 22 native axe reports have zero violations and
+at least 20 passing rules. The added real-native checks assert that a policy
+draft blocks source mutations, a source draft blocks policy editing/review, and
+cancelling navigation preserves the draft and native sessions/library revision.
+The fresh post-fix `pnpm verify` run passed 115 Rust workspace tests, seven
+additional preserve-order backup cases, 89 frontend tests, 16 maintenance cases
+and nine browser scenarios. All 36 original browser axe reports have zero
+violations and at least 14 passing rules. Formatting, Clippy, contracts, types,
+lint, notices, production frontend build and workflow lint passed as well.
+
+One new Minor remains deferred: retained original-card capture timestamps use
+Cairo rather than the selected timezone. This affects explanatory metadata; the
+native scheduler and completion calendar use the selected timezone. The two
+v0.1.0 Minor items described above remain deferred as well.
+
 A supplementary agent-browser presentation check reported 37 passing rules,
 zero violations and one incomplete decorative-mark color-contrast check. The
 versioned project acceptance uses axe 4.14 rather than that tool's bundled 4.12.1.
@@ -94,6 +123,8 @@ The local feature-flow acceptance above used the automation build before the
 routine product-version bump. Production packaging was built and cryptographically
 verified without launching it against a real study library. These preflight
 artifacts are distinct from the final immutable-tag CI release artifacts.
+The local preflight candidates also precede the review guard repairs and must
+not be substituted for those final checked-tag artifacts.
 
 ## Limits
 

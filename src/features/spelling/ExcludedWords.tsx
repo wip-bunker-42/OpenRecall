@@ -11,10 +11,14 @@ export function ExcludedWords({
   api,
   config,
   onChanged,
+  disabled = false,
+  onBusyChange,
 }: {
   api: Api;
   config: SpellingConfig;
   onChanged: () => Promise<void>;
+  disabled?: boolean;
+  onBusyChange?: (value: boolean) => void;
 }) {
   const [page, setPage] = useState(1);
   const [reload, setReload] = useState(0);
@@ -23,6 +27,10 @@ export function ExcludedWords({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const mounted = useMountedView();
+  useEffect(() => {
+    onBusyChange?.(busy);
+  }, [busy, onBusyChange]);
+  useEffect(() => () => onBusyChange?.(false), [onBusyChange]);
   useEffect(() => {
     let current = true;
     setBusy(true);
@@ -45,6 +53,7 @@ export function ExcludedWords({
     };
   }, [api, config.deckId, config.revision, page, reload]);
   async function allow(canonical: string) {
+    if (disabled || busy) return;
     setBusy(true);
     setError(null);
     try {
@@ -73,7 +82,7 @@ export function ExcludedWords({
       <FormErrors error={error} />
       <StatusRegion message={message} />
       {error && (
-        <button disabled={busy} onClick={() => setReload((n) => n + 1)}>
+        <button disabled={busy || disabled} onClick={() => setReload((n) => n + 1)}>
           تحديث الكلمات المستبعدة
         </button>
       )}
@@ -87,7 +96,7 @@ export function ExcludedWords({
                 <bdi lang="en" dir="ltr">
                   {w.canonical}
                 </bdi>{' '}
-                <button disabled={busy} onClick={() => void allow(w.canonical)}>
+                <button disabled={busy || disabled} onClick={() => void allow(w.canonical)}>
                   السماح بجمع{' '}
                   <bdi lang="en" dir="ltr">
                     {w.canonical}
@@ -101,12 +110,12 @@ export function ExcludedWords({
       </div>
       {result && result.total > 20 && (
         <div className="actions" aria-label="صفحات الكلمات المستبعدة">
-          <button disabled={busy || page <= 1} onClick={() => setPage((p) => p - 1)}>
+          <button disabled={busy || disabled || page <= 1} onClick={() => setPage((p) => p - 1)}>
             السابق
           </button>
           <p>الصفحة {number(page)}</p>
           <button
-            disabled={busy || page * 20 >= result.total}
+            disabled={busy || disabled || page * 20 >= result.total}
             onClick={() => setPage((p) => p + 1)}
           >
             التالي

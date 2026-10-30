@@ -6,6 +6,7 @@ const marker = 'native-private-spelling-attempt-73bc40';
 const restartMarker = 'native-restart-disposable-attempt-93c820';
 const statePath = resolve(root, 'spelling-state.json');
 async function selectSource(selector: string, id: string) {
+  await $(selector).waitForEnabled();
   await browser.execute(
     (selector, id) => {
       const field = document.querySelector<HTMLSelectElement>(selector)!;
@@ -253,7 +254,29 @@ describe('native spelling privacy, portability and process restart', () => {
       await click('فتح مجموعة التدرب على الكتابة');
       await $('summary=مصدر كلمات الكتابة').click();
       await $('select').waitForExist();
+      await $('select').waitForEnabled();
+      await $('summary=الجدولة والتحسين').click();
+      const policy = $('input[name="minIntervalSeconds"]');
+      await policy.setValue('120');
+      await expect(policy).toHaveValue('120');
+      await expect($('select')).toBeDisabled();
+      await expect($('button=فحص المصدر مجددًا')).toBeDisabled();
+      await audit('native-spelling-policy-draft-guard');
+      await click('تجاهل تعديلات المجموعة');
+      await expect($('select')).toBeEnabled();
+      const beforeDraft = await command('bootstrap', {});
       await selectSource('select', second.id);
+      await expect($('button=بدء المراجعة')).toBeDisabled();
+      await expect(policy).toBeDisabled();
+      await click('المجموعات');
+      await expect($('h2=تغييرات غير محفوظة')).toBeDisplayed();
+      await click('متابعة التعديل');
+      await expect($('select')).toHaveValue(second.id);
+      await expect($('button=بدء المراجعة')).toBeDisabled();
+      const afterCancel = await command('bootstrap', {});
+      expect(afterCancel.resumableSessions).toEqual(beforeDraft.resumableSessions);
+      expect(afterCancel.libraryRevision).toBe(beforeDraft.libraryRevision);
+      await audit('native-spelling-source-draft-guard');
       await click('حفظ المصدر');
       await expect($('p*=أُضيفت ٠ كلمة')).toBeDisplayed();
       await $('summary=البطاقات').click();
