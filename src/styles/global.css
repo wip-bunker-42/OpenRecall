@@ -259,6 +259,15 @@ summary {
   overflow-wrap: anywhere;
   max-width: 74ch;
 }
+.spelling-word {
+  unicode-bidi: isolate;
+  font-size: 1.7rem;
+}
+.source-context {
+  border-block-start: 1px solid var(--line);
+  margin-block-start: 1rem;
+  padding-block-start: 0.8rem;
+}
 .sr-only {
   position: absolute;
   width: 1px;

@@ -4,6 +4,7 @@ import type { Navigate } from '../../app/navigation';
 import type { ReviewFilter } from '../../shared/generated/ReviewFilter';
 import { useReviewSession } from './useReviewSession';
 import { ReviewQuestion } from './ReviewQuestion';
+import { SpellingQuestion } from '../spelling/SpellingQuestion';
 import { ReviewSummary } from './ReviewSummary';
 import { ratings } from './RatingButtons';
 import { FormErrors } from '../../components/FormErrors';
@@ -70,15 +71,12 @@ export function ReviewPage({
         e.code === 'Space' &&
         !target.closest('button,summary') &&
         s.view?.state === 'question' &&
+        s.view.payload.mode === 'standard' &&
         !s.view.payload.answerRevealed
       ) {
         e.preventDefault();
         void s.reveal();
-      } else if (
-        /^[1-4]$/.test(e.key) &&
-        s.view?.state === 'question' &&
-        s.view.payload.answerRevealed
-      ) {
+      } else if (/^[1-4]$/.test(e.key) && s.view?.state === 'question' && s.view.payload.canRate) {
         e.preventDefault();
         void s.rate(ratings[Number(e.key) - 1]);
       }
@@ -168,7 +166,16 @@ export function ReviewPage({
               />
             </>
           )}
-          {view.state === 'question' ? (
+          {view.state === 'question' && view.payload.mode === 'spelling' ? (
+            <SpellingQuestion
+              key={`${view.payload.sessionId}:${view.payload.presentationId}`}
+              api={api}
+              frame={view.payload}
+              disabled={busy || pendingRating}
+              onRate={(r) => void session.rate(r)}
+              timezone={timezone}
+            />
+          ) : view.state === 'question' ? (
             <ReviewQuestion
               frame={view.payload}
               disabled={busy || pendingRating}

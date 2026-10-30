@@ -141,7 +141,7 @@ export function useReviewSession(api: Api, sessionId: string) {
       async () => {
         if (!pending.current) {
           const v = current.current;
-          if (v?.state !== 'question' || !v.payload.answerRevealed) throw { code: 'noQuestion' };
+          if (v?.state !== 'question' || !v.payload.canRate) throw { code: 'noQuestion' };
           pending.current = {
             sessionId,
             presentationId: v.payload.presentationId,
