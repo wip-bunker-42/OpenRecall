@@ -21,3 +21,15 @@ GitHub setup actions use immutable commits verified from their current release
 tags. Build jobs use standard hosted runners; macOS ARM64 limits Cargo parallelism
 to fit its available memory. Release compilation receives no signing credential;
 the separate `tauri bundle` step signs the already-built reviewed binary.
+
+Spelling extraction policy 1 pins `unicode-segmentation` 1.13.3,
+`unicode-script` 0.5.8 and `linkify` 0.11.0. Their current stable versions and
+MIT OR Apache-2.0 licenses were checked against crates.io on 2026-10-29.
+unicode-segmentation declares Rust 1.85; the other two do not declare an MSRV.
+All three are compiled with the existing supported toolchain. These libraries
+provide [Unicode word boundaries](https://docs.rs/unicode-segmentation/1.13.3/),
+[script properties](https://docs.rs/unicode-script/0.5.8/) and
+[local URL/email detection](https://docs.rs/linkify/0.11.0/). No dictionary,
+language model or network lookup participates in extraction. Dependency or
+policy changes must run the frozen `spelling_extract` corpus before changing
+persisted provenance semantics; unrelated FSRS and toolchain versions stay fixed.

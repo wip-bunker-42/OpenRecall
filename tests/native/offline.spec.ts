@@ -51,7 +51,7 @@ describe('real offline editing, profiles and portable restore', () => {
     await expect($('p=اكتمل تصدير النسخة الاحتياطية.')).toBeDisplayed();
     const path = await $('.result p[dir="auto"]').getText();
     const backup = JSON.parse(readFileSync(path, 'utf8'));
-    expect(backup.formatVersion).toBe(1);
+    expect(backup.formatVersion).toBe(2);
     copyFileSync(path, resolve(root, 'restore.json'));
     await click('المجموعات');
     await $('button[aria-label="حذف اختبار أصلي"]').click();

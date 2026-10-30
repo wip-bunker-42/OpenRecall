@@ -183,6 +183,7 @@ packages. MPL-2.0 crate archives are also included under `sources/`.
 - [libdbus-sys 0.2.7](https://crates.io/api/v1/crates/libdbus-sys/0.2.7/download) — Apache-2.0 OR MIT
 - [libm 0.2.16](https://crates.io/api/v1/crates/libm/0.2.16/download) — MIT
 - [libsqlite3-sys 0.39.0](https://crates.io/api/v1/crates/libsqlite3-sys/0.39.0/download) — MIT
+- [linkify 0.11.0](https://crates.io/api/v1/crates/linkify/0.11.0/download) — MIT OR Apache-2.0
 - [linux-raw-sys 0.12.1](https://crates.io/api/v1/crates/linux-raw-sys/0.12.1/download) — Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT
 - [litemap 0.8.3](https://crates.io/api/v1/crates/litemap/0.8.3/download) — Unicode-3.0
 - [lock_api 0.4.14](https://crates.io/api/v1/crates/lock_api/0.4.14/download) — MIT OR Apache-2.0
@@ -369,6 +370,7 @@ packages. MPL-2.0 crate archives are also included under `sources/`.
 - [uds_windows 1.2.1](https://crates.io/api/v1/crates/uds_windows/1.2.1/download) — MIT
 - [unicode-ident 1.0.27](https://crates.io/api/v1/crates/unicode-ident/1.0.27/download) — (MIT OR Apache-2.0) AND Unicode-3.0
 - [unicode-normalization 0.1.26](https://crates.io/api/v1/crates/unicode-normalization/0.1.26/download) — (MIT OR Apache-2.0) AND Unicode-3.0
+- [unicode-script 0.5.8](https://crates.io/api/v1/crates/unicode-script/0.5.8/download) — MIT OR Apache-2.0
 - [unicode-segmentation 1.13.3](https://crates.io/api/v1/crates/unicode-segmentation/1.13.3/download) — MIT OR Apache-2.0
 - [untrusted 0.9.0](https://crates.io/api/v1/crates/untrusted/0.9.0/download) — ISC
 - [url 2.5.8](https://crates.io/api/v1/crates/url/2.5.8/download) — MIT OR Apache-2.0

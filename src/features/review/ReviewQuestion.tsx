@@ -7,13 +7,11 @@ export function ReviewQuestion({
   onReveal,
   onRate,
   disabled,
-  timezone,
 }: {
   frame: ReviewFrame;
   onReveal: () => void;
   onRate: (rating: Rating) => void;
   disabled: boolean;
-  timezone: string;
 }) {
   const question = useRef<HTMLHeadingElement>(null);
   const answer = useRef<HTMLHeadingElement>(null);
@@ -25,8 +23,8 @@ export function ReviewQuestion({
   return (
     <div className="study-column">
       <section aria-labelledby={`${id}-question`}>
-        <h1 ref={question} id={`${id}-question`} tabIndex={-1}>
-          السؤال
+        <h1 ref={question} id={`${id}-question`} tabIndex={-1} dir="auto">
+          {frame.form.questionTitle ?? 'السؤال'}
         </h1>
         <p className="study-text question-text" dir="auto" lang={frame.form.language ?? undefined}>
           {frame.form.front}
@@ -50,7 +48,7 @@ export function ReviewQuestion({
               </>
             )}
           </section>
-          <RatingButtons frame={frame} onRate={onRate} disabled={disabled} timezone={timezone} />
+          <RatingButtons frame={frame} onRate={onRate} disabled={disabled} />
         </>
       ) : (
         <button className="primary reveal-button" disabled={disabled} onClick={onReveal}>

@@ -4,7 +4,7 @@ test('library keyboard, create rename delete and native dialog focus restoration
 }) => {
   await audit(app, 'library');
   await app.screenshot({ path: 'target/qa-library.png', fullPage: true });
-  const create = app.getByRole('button', { name: 'إنشاء مجموعة' });
+  const create = app.getByRole('button', { name: 'إنشاء مجموعة', exact: true });
   await create.focus();
   await app.keyboard.press('Enter');
   await expect(app.getByLabel('اسم المجموعة')).toBeFocused();

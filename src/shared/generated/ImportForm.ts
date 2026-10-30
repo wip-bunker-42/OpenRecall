@@ -2,4 +2,4 @@
 import type { DuplicateRef } from "./DuplicateRef";
 import type { FieldError } from "./FieldError";
 
-export type ImportForm = { key: string, front: string, back: string, notes: string, valid: boolean, duplicate: boolean, duplicateOf: DuplicateRef | null, issues: Array<FieldError>, warnings: Array<FieldError>, };
+export type ImportForm = { questionTitle: string | null, key: string, front: string, back: string, notes: string, valid: boolean, duplicate: boolean, duplicateOf: DuplicateRef | null, issues: Array<FieldError>, warnings: Array<FieldError>, };

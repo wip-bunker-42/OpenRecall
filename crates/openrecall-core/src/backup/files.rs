@@ -1,13 +1,14 @@
 use super::{
     BackupLimits,
-    format::{BackupEnvelope, FORMAT_VERSION, canonical_value, digest},
+    decode::{ValidatedBackup, decode},
+    format::{BackupEnvelope, canonical_value},
 };
 use crate::{AppError, AppResult};
 use std::{
     io::{Read, Write},
     path::{Path, PathBuf},
 };
-pub(crate) fn read(path: &Path, limits: BackupLimits) -> AppResult<BackupEnvelope> {
+pub(crate) fn read(path: &Path, limits: BackupLimits) -> AppResult<ValidatedBackup> {
     let file = std::fs::File::open(path)?;
     if file.metadata()?.len() > limits.max_bytes {
         return Err(AppError::new("backupTooLarge"));
@@ -18,21 +19,7 @@ pub(crate) fn read(path: &Path, limits: BackupLimits) -> AppResult<BackupEnvelop
     if bytes.len() as u64 > limits.max_bytes {
         return Err(AppError::new("backupTooLarge"));
     }
-    let v: serde_json::Value = serde_json::from_slice(&bytes)?;
-    if v["formatVersion"].as_u64() != Some(FORMAT_VERSION as u64) {
-        return Err(AppError::new("unsupportedBackup"));
-    }
-    let envelope: BackupEnvelope = serde_json::from_value(v)?;
-    if envelope.schema_version > crate::storage::SCHEMA_VERSION {
-        return Err(AppError::new("unsupportedSchema"));
-    }
-    chrono::DateTime::parse_from_rfc3339(&envelope.exported_at)
-        .map_err(|_| AppError::new("invalidBackup"))?;
-    if envelope.payload_sha256 != digest(&envelope.data)? {
-        return Err(AppError::new("backupDigest"));
-    }
-    super::validation::validate(&envelope.data)?;
-    Ok(envelope)
+    decode(&bytes)
 }
 pub(crate) fn write(
     destination: &Path,

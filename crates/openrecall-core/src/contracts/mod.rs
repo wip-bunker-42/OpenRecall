@@ -5,6 +5,7 @@ use ts_rs::TS;
 pub mod backup;
 pub mod cards;
 pub mod import;
+pub mod spelling;
 pub mod statistics;
 pub mod system;
 pub mod updates;
@@ -40,7 +41,38 @@ pub struct Bootstrap {
     rename_all_fields = "camelCase"
 )]
 pub enum Request {
+    ListSpellingSources {
+        card_id: String,
+        page: u32,
+        page_size: u16,
+    },
+    ListSpellingExclusions {
+        deck_id: String,
+        page: u32,
+        page_size: u16,
+    },
+    AllowSpellingWord {
+        deck_id: String,
+        canonical: String,
+        expected_revision: String,
+    },
+    CreateSpellingDeck {
+        source_deck_id: String,
+    },
+    GetSpellingConfig {
+        deck_id: String,
+    },
+    SetSpellingSource {
+        deck_id: String,
+        source_deck_id: String,
+        expected_revision: String,
+    },
+    RescanSpellingSource {
+        deck_id: String,
+        expected_revision: String,
+    },
     GetDefaultSettings {},
+    GetLibraryStatistics {},
     GetDeckStatistics {
         deck_id: String,
     },
@@ -178,7 +210,15 @@ pub enum Request {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(tag = "kind", content = "payload", rename_all = "camelCase")]
 pub enum Response {
+    ListSpellingSources(Page<spelling::SpellingSourceView>),
+    ListSpellingExclusions(Page<crate::domain::spelling::SpellingExclusion>),
+    AllowSpellingWord(spelling::SpellingDeckResult),
+    CreateSpellingDeck(spelling::SpellingDeckResult),
+    GetSpellingConfig(crate::domain::spelling::SpellingConfig),
+    SetSpellingSource(spelling::SpellingDeckResult),
+    RescanSpellingSource(spelling::SpellingDeckResult),
     GetDefaultSettings(Settings),
+    GetLibraryStatistics(statistics::LibraryStatistics),
     GetDeckStatistics(statistics::DeckStatistics),
     StartTraining(TrainingJob),
     GetTrainingJob(TrainingJob),
@@ -234,5 +274,15 @@ pub fn export(output: &Path) -> AppResult<()> {
     backup::RestorePreview::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     backup::RestoreReport::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     updates::UpdateStatus::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
+    spelling::SpellingDeckResult::export_all(&config)
+        .map_err(|_| AppError::new("contractExport"))?;
+    spelling::SpellingSourceView::export_all(&config)
+        .map_err(|_| AppError::new("contractExport"))?;
+    crate::domain::spelling::SpellingWord::export_all(&config)
+        .map_err(|_| AppError::new("contractExport"))?;
+    crate::domain::spelling::WordOrigin::export_all(&config)
+        .map_err(|_| AppError::new("contractExport"))?;
+    crate::domain::spelling::SpellingExclusion::export_all(&config)
+        .map_err(|_| AppError::new("contractExport"))?;
     Ok(())
 }

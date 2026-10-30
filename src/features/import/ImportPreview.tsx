@@ -12,10 +12,14 @@ const reasons: Record<string, string> = {
   nestedVariants: 'الصيغ المتداخلة غير مسموحة',
   unknownField: 'حقل غير معروف سيُتجاهل',
   duplicate: 'صيغة مكررة',
+  invalidQuestionTitle: 'يلزم عنوان من ١٦٠ حرفًا على الأكثر، دون أسطر جديدة أو محارف تحكم',
 };
 function FormPreview({ form }: { form: ImportForm }) {
   return (
     <>
+      <p>
+        عنوان السؤال: <bdi dir="auto">{form.questionTitle ?? 'السؤال'}</bdi>
+      </p>
       <p className="study-text" dir="auto">
         {form.front}
       </p>

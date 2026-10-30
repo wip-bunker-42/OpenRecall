@@ -4,6 +4,7 @@ import type { Response } from '../shared/generated/Response';
 import type { Bootstrap } from '../shared/generated/Bootstrap';
 import type { DeckDetail } from '../shared/generated/DeckDetail';
 export const deckFixture: DeckDetail = {
+  kind: 'standard',
   id: 'deck-1',
   name: 'طب',
   profileId: 'profile-1',
@@ -30,7 +31,7 @@ export const bootstrapFixture: Bootstrap = {
     pageSize: 20,
     revision: 'settings-revision',
   },
-  schemaVersion: 8,
+  schemaVersion: 9,
   resumableSessions: [],
   decks: [deckFixture],
   profiles: [],
@@ -92,7 +93,7 @@ export const nativeFixture: NativeApi = {
       appVersion: '0.1.0',
       engineVersion: 'FSRS-7',
       engineRevision: '0fd5994',
-      schemaVersion: 8,
+      schemaVersion: 9,
       dataDirectory: 'test-data',
     };
   },

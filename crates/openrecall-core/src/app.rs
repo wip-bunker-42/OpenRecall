@@ -55,11 +55,58 @@ impl App {
     }
     fn dispatch(&mut self, request: Request) -> AppResult<Response> {
         match request {
+            Request::ListSpellingSources {
+                card_id,
+                page,
+                page_size,
+            } => Ok(Response::ListSpellingSources(
+                self.list_spelling_sources(&card_id, page, page_size)?,
+            )),
+            Request::ListSpellingExclusions {
+                deck_id,
+                page,
+                page_size,
+            } => Ok(Response::ListSpellingExclusions(
+                self.list_spelling_exclusions(&deck_id, page, page_size)?,
+            )),
+            Request::AllowSpellingWord {
+                deck_id,
+                canonical,
+                expected_revision,
+            } => Ok(Response::AllowSpellingWord(self.allow_spelling_word(
+                deck_id,
+                canonical,
+                expected_revision,
+            )?)),
+            Request::CreateSpellingDeck { source_deck_id } => Ok(Response::CreateSpellingDeck(
+                self.create_spelling_deck(source_deck_id)?,
+            )),
+            Request::GetSpellingConfig { deck_id } => Ok(Response::GetSpellingConfig(
+                self.get_spelling_config(&deck_id)?,
+            )),
+            Request::SetSpellingSource {
+                deck_id,
+                source_deck_id,
+                expected_revision,
+            } => Ok(Response::SetSpellingSource(self.set_spelling_source(
+                deck_id,
+                source_deck_id,
+                expected_revision,
+            )?)),
+            Request::RescanSpellingSource {
+                deck_id,
+                expected_revision,
+            } => Ok(Response::RescanSpellingSource(
+                self.rescan_spelling_source(deck_id, expected_revision)?,
+            )),
             Request::GetDefaultSettings {} => Ok(Response::GetDefaultSettings(
                 crate::domain::settings::Settings::default(),
             )),
             Request::GetDeckStatistics { deck_id } => {
                 Ok(Response::GetDeckStatistics(self.deck_statistics(&deck_id)?))
+            }
+            Request::GetLibraryStatistics {} => {
+                Ok(Response::GetLibraryStatistics(self.library_statistics()?))
             }
             Request::StartTraining { profile_id } => {
                 Ok(Response::StartTraining(self.start_training(profile_id)?))

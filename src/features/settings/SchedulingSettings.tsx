@@ -15,12 +15,14 @@ export function SchedulingSettings({
   onSaved,
   navigate,
   onDirtyChange,
+  disabled = false,
 }: {
   deck: DeckDetail;
   api: Api;
   onSaved: () => void | Promise<void>;
   navigate: Navigate;
   onDirtyChange?: (value: boolean) => void;
+  disabled?: boolean;
 }) {
   const [profiles, setProfiles] = useState<ProfileDetail[]>([]);
   const [selected, setSelected] = useState(deck.profileId);
@@ -51,6 +53,7 @@ export function SchedulingSettings({
     };
   }, [api, setDirty]);
   async function save(data: FormData) {
+    if (disabled || busy) return;
     setError(null);
     try {
       const value = numeric(data, 'desiredRetention', 70, 99, false, true);
@@ -74,6 +77,7 @@ export function SchedulingSettings({
     }
   }
   async function assign() {
+    if (disabled || busy) return;
     setBusy(true);
     setError(null);
     try {
@@ -92,6 +96,7 @@ export function SchedulingSettings({
         key={`${deck.revision}-${resetKey}`}
         noValidate
         onInput={() => {
+          if (disabled || busy) return;
           setDirty(true);
           setHasDraft(true);
         }}
@@ -100,7 +105,7 @@ export function SchedulingSettings({
           void save(new FormData(e.currentTarget));
         }}
       >
-        <fieldset disabled={busy}>
+        <fieldset disabled={busy || disabled}>
           <legend>حدود هذه المجموعة</legend>
           <p>
             اترك الحقول فارغة لاستخدام الإعدادات العامة. لا تغيّر هذه الحقول أوزان نموذج التحسين
@@ -143,7 +148,7 @@ export function SchedulingSettings({
       </form>
       {hasDraft && (
         <button
-          disabled={busy}
+          disabled={busy || disabled}
           onClick={() => {
             setResetKey((n) => n + 1);
             setDirty(false);
@@ -159,7 +164,7 @@ export function SchedulingSettings({
       <label>
         نموذج التحسين
         <select
-          disabled={busy || hasDraft}
+          disabled={busy || disabled || hasDraft}
           value={selected}
           onChange={(e) => setSelected(e.target.value)}
         >
@@ -172,7 +177,7 @@ export function SchedulingSettings({
       </label>
       <div className="actions">
         <button
-          disabled={busy || hasDraft || selected === deck.profileId}
+          disabled={busy || disabled || hasDraft || selected === deck.profileId}
           onClick={() => void assign()}
         >
           تغيير نموذج المجموعة

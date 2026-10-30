@@ -9,6 +9,13 @@ use crate::{
 };
 use chrono::DateTime;
 impl App {
+    pub(crate) fn require_manual_card_deck(&self, deck_id: &str) -> AppResult<()> {
+        let deck: DeckDetail = self.store.get("decks", deck_id)?;
+        if deck.kind == crate::domain::spelling::DeckKind::Spelling {
+            return Err(AppError::new("managedSpellingDeck"));
+        }
+        Ok(())
+    }
     pub(crate) fn form_drafts(
         &self,
         draft: CardDraft,
@@ -42,6 +49,13 @@ impl App {
                     return Err(AppError::field("forms", "duplicateId"));
                 }
                 Ok(CardForm {
+                    question_title: crate::domain::card::normalize_question_title(f.question_title)
+                        .map_err(|mut error| {
+                            for field in &mut error.fields {
+                                field.field = format!("forms.{i}.questionTitle");
+                            }
+                            error
+                        })?,
                     id: form_id,
                     front: f.front,
                     back: f.back,
@@ -86,7 +100,9 @@ impl App {
         deck_id: String,
         draft: CardDraft,
     ) -> AppResult<CardDetail> {
-        self.create_card_at(deck_id, draft, self.clock.now())
+        let card = self.create_card_at(deck_id, draft, self.clock.now())?;
+        self.sync_spelling_for_content_change(&card)?;
+        Ok(card)
     }
     pub(crate) fn create_card_at(
         &mut self,
@@ -94,7 +110,7 @@ impl App {
         draft: CardDraft,
         at: chrono::DateTime<chrono::Utc>,
     ) -> AppResult<CardDetail> {
-        let _: DeckDetail = self.store.get("decks", &deck_id)?;
+        self.require_manual_card_deck(&deck_id)?;
         let forms = self.form_drafts(draft, None)?;
         let now = at.to_rfc3339();
         let card = CardDetail {
@@ -123,10 +139,13 @@ impl App {
         expected: String,
     ) -> AppResult<CardDetail> {
         let mut card: CardDetail = self.store.get("cards", &card_id)?;
+        self.require_manual_card_deck(&card.deck_id)?;
         if card.revision != expected {
             return Err(AppError::new("conflict"));
         }
-        card.forms = self.form_drafts(draft, Some(&card))?;
+        let forms = self.form_drafts(draft, Some(&card))?;
+        self.retain_spelling_before_source_delete(std::slice::from_ref(&card.id))?;
+        card.forms = forms;
         self.invalidate_card_undo(&card.id)?;
         let ids = card.forms.iter().map(|f| f.id.clone()).collect::<Vec<_>>();
         crate::scheduling::forms::reconcile_forms(&mut card.bag, &ids, self.random.as_mut())?;
@@ -134,6 +153,7 @@ impl App {
         self.save_card(&card)?;
         self.reconcile_card_presentations(&card)?;
         self.touch_deck(&card.deck_id)?;
+        self.sync_spelling_for_content_change(&card)?;
         Ok(card)
     }
     pub(crate) fn delete_card(
@@ -145,10 +165,13 @@ impl App {
         if card.revision != expected {
             return Err(AppError::new("conflict"));
         }
+        self.exclude_deleted_spelling_word(&card)?;
+        self.retain_spelling_before_source_delete(std::slice::from_ref(&card.id))?;
         self.clear_deck_undos(std::slice::from_ref(&card.deck_id))?;
         self.store
             .conn
             .execute("DELETE FROM cards WHERE id=?1", [&card_id])?;
+        crate::spelling::storage::prune_snapshots(&self.store.conn)?;
         self.refresh_session_counts(&card.deck_id)?;
         self.touch_deck(&card.deck_id)?;
         Ok(DeleteReport { id: card_id })

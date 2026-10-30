@@ -9,7 +9,7 @@ use crate::{
     },
 };
 use serde::{Deserialize, Serialize};
-pub const FORMAT_VERSION: u32 = 1;
+pub const FORMAT_VERSION: u32 = 2;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BackupEnvelope {
@@ -23,6 +23,7 @@ pub struct BackupEnvelope {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct BackupData {
+    pub spelling: crate::domain::spelling::SpellingBackupData,
     pub settings: Settings,
     pub library_revision: String,
     pub models: Vec<ModelRevision>,
@@ -42,6 +43,9 @@ pub(crate) fn canonical_value<T: Serialize>(input: &T) -> crate::AppResult<serde
     Ok(value)
 }
 pub fn digest(data: &BackupData) -> crate::AppResult<String> {
+    digest_value(&serde_json::to_value(data)?)
+}
+pub(crate) fn digest_value(data: &serde_json::Value) -> crate::AppResult<String> {
     use sha2::{Digest, Sha256};
     // Explicit canonical ordering is independent of struct/dependency features.
     Ok(Sha256::digest(serde_json::to_vec(&canonical_value(data)?)?)

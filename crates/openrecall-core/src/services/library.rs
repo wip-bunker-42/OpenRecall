@@ -45,12 +45,25 @@ impl App {
         requested_name: String,
         profile_id: Option<String>,
     ) -> AppResult<DeckDetail> {
+        self.create_deck_kind(
+            requested_name,
+            profile_id,
+            crate::domain::spelling::DeckKind::Standard,
+        )
+    }
+    pub(crate) fn create_deck_kind(
+        &mut self,
+        requested_name: String,
+        profile_id: Option<String>,
+        kind: crate::domain::spelling::DeckKind,
+    ) -> AppResult<DeckDetail> {
         let name = name(requested_name)?;
         let mut profile: ProfileDetail = match profile_id {
             Some(p) => self.store.get("profiles", &p)?,
             None => self.create_default_profile(format!("تحسين — {name}"))?,
         };
         let deck = DeckDetail {
+            kind,
             id: id(),
             name,
             profile_id: profile.id.clone(),
@@ -72,7 +85,7 @@ impl App {
         Ok(deck)
     }
     pub(crate) fn save_deck(&self, deck: &DeckDetail) -> AppResult<()> {
-        self.store.conn.execute("INSERT INTO decks(id,profile_id,payload) VALUES(?1,?2,?3) ON CONFLICT(id) DO UPDATE SET profile_id=excluded.profile_id,payload=excluded.payload",rusqlite::params![deck.id,deck.profile_id,serde_json::to_string(deck)?])?;
+        self.store.conn.execute("INSERT INTO decks(id,profile_id,kind,payload) VALUES(?1,?2,?3,?4) ON CONFLICT(id) DO UPDATE SET profile_id=excluded.profile_id,kind=excluded.kind,payload=excluded.payload",rusqlite::params![deck.id,deck.profile_id,deck.kind.as_str(),serde_json::to_string(deck)?])?;
         Ok(())
     }
     pub(crate) fn rename_deck(
@@ -101,6 +114,21 @@ impl App {
             return Err(AppError::new("conflict"));
         }
         let mut profile: ProfileDetail = self.store.get("profiles", &deck.profile_id)?;
+        let card_ids: Vec<String> = self
+            .store
+            .conn
+            .prepare("SELECT id FROM cards WHERE deck_id=?1")?
+            .query_map([&deck_id], |row| row.get(0))?
+            .collect::<Result<_, _>>()?;
+        self.retain_spelling_before_source_delete(&card_ids)?;
+        if let Some(mut config) = crate::spelling::storage::config(&self.store.conn)?
+            && config.source_deck_id.as_deref() == Some(deck_id.as_str())
+        {
+            config.source_deck_id = None;
+            config.source_deck_name = Some(deck.name.clone());
+            config.revision = id();
+            crate::spelling::storage::save_config(&self.store.conn, &config)?;
+        }
         profile.member_deck_ids.retain(|d| d != &deck_id);
         profile.revision = id();
         self.store.put("profiles", &profile.id, &profile)?;

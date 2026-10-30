@@ -2,11 +2,15 @@ use crate::{
     App, AppResult,
     contracts::statistics::*,
     domain::{card::CardDetail, review::ReviewLog, time::study_date},
+    statistics::completion::daily_completions,
 };
 use chrono::{DateTime, Duration, NaiveDate, Utc};
 use std::collections::{BTreeMap, HashSet};
-fn period(logs: &[&ReviewLog]) -> PeriodStatistics {
-    let mut p = PeriodStatistics::default();
+fn period(logs: &[&ReviewLog], completed_for_day: u32) -> PeriodStatistics {
+    let mut p = PeriodStatistics {
+        completed_for_day,
+        ..Default::default()
+    };
     let mut cards = HashSet::new();
     for l in logs {
         p.attempts += 1;
@@ -41,7 +45,7 @@ impl App {
         let logs: Vec<ReviewLog> = self
             .store
             .conn
-            .prepare("SELECT payload FROM reviews WHERE deck_id=?1")?
+            .prepare("SELECT payload FROM reviews WHERE deck_id=?1 ORDER BY at_ms,rowid")?
             .query_map([deck_id], |r| r.get::<_, String>(0))?
             .map(|r| Ok(serde_json::from_str(&r?)?))
             .collect::<AppResult<_>>()?;
@@ -73,6 +77,7 @@ impl App {
                 next_due_at = Some(next_due_at.map_or(due, |n| n.min(due)));
             }
         }
+        let completions = daily_completions(&logs, zone, settings.day_start_minute)?;
         let mut history = BTreeMap::<NaiveDate, Vec<&ReviewLog>>::new();
         for l in &logs {
             let at = l
@@ -89,7 +94,11 @@ impl App {
                 .range((today - Duration::days(days - 1))..=today)
                 .flat_map(|(_, v)| v.iter().copied())
                 .collect::<Vec<_>>();
-            period(&v)
+            let completed = completions
+                .range((today - Duration::days(days - 1))..=today)
+                .map(|(_, n)| n)
+                .sum();
+            period(&v, completed)
         };
         let forecasts = |days: i64| {
             (0..days)
@@ -116,12 +125,12 @@ impl App {
             today: window(1),
             last_7_days: window(7),
             last_30_days: window(30),
-            all_time: period(&logs.iter().collect::<Vec<_>>()),
+            all_time: period(&logs.iter().collect::<Vec<_>>(), completions.values().sum()),
             daily_history: history
                 .iter()
                 .map(|(d, l)| HistoryDay {
                     date: d.to_string(),
-                    statistics: period(l),
+                    statistics: period(l, *completions.get(d).unwrap_or(&0)),
                 })
                 .collect(),
             profile_status: ProfileStatus {
@@ -131,6 +140,59 @@ impl App {
                 model_revision: profile.active_model_revision,
                 eligibility,
             },
+        })
+    }
+    pub fn library_statistics(&self) -> AppResult<LibraryStatistics> {
+        let settings = self.store.settings()?;
+        let zone = settings
+            .timezone
+            .parse()
+            .map_err(|_| crate::AppError::new("invalidTimezone"))?;
+        let today = study_date(self.clock.now(), zone, settings.day_start_minute);
+        let logs: Vec<ReviewLog> = self
+            .store
+            .conn
+            .prepare("SELECT payload FROM reviews ORDER BY at_ms,rowid")?
+            .query_map([], |r| r.get::<_, String>(0))?
+            .map(|r| Ok(serde_json::from_str(&r?)?))
+            .collect::<AppResult<_>>()?;
+        let spelling_decks: HashSet<String> = self
+            .store
+            .conn
+            .prepare("SELECT id FROM decks WHERE kind='spelling'")?
+            .query_map([], |r| r.get(0))?
+            .collect::<Result<_, _>>()?;
+        let spelling_logs = logs
+            .iter()
+            .filter(|log| spelling_decks.contains(&log.deck_id))
+            .cloned()
+            .collect::<Vec<_>>();
+        let completions = daily_completions(&logs, zone, settings.day_start_minute)?;
+        let spelling = daily_completions(&spelling_logs, zone, settings.day_start_minute)?;
+        let mut history = BTreeMap::<NaiveDate, Vec<&ReviewLog>>::new();
+        for log in &logs {
+            let at = log
+                .reviewed_at
+                .parse()
+                .map_err(|_| crate::AppError::new("invalidData"))?;
+            history
+                .entry(study_date(at, zone, settings.day_start_minute))
+                .or_default()
+                .push(log);
+        }
+        Ok(LibraryStatistics {
+            today: period(
+                history.get(&today).map(Vec::as_slice).unwrap_or(&[]),
+                *completions.get(&today).unwrap_or(&0),
+            ),
+            daily_history: history
+                .iter()
+                .map(|(date, logs)| HistoryDay {
+                    date: date.to_string(),
+                    statistics: period(logs, *completions.get(date).unwrap_or(&0)),
+                })
+                .collect(),
+            spelling_completed_today: *spelling.get(&today).unwrap_or(&0),
         })
     }
 }

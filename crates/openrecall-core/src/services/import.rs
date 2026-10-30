@@ -4,7 +4,6 @@ use crate::{
     contracts::{
         cards::{CardDraft, FormDraft},
         import::*,
-        library::DeckDetail,
     },
 };
 use serde_json::Value;
@@ -36,6 +35,7 @@ fn issue(field: String, code: &str) -> FieldError {
 }
 fn parse_form(value: &Value, path: &str, key: String, variant: bool) -> ImportForm {
     let mut form = ImportForm {
+        question_title: None,
         key,
         front: String::new(),
         back: String::new(),
@@ -77,8 +77,22 @@ fn parse_form(value: &Value, path: &str, key: String, variant: bool) -> ImportFo
         form.issues
             .push(issue(format!("{path}.variants"), "nestedVariants"));
     }
+    let title = match object.get("questionTitle") {
+        Some(Value::String(text)) => {
+            crate::domain::card::normalize_question_title(Some(text.clone()))
+                .map_err(|_| "invalidQuestionTitle")
+        }
+        None | Some(Value::Null) => Ok(None),
+        _ => Err("stringExpected"),
+    };
+    match title {
+        Ok(title) => form.question_title = title,
+        Err(code) => form
+            .issues
+            .push(issue(format!("{path}.questionTitle"), code)),
+    }
     for name in object.keys() {
-        if !["front", "back", "notes", "variants"].contains(&name.as_str()) {
+        if !["front", "back", "notes", "variants", "questionTitle"].contains(&name.as_str()) {
             form.warnings
                 .push(issue(format!("{path}.{name}"), "unknownField"));
         }
@@ -110,7 +124,7 @@ fn mark_duplicate(form: &mut ImportForm, seen: &mut HashMap<String, DuplicateRef
 impl App {
     fn existing_forms(&self) -> AppResult<HashMap<String, DuplicateRef>> {
         let mut result = HashMap::new();
-        let mut stmt=self.store.conn.prepare("SELECT c.id,c.deck_id,json_extract(f.value,'$.id'),json_extract(f.value,'$.front'),json_extract(f.value,'$.back') FROM cards c,json_each(c.payload,'$.forms') f")?;
+        let mut stmt=self.store.conn.prepare("SELECT c.id,c.deck_id,json_extract(f.value,'$.id'),json_extract(f.value,'$.front'),json_extract(f.value,'$.back') FROM cards c JOIN decks d ON d.id=c.deck_id,json_each(c.payload,'$.forms') f WHERE d.kind='standard'")?;
         let rows = stmt.query_map([], |r| {
             Ok((
                 r.get::<_, String>(0)?,
@@ -139,7 +153,7 @@ impl App {
         deck_id: String,
         text: String,
     ) -> AppResult<ImportPreview> {
-        let _: DeckDetail = self.store.get("decks", &deck_id)?;
+        self.require_manual_card_deck(&deck_id)?;
         if text.len() > 50 * 1024 * 1024 {
             return Err(AppError::new("importTooLarge"));
         }
@@ -178,6 +192,12 @@ impl App {
                         format!("{key}-variant-{v}"),
                         true,
                     );
+                    if item
+                        .as_object()
+                        .is_some_and(|o| !o.contains_key("questionTitle"))
+                    {
+                        form.question_title = primary.question_title.clone();
+                    }
                     mark_duplicate(&mut form, &mut seen, valid);
                     variants.push(form);
                 }
@@ -228,6 +248,7 @@ impl App {
             .get(&input.preview_id)
             .cloned()
             .ok_or_else(|| AppError::new("previewExpired"))?;
+        self.require_manual_card_deck(&preview.deck_id)?;
         if input.library_revision != preview.library_revision
             || self.store.revision()? != preview.library_revision
         {
@@ -283,6 +304,7 @@ impl App {
                     },
                 );
                 forms.push(FormDraft {
+                    question_title: form.question_title.clone(),
                     id: None,
                     front: form.front.clone(),
                     back: form.back.clone(),
@@ -295,8 +317,18 @@ impl App {
         }
         let now = self.clock.now();
         let inserted_cards = drafts.len() as u32;
+        let spelling = crate::spelling::storage::config(&self.store.conn)?
+            .filter(|config| config.source_deck_id.as_deref() == Some(preview.deck_id.as_str()));
+        let before = self.store.conn.total_changes();
+        let mut collected = 0;
         for draft in drafts {
-            self.create_card_at(preview.deck_id.clone(), draft, now)?;
+            let card = self.create_card_at(preview.deck_id.clone(), draft, now)?;
+            if spelling.is_some() {
+                collected += self.collect_spelling_content(&card, true)?;
+            }
+        }
+        if let Some(config) = spelling {
+            self.finish_spelling_collection(&config.deck_id, collected, before)?;
         }
         self.import_previews.remove(&input.preview_id);
         Ok(ImportReport {

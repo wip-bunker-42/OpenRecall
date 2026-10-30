@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { App } from '../../app/App';
 import { fixtureApi, nativeFixture, deckFixture } from '../../test/mockApi';
 import { Disclosure } from '../../components/Disclosure';
+import { bootstrapFixture } from '../../test/mockApi';
+import { spellingDeck } from '../../test/spellingFixtures';
 it('keeps optional details collapsed with a focusable native summary', async () => {
   const user = userEvent.setup();
   render(
@@ -63,4 +65,25 @@ it('creates, renames and deletes through explicit dialogs and displays API error
       expect.objectContaining({ kind: 'deleteDeck' }),
     ]),
   );
+});
+it('explains that explicit spelling group deletion removes its progress while keeping its source', async () => {
+  const user = userEvent.setup();
+  const calls: unknown[] = [];
+  const api = fixtureApi((r) => {
+    calls.push(r);
+    if (r.kind === 'bootstrap')
+      return { kind: r.kind, payload: { ...bootstrapFixture, decks: [deckFixture, spellingDeck] } };
+    if (r.kind === 'deleteDeck') return { kind: r.kind, payload: { id: spellingDeck.id } };
+  });
+  render(<App api={api} native={nativeFixture} />);
+  await user.click(await screen.findByRole('button', { name: `حذف ${spellingDeck.name}` }));
+  expect(
+    within(screen.getByRole('dialog')).getByText(/تبقى مجموعات المصدر كما هي/),
+  ).toBeInTheDocument();
+  await user.click(screen.getByRole('button', { name: 'حذف المجموعة نهائيًا' }));
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  expect(calls).toContainEqual({
+    kind: 'deleteDeck',
+    payload: { deckId: spellingDeck.id, expectedRevision: spellingDeck.revision },
+  });
 });

@@ -4,6 +4,48 @@ import { CardEditor } from './CardEditor';
 import { DeckPage } from './DeckPage';
 import { fixtureApi, nativeFixture, deckFixture } from '../../test/mockApi';
 import { cardFixture } from '../../test/cardFixtures';
+it('edits_each_form_title_without_losing_other_drafts', async () => {
+  const calls: unknown[] = [];
+  const api = fixtureApi((request) => {
+    calls.push(request);
+    if (request.kind === 'updateCard') return { kind: request.kind, payload: cardFixture };
+  });
+  const user = userEvent.setup();
+  render(
+    <CardEditor
+      card={cardFixture}
+      deckId="deck-1"
+      api={api}
+      onSaved={vi.fn()}
+      onCancel={vi.fn()}
+    />,
+  );
+  await user.type(screen.getByLabelText('عنوان السؤال، الصيغة ١'), 'ترجم');
+  await user.type(screen.getByLabelText('عنوان السؤال، الصيغة ٢'), '<b>أكمل</b>');
+  expect(screen.getByLabelText('السؤال، الصيغة ١')).toHaveValue('<h1>مرحبا</h1>');
+  expect(screen.getByLabelText('الإجابة، الصيغة ٢')).toHaveValue('عربي');
+  await user.click(screen.getByRole('button', { name: 'إضافة صيغة بديلة' }));
+  expect(screen.getByLabelText('عنوان السؤال، الصيغة ١')).toHaveValue('ترجم');
+  await user.click(screen.getByRole('button', { name: 'حذف الصيغة ٣' }));
+  await user.click(screen.getByRole('button', { name: 'حفظ البطاقة' }));
+  expect(calls).toContainEqual(
+    expect.objectContaining({
+      kind: 'updateCard',
+      payload: expect.objectContaining({
+        draft: {
+          forms: [
+            expect.objectContaining({
+              id: 'form-1',
+              questionTitle: 'ترجم',
+              front: '<h1>مرحبا</h1>',
+            }),
+            expect.objectContaining({ id: 'form-2', questionTitle: '<b>أكمل</b>', back: 'عربي' }),
+          ],
+        },
+      }),
+    }),
+  );
+});
 it('keeps stable form IDs, focuses added/removed alternatives and submits all forms', async () => {
   const calls: unknown[] = [];
   const api = fixtureApi((r) => {

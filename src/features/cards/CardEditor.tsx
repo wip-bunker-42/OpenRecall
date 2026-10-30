@@ -8,6 +8,7 @@ import { number } from '../../shared/format';
 import { useUnsaved } from '../../app/unsaved';
 type EditForm = FormDraft & { key: string };
 const empty = (): EditForm => ({
+  questionTitle: null,
   key: crypto.randomUUID(),
   id: null,
   front: '',
@@ -54,7 +55,12 @@ export function CardEditor({
   function change(key: string, field: keyof FormDraft, value: string) {
     setForms((fs) =>
       fs.map((f) =>
-        f.key === key ? { ...f, [field]: field === 'language' ? value || null : value } : f,
+        f.key === key
+          ? {
+              ...f,
+              [field]: field === 'language' || field === 'questionTitle' ? value || null : value,
+            }
+          : f,
       ),
     );
   }
@@ -141,6 +147,19 @@ export function CardEditor({
                   lang={form.language ?? undefined}
                 />
               </label>
+              <label>
+                عنوان السؤال، الصيغة {number(i + 1)}
+                <input
+                  value={form.questionTitle ?? ''}
+                  onChange={(e) => change(form.key, 'questionTitle', e.target.value)}
+                  aria-describedby={`${id}-${form.key}-title-help`}
+                  dir="auto"
+                />
+              </label>
+              <p id={`${id}-${form.key}-title-help`} className="muted">
+                اختياري. اتركه فارغًا لاستخدام «السؤال». حتى ١٦٠ حرفًا في سطر واحد، مثل «ترجم» أو
+                «أكمل».
+              </p>
               <label>
                 لغة الصيغة {number(i + 1)} (اختياري، مثل ar أو en)
                 <input

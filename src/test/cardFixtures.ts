@@ -4,8 +4,15 @@ export const cardFixture: CardDetail = {
   id: 'card-1',
   deckId: 'deck-1',
   forms: [
-    { id: 'form-1', front: '<h1>مرحبا</h1>', back: 'English', notes: 'ملاحظة', language: null },
-    { id: 'form-2', front: '日本語', back: 'عربي', notes: '', language: 'ja' },
+    {
+      id: 'form-1',
+      front: '<h1>مرحبا</h1>',
+      back: 'English',
+      notes: 'ملاحظة',
+      language: null,
+      questionTitle: null,
+    },
+    { id: 'form-2', front: '日本語', back: 'عربي', notes: '', language: 'ja', questionTitle: null },
   ],
   phase: 'new',
   memory: null,
@@ -19,6 +26,7 @@ export const cardFixture: CardDetail = {
   bag: { remaining: [], consumed: [], lastConsumed: null, reserved: null, cycle: 0 },
 };
 const primary = {
+  questionTitle: null,
   key: 'p1',
   front: 'سؤال عربي English',
   back: 'answer',

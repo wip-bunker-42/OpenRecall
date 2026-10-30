@@ -34,21 +34,41 @@ await new Promise((resolve, reject) => {
   proxy.once('error', reject);
   proxy.listen(4459, '127.0.0.1', resolve);
 });
-async function invoke(args) {
+async function invoke(args, extraEnv = {}) {
   const { command, prefix } = pnpmInvocation();
   const status = await new Promise((resolve, reject) => {
     const child = spawn(command, [...prefix, ...args], {
       stdio: 'inherit',
       shell: false,
-      env: { ...process.env, OPENRECALL_NATIVE_ROOT: root },
+      env: { ...process.env, ...extraEnv, OPENRECALL_NATIVE_ROOT: root },
     });
     child.once('error', reject);
     child.once('exit', resolve);
   });
   if (status !== 0) throw new Error(`Native suite exited with ${status}`);
 }
-async function run(args) {
-  await invoke(['exec', 'wdio', 'run', 'wdio.conf.ts', ...args]);
+async function run(args, extraEnv = {}) {
+  await invoke(['exec', 'wdio', 'run', 'wdio.conf.ts', ...args], extraEnv);
+}
+function assertStopped() {
+  const result = spawnSync(
+    'powershell.exe',
+    [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      '$count=@(Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -eq $env:OPENRECALL_TEST_BINARY }).Count; if ($count -ne 0) { exit 1 }',
+    ],
+    {
+      env: {
+        ...process.env,
+        OPENRECALL_TEST_BINARY: resolve('target/native-automation/OpenRecallAutomation.exe'),
+      },
+      encoding: 'utf8',
+    },
+  );
+  if (result.status !== 0)
+    throw new Error('Native app process did not exit; restart privacy is unverified.');
 }
 try {
   if (process.argv.length > 2) await run(process.argv.slice(2));
@@ -85,6 +105,15 @@ try {
       '--spec',
       'tests/native/focus.spec.ts',
     ]);
+    assertStopped();
+    await run(['--spec', 'tests/native/spelling.spec.ts'], {
+      OPENRECALL_NATIVE_SPELLING_PHASE: 'prepare',
+    });
+    assertStopped();
+    console.log('Confirmed spelling app process exited. Restarting its saved presentation.');
+    await run(['--spec', 'tests/native/spelling.spec.ts'], {
+      OPENRECALL_NATIVE_SPELLING_PHASE: 'resume',
+    });
     if (
       !blocked.some(
         (request) => request.method === 'CONNECT' && request.target === 'github.com:443',

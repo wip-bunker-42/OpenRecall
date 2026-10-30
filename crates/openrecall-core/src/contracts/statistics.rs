@@ -3,6 +3,7 @@ use ts_rs::TS;
 #[derive(Clone, Debug, Default, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct PeriodStatistics {
+    pub completed_for_day: u32,
     pub attempts: u32,
     pub unique_cards: u32,
     pub active_ms: u64,
@@ -29,6 +30,13 @@ pub struct ForecastDay {
 pub struct HistoryDay {
     pub date: String,
     pub statistics: PeriodStatistics,
+}
+#[derive(Clone, Debug, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+pub struct LibraryStatistics {
+    pub today: PeriodStatistics,
+    pub daily_history: Vec<HistoryDay>,
+    pub spelling_completed_today: u32,
 }
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]

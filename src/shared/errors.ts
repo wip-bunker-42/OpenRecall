@@ -2,6 +2,11 @@ export function errorText(error: unknown): string {
   const code =
     typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : 'unknown';
   const messages: Record<string, string> = {
+    spellingDeckExists: 'مجموعة التدرب على الكتابة موجودة بالفعل في مكتبتك. يمكنك فتحها.',
+    invalidSpellingSource: 'اختر مجموعة عادية موجودة لتكون مصدر الكلمات.',
+    managedSpellingDeck:
+      'تُدار كلمات هذه المجموعة تلقائيًا من المصدر. يمكنك حذف كلمة أو تغيير مصدرها.',
+    spellingRevealNotApplicable: 'قيّم كلمة الكتابة مباشرة بعد التدريب عليها.',
     updateCheckFailed:
       'تعذر التحقق من التحديثات. تحقق من الاتصال وحاول مرة أخرى؛ المذاكرة متاحة دون إنترنت.',
     updateDownloadFailed: 'تعذر تنزيل التحديث. يمكنك إعادة المحاولة؛ بيانات المذاكرة محفوظة.',

@@ -8,6 +8,8 @@ import { FormErrors } from '../../components/FormErrors';
 import { StatusRegion } from '../../components/StatusRegion';
 import { number } from '../../shared/format';
 import { useMountedView } from '../../shared/useMountedView';
+import { SpellingSetup } from '../spelling/SpellingSetup';
+import { LibraryStatistics } from '../statistics/LibraryStatistics';
 type Editing = { action: 'create' } | { action: 'rename' | 'delete'; deck: DeckDetail };
 export function LibraryPage({
   bootstrap,
@@ -25,6 +27,10 @@ export function LibraryPage({
   const [error, setError] = useState<unknown>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [spellingSetup, setSpellingSetup] = useState(false);
+  const [statisticsOpen, setStatisticsOpen] = useState(false);
+  const spelling = bootstrap.decks.find((d) => d.kind === 'spelling');
+  const sources = bootstrap.decks.filter((d) => d.kind === 'standard');
   const mounted = useMountedView();
   function edit(value: Editing) {
     setError(null);
@@ -87,7 +93,35 @@ export function LibraryPage({
           إنشاء مجموعة
         </button>
       </div>
+      <div className="actions">
+        {spelling ? (
+          <button onClick={() => navigate({ page: 'deck', deckId: spelling.id })}>
+            فتح مجموعة التدرب على الكتابة
+          </button>
+        ) : (
+          <button disabled={busy || !sources.length} onClick={() => setSpellingSetup(true)}>
+            إنشاء مجموعة التدرب على الكتابة
+          </button>
+        )}
+      </div>
+      {!spelling && !sources.length && (
+        <p>أنشئ مجموعة عادية أولًا لتكون مصدر الكلمات الإنجليزية للتدرب على الكتابة.</p>
+      )}
       <StatusRegion message={message} />
+      <details className="disclosure" onToggle={(e) => setStatisticsOpen(e.currentTarget.open)}>
+        <summary>
+          <h2>إحصاءات المكتبة</h2>
+        </summary>
+        <div className="disclosure-body">
+          {statisticsOpen && (
+            <LibraryStatistics
+              api={api}
+              revision={bootstrap.libraryRevision}
+              timezone={bootstrap.settings.timezone}
+            />
+          )}
+        </div>
+      </details>
       {!editing && <FormErrors error={error} />}
       {bootstrap.resumableSessions.length > 0 && (
         <section aria-label="جلسات غير مكتملة">
@@ -117,6 +151,9 @@ export function LibraryPage({
                   {d.name}
                 </button>
               </h2>
+              {d.kind === 'spelling' && (
+                <p className="muted">تدرب على الكتابة · كلمات مولّدة من المصدر</p>
+              )}
               <p className="muted">
                 {number(d.logicalCards)} بطاقة، {number(d.dueNow)} مستحقة الآن، {number(d.newCards)}{' '}
                 جديدة
@@ -173,6 +210,8 @@ export function LibraryPage({
               <p>
                 ستُحذف مجموعة «{editing.deck.name}» وبطاقاتها وسجل مراجعاتها نهائيًا. صدّر نسخة
                 احتياطية للاحتفاظ بها.
+                {editing.deck.kind === 'spelling' &&
+                  ' حذف مجموعة الكتابة يمحو كلماتها وتقدمها واستبعاداتها، وتبقى مجموعات المصدر كما هي.'}
               </p>
             ) : (
               <label>
@@ -205,6 +244,19 @@ export function LibraryPage({
             </div>
           </form>
         </Dialog>
+      )}
+      {spellingSetup && (
+        <SpellingSetup
+          api={api}
+          sources={sources}
+          onCancel={() => setSpellingSetup(false)}
+          onCreated={async (result) => {
+            await refresh();
+            if (!mounted.current) return;
+            setSpellingSetup(false);
+            navigate({ page: 'deck', deckId: result.deck.id });
+          }}
+        />
       )}
     </>
   );

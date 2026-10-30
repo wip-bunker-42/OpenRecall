@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { Api } from '../../shared/api';
-import type { DeckStatistics as Statistics } from '../../shared/generated/DeckStatistics';
+import type { DeckKind } from '../../shared/generated/DeckKind';
 import type { PeriodStatistics } from '../../shared/generated/PeriodStatistics';
 import type { ForecastDay } from '../../shared/generated/ForecastDay';
 import { EligibilityTable } from '../profiles/EligibilityTable';
 import { FormErrors } from '../../components/FormErrors';
 import { number, dateTime } from '../../shared/format';
+import { useStatistics } from './useStatistics';
 const percentage = (v: number | null) =>
   v === null
     ? 'لا توجد نتائج'
@@ -16,14 +17,14 @@ const day = (date: string) =>
   new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium', timeZone: 'UTC' }).format(
     new Date(`${date}T12:00:00Z`),
   );
-function Forecast({ caption, rows }: { caption: string; rows: ForecastDay[] }) {
+function Forecast({ caption, rows, unit }: { caption: string; rows: ForecastDay[]; unit: string }) {
   return (
     <table>
       <caption>{caption}</caption>
       <thead>
         <tr>
           <th scope="col">يوم المذاكرة</th>
-          <th scope="col">البطاقات</th>
+          <th scope="col">{unit}</th>
         </tr>
       </thead>
       <tbody>
@@ -45,6 +46,7 @@ function PeriodRow({ label, value }: { label: string; value: PeriodStatistics })
       <th scope="row">{label}</th>
       <td>{number(value.attempts)}</td>
       <td>{number(value.uniqueCards)}</td>
+      <td>{number(value.completedForDay)}</td>
       <td>{seconds(value.activeMs)}</td>
       <td>{seconds(value.meanResponseMs)}</td>
       <td>{percentage(value.observedRecallRate)}</td>
@@ -54,12 +56,13 @@ function PeriodRow({ label, value }: { label: string; value: PeriodStatistics })
     </tr>
   );
 }
-const Head = () => (
+const Head = ({ unit }: { unit: string }) => (
   <thead>
     <tr>
       <th scope="col">الفترة</th>
       <th scope="col">المحاولات</th>
-      <th scope="col">البطاقات المختلفة</th>
+      <th scope="col">{unit} المختلفة</th>
+      <th scope="col">انتهت مراجعاتها في اليوم</th>
       <th scope="col">وقت الإجابة الفعلي</th>
       <th scope="col">متوسط الإجابة</th>
       <th scope="col">التذكر المرصود</th>
@@ -75,30 +78,26 @@ export function DeckStatistics({
   api,
   timezone = 'Africa/Cairo',
   revision,
+  deckKind = 'standard',
 }: {
   deckId: string;
   api: Api;
   timezone?: string;
   revision?: string;
+  deckKind?: DeckKind;
 }) {
-  const [stats, setStats] = useState<Statistics | null>(null);
-  const [error, setError] = useState<unknown>(null);
   const [forecasts, setForecasts] = useState(false);
   const [history, setHistory] = useState(false);
-  const [page, setPage] = useState(1);
-  const load = useCallback(
-    async () => setStats(await api.call('getDeckStatistics', { deckId })),
-    [api, deckId],
-  );
-  useEffect(() => {
-    void load().catch(setError);
-  }, [load, revision]);
+  const [requestedPage, setPage] = useState(1);
+  const read = useCallback(() => api.call('getDeckStatistics', { deckId }), [api, deckId]);
+  const { stats, error, refresh } = useStatistics(read, `${revision ?? ''}:${timezone}`);
+  const unit = deckKind === 'spelling' ? 'كلمات الإملاء' : 'البطاقات';
   if (!stats)
     return (
       <>
-        <FormErrors error={error} />
+        <FormErrors error={error} focus={false} />
         <p role="status">جارٍ حساب الإحصاءات…</p>
-        <button onClick={() => void load().catch(setError)}>تحديث الإحصاءات</button>
+        <button onClick={() => void refresh()}>تحديث الإحصاءات</button>
       </>
     );
   const periods: [string, PeriodStatistics][] = [
@@ -108,15 +107,18 @@ export function DeckStatistics({
     ['كل الوقت', stats.allTime],
   ];
   const daily = stats.dailyHistory.slice().reverse();
+  const page = Math.min(requestedPage, Math.max(1, Math.ceil(daily.length / 20)));
   return (
     <>
       <h3>إحصاءات هذه المجموعة</h3>
-      <FormErrors error={error} />
+      <FormErrors error={error} focus={false} />
       <dl className="statistics-list">
-        <dt>عدد البطاقات</dt>
+        <dt>عدد {unit}</dt>
         <dd>{number(stats.cards)}</dd>
         <dt>عدد الصيغ</dt>
         <dd>{number(stats.forms)}</dd>
+        <dt>انتهت مراجعاتها اليوم</dt>
+        <dd>{number(stats.today.completedForDay)}</dd>
         <dt>جديدة</dt>
         <dd>{number(stats.phases.new)}</dd>
         <dt>في التعلّم</dt>
@@ -136,10 +138,18 @@ export function DeckStatistics({
         كل بطاقة تُحسب مرة واحدة مهما تعددت صيغها. التذكر المرصود هو نسبة تقييمات الصعوبة والطبيعي
         والسهل من المحاولات؛ «نسيت» لا تُحسب تذكرًا.
       </p>
+      <p>
+        يُحسب الإنجاز من آخر تقييم للبطاقة في يوم المذاكرة إذا نقل استحقاقها إلى يوم لاحق. مجموع
+        الفترة هو مجموع الإنجاز في أيامها، ويظل إنجاز اليوم السابق محفوظًا عند مراجعة البطاقة
+        لاحقًا.
+      </p>
+      {deckKind === 'spelling' && (
+        <p>كلمات الإملاء مهام مستقلة عن مراجعات بطاقات المصدر، ولكل كلمة تقدمها الخاص.</p>
+      )}
       <div className="table-scroll" role="region" aria-label="جدول فترات المراجعة" tabIndex={0}>
         <table>
           <caption>المراجعة عبر الفترات</caption>
-          <Head />
+          <Head unit={unit} />
           <tbody>
             {periods.map(([label, value]) => (
               <PeriodRow key={label} label={label} value={value} />
@@ -155,8 +165,8 @@ export function DeckStatistics({
               الأعداد حسب المواعيد الحالية وبداية يوم المذاكرة. تُضاف المتأخرة إلى اليوم الحالي، وقد
               تغيّر المراجعات القادمة هذه التوقعات.
             </p>
-            <Forecast caption="الاستحقاقات خلال ٧ أيام" rows={stats.forecast7Days} />
-            <Forecast caption="الاستحقاقات خلال ٣٠ يومًا" rows={stats.forecast30Days} />
+            <Forecast caption="الاستحقاقات خلال ٧ أيام" rows={stats.forecast7Days} unit={unit} />
+            <Forecast caption="الاستحقاقات خلال ٣٠ يومًا" rows={stats.forecast30Days} unit={unit} />
           </>
         )}
       </details>
@@ -175,7 +185,7 @@ export function DeckStatistics({
               >
                 <table>
                   <caption>المراجعات حسب يوم المذاكرة</caption>
-                  <Head />
+                  <Head unit={unit} />
                   <tbody>
                     {daily.slice((page - 1) * 20, page * 20).map((row) => (
                       <PeriodRow key={row.date} label={day(row.date)} value={row.statistics} />
@@ -184,10 +194,10 @@ export function DeckStatistics({
                 </table>
               </div>
               <div className="actions">
-                <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+                <button disabled={page === 1} onClick={() => setPage(page - 1)}>
                   الأيام الأحدث
                 </button>
-                <button disabled={page * 20 >= daily.length} onClick={() => setPage((p) => p + 1)}>
+                <button disabled={page * 20 >= daily.length} onClick={() => setPage(page + 1)}>
                   الأيام الأقدم
                 </button>
               </div>
@@ -203,15 +213,7 @@ export function DeckStatistics({
         <summary>شروط ومساهمات تدريب النموذج</summary>
         <EligibilityTable eligibility={stats.profileStatus.eligibility} />
       </details>
-      <button
-        onClick={() =>
-          void load()
-            .then(() => setError(null))
-            .catch(setError)
-        }
-      >
-        تحديث الإحصاءات
-      </button>
+      <button onClick={() => void refresh()}>تحديث الإحصاءات</button>
     </>
   );
 }

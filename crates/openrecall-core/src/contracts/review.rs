@@ -1,4 +1,10 @@
 use crate::scheduling::fsrs::Rating;
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+pub enum ReviewMode {
+    Standard,
+    Spelling,
+}
 use crate::{
     domain::card::{CardDetail, CardForm},
     scheduling::{fsrs::RatingPreviews, queue::ReviewFilter},
@@ -39,6 +45,8 @@ pub struct Progress {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewFrame {
+    pub mode: ReviewMode,
+    pub can_rate: bool,
     pub preview_due_at: Option<RatingDueDates>,
     pub last_review: Option<ReviewResult>,
     pub session_id: String,

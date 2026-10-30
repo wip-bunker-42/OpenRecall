@@ -14,6 +14,7 @@ import { number } from '../../shared/format';
 import { DeckStatistics } from '../statistics/DeckStatistics';
 import { SchedulingSettings } from '../settings/SchedulingSettings';
 import { useMountedView } from '../../shared/useMountedView';
+import { SpellingSettings } from '../spelling/SpellingSettings';
 export function DeckPage({
   deckId,
   api,
@@ -41,6 +42,9 @@ export function DeckPage({
   const [statisticsOpen, setStatisticsOpen] = useState(false);
   const [schedulingOpen, setSchedulingOpen] = useState(false);
   const [policyDirty, setPolicyDirty] = useState(false);
+  const [sourceOpen, setSourceOpen] = useState(false);
+  const [sourceBlocked, setSourceBlocked] = useState(false);
+  const actionsBlocked = policyDirty || sourceBlocked;
   const mounted = useMountedView();
   const refresh = useCallback(async () => {
     setDeck(await api.call('getDeck', { deckId }));
@@ -52,6 +56,7 @@ export function DeckPage({
       .catch(setError);
   }, [refresh]);
   async function start() {
+    if (actionsBlocked) return;
     setBusy(true);
     setError(null);
     try {
@@ -101,21 +106,32 @@ export function DeckPage({
             {number(deck.newCards)} جديدة.
           </p>
         </div>
-        <button className="primary" disabled={busy || policyDirty} onClick={() => void start()}>
+        <button className="primary" disabled={busy || actionsBlocked} onClick={() => void start()}>
           بدء المراجعة
         </button>
       </div>
-      <div className="actions">
-        <button disabled={policyDirty} onClick={() => setEditor({ card: null })}>
-          إنشاء بطاقة
-        </button>
-        <button disabled={policyDirty} onClick={() => setImporting(true)}>
-          استيراد بطاقات JSON
-        </button>
-      </div>
+      {deck.kind === 'standard' && (
+        <div className="actions">
+          <button disabled={policyDirty} onClick={() => setEditor({ card: null })}>
+            إنشاء بطاقة
+          </button>
+          <button disabled={policyDirty} onClick={() => setImporting(true)}>
+            استيراد بطاقات JSON
+          </button>
+        </div>
+      )}
       <StatusRegion message={message} />
       {policyDirty && (
-        <p>احفظ تعديلات الجدولة والتحسين أو تجاهلها قبل تعديل البطاقات أو بدء المراجعة.</p>
+        <p>
+          احفظ تعديلات الجدولة والتحسين أو تجاهلها قبل تعديل البطاقات أو مصدر الكلمات أو بدء
+          المراجعة.
+        </p>
+      )}
+      {sourceBlocked && (
+        <p>
+          احفظ اختيار المصدر أو تجاهله، وانتظر اكتمال عمليته قبل تعديل الجدولة أو بدء المراجعة أو
+          حذف كلمة.
+        </p>
       )}
       {!deleting && <FormErrors error={error} />}
       {error && (
@@ -143,15 +159,39 @@ export function DeckPage({
               onDelete={setDeleting}
               revision={revision}
               timezone={timezone}
-              editingDisabled={policyDirty}
+              editingDisabled={actionsBlocked}
+              managed={deck.kind === 'spelling'}
             />
           )}
         </div>
       </details>
+      {deck.kind === 'spelling' && (
+        <details
+          className="disclosure"
+          onToggle={(e) => {
+            if (e.currentTarget.open) setSourceOpen(true);
+          }}
+        >
+          <summary>
+            <h2>مصدر كلمات الكتابة</h2>
+          </summary>
+          <div className="disclosure-body">
+            {sourceOpen && (
+              <SpellingSettings
+                api={api}
+                deck={deck}
+                onChanged={refresh}
+                onBlockedChange={setSourceBlocked}
+                disabled={policyDirty}
+              />
+            )}
+          </div>
+        </details>
+      )}
       <details
         className="disclosure"
         onToggle={(e) => {
-          if (e.currentTarget.open) setStatisticsOpen(true);
+          setStatisticsOpen(e.currentTarget.open);
         }}
       >
         <summary>
@@ -164,6 +204,7 @@ export function DeckPage({
               api={api}
               timezone={timezone}
               revision={deck.revision}
+              deckKind={deck.kind}
             />
           )}
         </div>
@@ -186,6 +227,7 @@ export function DeckPage({
               navigate={navigate}
               onSaved={refresh}
               onDirtyChange={setPolicyDirty}
+              disabled={sourceBlocked}
             />
           )}
         </div>
@@ -227,6 +269,12 @@ export function DeckPage({
         >
           <FormErrors error={error} />
           <p>ستُحذف البطاقة وكل صيغها وسجل مراجعاتها نهائيًا.</p>
+          {deck.kind === 'spelling' && (
+            <p>
+              لن تُجمع هذه الكلمة مجددًا حتى تسمح بها في الكلمات المستبعدة. حذفها يمحو تقدمها، وتبقى
+              البطاقة الأصلية كما هي.
+            </p>
+          )}
           <div className="actions">
             <button data-autofocus disabled={busy} onClick={() => setDeleting(null)}>
               إلغاء

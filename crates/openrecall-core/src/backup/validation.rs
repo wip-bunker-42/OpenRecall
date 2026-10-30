@@ -47,6 +47,10 @@ fn card(c: &CardDetail) -> AppResult<()> {
     let form_ids = ids(c.forms.iter().map(|f| f.id.as_str()))?;
     for f in &c.forms {
         check(!f.front.trim().is_empty() && !f.back.trim().is_empty())?;
+        check(
+            crate::domain::card::normalize_question_title(f.question_title.clone())
+                .is_ok_and(|title| title == f.question_title),
+        )?;
     }
     let remaining = ids(c.bag.remaining.iter().map(String::as_str))?;
     let consumed = ids(c.bag.consumed.iter().map(String::as_str))?;
@@ -137,6 +141,7 @@ fn progress(c: &CardDetail, logs: &[&crate::domain::review::ReviewLog]) -> AppRe
     }
 }
 pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
+    crate::spelling::validate::validate(d)?;
     d.settings.validate()?;
     check(!d.library_revision.is_empty())?;
     let models = ids(d.models.iter().map(|m| m.id.as_str()))?;
@@ -369,7 +374,11 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
                 && input.expected_card_revision == u.card_before.revision
                 && p.card_id == log.card_id
                 && p.form_id == log.form_id
-                && p.answer_revealed
+                && (p.answer_revealed
+                    || d.decks.iter().any(|deck| {
+                        deck.id == u.card_before.deck_id
+                            && deck.kind == crate::domain::spelling::DeckKind::Spelling
+                    }))
                 && input.rating == log.rating,
         )?;
     }

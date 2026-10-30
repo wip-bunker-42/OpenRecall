@@ -9,6 +9,7 @@ fn ms(s: &str) -> AppResult<i64> {
 impl Store {
     pub(crate) fn snapshot(&self) -> AppResult<BackupData> {
         Ok(BackupData {
+            spelling: crate::spelling::storage::load(&self.conn)?,
             settings: self.settings()?,
             library_revision: self.revision()?,
             models: self.all("models")?,
@@ -23,7 +24,7 @@ impl Store {
         })
     }
     pub(crate) fn replace_snapshot(&self, d: &BackupData) -> AppResult<()> {
-        self.conn.execute_batch("DELETE FROM undo_records;DELETE FROM actions;DELETE FROM reviews;DELETE FROM sessions;DELETE FROM cards;DELETE FROM decks;DELETE FROM training_runs;DELETE FROM profiles;DELETE FROM models;DELETE FROM metadata;")?;
+        self.conn.execute_batch("DELETE FROM spelling_origins;DELETE FROM spelling_words;DELETE FROM spelling_snapshots;DELETE FROM spelling_configs;DELETE FROM spelling_exclusions;DELETE FROM undo_records;DELETE FROM actions;DELETE FROM reviews;DELETE FROM sessions;DELETE FROM cards;DELETE FROM decks;DELETE FROM training_runs;DELETE FROM profiles;DELETE FROM models;DELETE FROM metadata;")?;
         self.conn.execute(
             "UPDATE settings SET payload=?1 WHERE id=1",
             [serde_json::to_string(&d.settings)?],
@@ -40,8 +41,13 @@ impl Store {
         }
         for x in &d.decks {
             self.conn.execute(
-                "INSERT INTO decks(id,profile_id,payload) VALUES(?1,?2,?3)",
-                params![x.id, x.profile_id, serde_json::to_string(x)?],
+                "INSERT INTO decks(id,profile_id,kind,payload) VALUES(?1,?2,?3,?4)",
+                params![
+                    x.id,
+                    x.profile_id,
+                    x.kind.as_str(),
+                    serde_json::to_string(x)?
+                ],
             )?;
         }
         for x in &d.cards {
@@ -74,6 +80,7 @@ impl Store {
                 params![x.id, x.profile_id, serde_json::to_string(x)?],
             )?;
         }
+        crate::spelling::storage::insert_all(&self.conn, &d.spelling)?;
         Ok(())
     }
 }

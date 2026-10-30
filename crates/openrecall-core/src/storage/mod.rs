@@ -2,7 +2,7 @@ use crate::{AppError, AppResult, domain::settings::Settings};
 mod backup;
 use rusqlite::Connection;
 use std::{path::Path, time::Duration};
-pub(crate) const SCHEMA_VERSION: u32 = 8;
+pub(crate) const SCHEMA_VERSION: u32 = 9;
 pub(crate) struct Store {
     pub conn: Connection,
 }
@@ -38,6 +38,9 @@ impl Store {
             }
             if version < 8 {
                 tx.execute_batch(include_str!("migrations/008_training_runs.sql"))?;
+            }
+            if version < 9 {
+                tx.execute_batch(include_str!("migrations/009_spelling.sql"))?;
             }
             tx.pragma_update(None, "user_version", SCHEMA_VERSION)?;
             tx.commit()?;

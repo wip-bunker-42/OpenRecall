@@ -5,6 +5,7 @@ import type { Progress } from "./Progress";
 import type { RatingDueDates } from "./RatingDueDates";
 import type { RatingPreviews } from "./RatingPreviews";
 import type { ReviewFilter } from "./ReviewFilter";
+import type { ReviewMode } from "./ReviewMode";
 import type { ReviewResult } from "./ReviewResult";
 
-export type ReviewFrame = { previewDueAt: RatingDueDates | null, lastReview: ReviewResult | null, sessionId: string, filter: ReviewFilter, presentationId: string, card: CardDetail, form: CardForm, answerRevealed: boolean, previews: RatingPreviews | null, progress: Progress, nextDueAt: string | null, cardRevision: string, canUndo: boolean, };
+export type ReviewFrame = { mode: ReviewMode, canRate: boolean, previewDueAt: RatingDueDates | null, lastReview: ReviewResult | null, sessionId: string, filter: ReviewFilter, presentationId: string, card: CardDetail, form: CardForm, answerRevealed: boolean, previews: RatingPreviews | null, progress: Progress, nextDueAt: string | null, cardRevision: string, canUndo: boolean, };

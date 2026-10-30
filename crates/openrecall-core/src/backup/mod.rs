@@ -1,5 +1,7 @@
+pub mod decode;
 pub(crate) mod files;
 pub mod format;
+mod legacy_v1;
 mod validation;
 #[derive(Clone, Copy)]
 pub struct BackupLimits {
@@ -14,5 +16,5 @@ impl Default for BackupLimits {
 }
 pub(crate) struct PreparedRestore {
     pub preview: crate::contracts::backup::RestorePreview,
-    pub envelope: format::BackupEnvelope,
+    pub envelope: decode::ValidatedBackup,
 }

@@ -3,6 +3,8 @@ use ts_rs::TS;
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct DeckDetail {
+    #[serde(default)]
+    pub kind: crate::domain::spelling::DeckKind,
     pub id: String,
     pub name: String,
     pub profile_id: String,

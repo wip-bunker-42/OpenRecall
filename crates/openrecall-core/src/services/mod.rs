@@ -6,5 +6,6 @@ mod profiles;
 mod restart;
 mod reviews;
 mod sessions;
+mod spelling;
 mod statistics;
 mod training;
