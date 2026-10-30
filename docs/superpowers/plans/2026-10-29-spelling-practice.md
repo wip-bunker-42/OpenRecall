@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+**Rating announcement amendment 2026-10-30:** Remove the additional estimated calendar date and delay caveat from rating descriptions. Keep the approximate interval in each accessible button name and the actual committed due date after grading.
+
 **Amendment 2026-10-30:** The user explicitly requests the target word on the textarea first line and automatic entry at the beginning of that line. Initial value is target + newline; never restore user edits. Apply during Task 15 with a failing focus/prefill regression. Completed task evidence remains historical.
 
 **Goal:** Release OpenRecall 0.2.0 with one additive spelling deck, durable original contexts, disposable accessible practice input, configurable question headings and daily completion statistics.
@@ -37,7 +39,7 @@
 1. A source edit/deletion lands during spelling grading: keep the word's revision and learning state independent, preserve its current input and avoid a false stale-rating conflict (Tasks 7, 9, 12).
 2. A shared context loses one word, then its source is unbound/deleted: retain that word's last matching snapshot while other words advance; garbage collection must not remove a referenced historical context (Tasks 7, 10).
 3. A real format-1 file has nested forms in undo before-images: verify its original digest before injecting title/kind/spelling defaults and retain a usable undo after restore (Tasks 1, 10).
-4. The same presentation returns through filter parking, navigation, summary undo or restart: its field must be empty, while blur/poll/source disclosure on the still-visible card must retain normal DOM editing (Tasks 12, 15).
+4. The same presentation returns through filter parking, navigation, summary undo or restart: its field must contain only the target and a newline, while blur/poll/source disclosure on the still-visible card must retain normal DOM editing (Tasks 12, 15).
 5. A card is reviewed again tomorrow or near Cairo DST/day rollover: preserve yesterday's count, count intraday boundary crossings correctly and reverse only the relevant undone rating (Tasks 13, 14).
 
 ## Execution Contract and File Map
@@ -318,7 +320,7 @@ Spelling mutation `expectedRevision` is the config revision. Advance it on bindi
 
 **Files:** Create `src/features/spelling/{SpellingQuestion,SourceContexts}.tsx`, `src/features/spelling/{SpellingQuestion,SourceContexts}.test.tsx`; Modify `src/features/review/{ReviewPage,ReviewPage.test}.tsx`, `src/features/review/{useReviewSession,useReviewSession.test}.ts`, `src/test/spellingFixtures.ts`, `src/styles/global.css`.
 
-**Interfaces:** `SpellingQuestion({api, frame: ReviewFrame, onRate(rating: Rating): void, disabled: boolean, timezone: string})`; `SourceContexts({api, cardId: string})`. ReviewPage mounts spelling question keyed by session/presentation; useReviewSession checks native canRate. No user-attempt value binding, onChange draft, input value/selection read or scratchpad cache is introduced. The known target is supplied only as an uncontrolled defaultValue; the input ref sets initial focus and collapsed caret without reading either.
+**Interfaces:** `SpellingQuestion({api, frame: ReviewFrame, onRate(rating: Rating): void, disabled: boolean})`; `SourceContexts({api, cardId: string})`. ReviewPage mounts spelling question keyed by session/presentation; useReviewSession checks native canRate. No user-attempt value binding, onChange draft, input value/selection read or scratchpad cache is introduced. The known target is supplied only as an uncontrolled defaultValue; the input ref sets initial focus and collapsed caret without reading either.
 
 - [ ] **Step 1:** Test an uncontrolled field labelled `مساحة الكتابة`, H1 `الكلمة`, full English text node, immediate interval-labelled grades and collapsed `عرض البطاقة الأصلية`. RF4 tests type a synthetic marker: blur/context/poll/failed grade retain the same field; advance, summary undo, filter parking/back, navigation/resume and remount return only target + newline. Same-card filter changes that do not park it retain the field.
   ```tsx

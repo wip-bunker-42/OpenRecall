@@ -9,13 +9,11 @@ export function SpellingQuestion({
   frame,
   onRate,
   disabled,
-  timezone,
 }: {
   api: Api;
   frame: ReviewFrame;
   onRate: (rating: Rating) => void;
   disabled: boolean;
-  timezone: string;
 }) {
   const input = useRef<HTMLTextAreaElement>(null);
   const id = useId();
@@ -50,12 +48,7 @@ export function SpellingQuestion({
         الكلمة في السطر الأول، وتحته سطر للكتابة الحرة دون تصحيح أو مقارنة. تختفي الكتابة بمجرد
         مغادرة البطاقة؛ عند العودة يبدأ الحقل بالكلمة من جديد.
       </p>
-      <RatingButtons
-        frame={frame}
-        onRate={onRate}
-        disabled={disabled || !frame.canRate}
-        timezone={timezone}
-      />
+      <RatingButtons frame={frame} onRate={onRate} disabled={disabled || !frame.canRate} />
       <SourceContexts api={api} cardId={frame.card.id} />
     </div>
   );

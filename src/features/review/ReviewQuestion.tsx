@@ -7,13 +7,11 @@ export function ReviewQuestion({
   onReveal,
   onRate,
   disabled,
-  timezone,
 }: {
   frame: ReviewFrame;
   onReveal: () => void;
   onRate: (rating: Rating) => void;
   disabled: boolean;
-  timezone: string;
 }) {
   const question = useRef<HTMLHeadingElement>(null);
   const answer = useRef<HTMLHeadingElement>(null);
@@ -50,7 +48,7 @@ export function ReviewQuestion({
               </>
             )}
           </section>
-          <RatingButtons frame={frame} onRate={onRate} disabled={disabled} timezone={timezone} />
+          <RatingButtons frame={frame} onRate={onRate} disabled={disabled} />
         </>
       ) : (
         <button className="primary reveal-button" disabled={disabled} onClick={onReveal}>

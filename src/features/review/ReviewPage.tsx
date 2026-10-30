@@ -173,7 +173,6 @@ export function ReviewPage({
               frame={view.payload}
               disabled={busy || pendingRating}
               onRate={(r) => void session.rate(r)}
-              timezone={timezone}
             />
           ) : view.state === 'question' ? (
             <ReviewQuestion
@@ -181,7 +180,6 @@ export function ReviewPage({
               disabled={busy || pendingRating}
               onReveal={() => void session.reveal()}
               onRate={(r) => void session.rate(r)}
-              timezone={timezone}
             />
           ) : view.state === 'emptyFilter' ? (
             <>

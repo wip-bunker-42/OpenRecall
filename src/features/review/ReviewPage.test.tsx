@@ -170,9 +170,7 @@ it('reveals label-only headings with correct focus, accessible intervals, summar
     /افتكرتها بشكل طبيعي.*يوم/,
     /افتكرتها بسهولة.*٣٠ يوم/,
   ])
-    expect(screen.getByRole('button', { name: label })).toHaveAccessibleDescription(
-      /الموعد المتوقع/,
-    );
+    expect(screen.getByRole('button', { name: label })).toHaveAccessibleDescription('');
   await user.click(screen.getByRole('button', { name: /افتكرتها بسهولة.*٣٠ يوم/ }));
   expect(await screen.findByRole('heading', { level: 1, name: 'ملخص الجلسة' })).toHaveFocus();
   expect(screen.getByText(/موعد المراجعة الجديد/)).toBeVisible();

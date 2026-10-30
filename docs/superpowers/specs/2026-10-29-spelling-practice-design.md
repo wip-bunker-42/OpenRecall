@@ -221,7 +221,10 @@ also contain the word and thus have their own provenance entry.
 - The review view explicitly identifies `standard` or `spelling` mode. Rust
   determines the mode from persisted deck kind. Ordinary cards still require
   answer reveal; spelling cards permit direct self-rating and receive native
-  rating previews immediately. There is no `عرض الإجابة` step for spelling.
+  rating previews immediately. Each button announces only its label and approximate
+  interval, without the extra expected-calendar-date/delay-caveat description,
+  per the user amendment on 2026-10-30. The actual committed due-date feedback
+  after grading remains available. There is no `عرض الإجابة` step for spelling.
   A reveal command for spelling returns a structured not-applicable error.
 - Use H1 `الكلمة`, followed by the entire word in one normal text node with
   `lang="en"`, LTR direction and bidirectional isolation. Keep this normal text
