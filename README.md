@@ -12,6 +12,24 @@ x64 are secondary targets.
 
 ## Study workflow
 
+- One optional spelling deck collects unique Latin-script words/terms from an
+  ordinary source, including old cards and every alternative form. Source edits,
+  deletion and rebinding retain collected progress and last matching contexts.
+  Explicit word deletion creates an exclusion; allowing collection again uses the
+  current source with fresh progress.
+- Spelling review prefills the target on the native textarea's first line, with
+  focus and a collapsed caret at its beginning and a blank line below. Typing is
+  uncontrolled and disposable: leaving the presentation destroys every user edit,
+  including on undo or restart. The application never reads/copies attempts, checks
+  spelling or grades automatically. The four grades are available immediately.
+- Per-deck and collapsed library statistics show daily completions based on the
+  last effective review per logical card and configured study day, with a separate
+  spelling-word subset. Original-card study and spelling are independent tasks.
+- Optional per-form `questionTitle` customizes the label-only H1. Missing/null or
+  blank labels use `السؤال`; omitted variant labels inherit the root on JSON import,
+  while explicit null/blank resets them. Labels are plain text, limited to 160
+  Unicode characters without control characters or newlines.
+
 - Create, rename and delete decks. Each deck shows logical card counts, due/new
   cards, review history, forecasts and scheduling settings.
 - Create/edit/delete cards, including any number of alternative wordings. All
@@ -65,11 +83,13 @@ Card import accepts UTF-8 JSON, including a BOM, up to 50 MiB:
 ```json
 [
   {
+    "questionTitle": "عرّف",
     "front": "ما معنى الاسترجاع النشط؟",
     "back": "محاولة استحضار المعلومة قبل رؤية الإجابة.",
     "notes": "أجب أولًا ثم اعرض الإجابة.",
     "variants": [
       {
+        "questionTitle": "اشرح",
         "front": "اشرح الاسترجاع النشط بكلماتك.",
         "back": "استحضار المعلومة من الذاكرة قبل الاطلاع عليها.",
         "notes": ""
@@ -82,14 +102,17 @@ Card import accepts UTF-8 JSON, including a BOM, up to 50 MiB:
 `variants` can be absent or empty. Preview shows invalid rows/forms and duplicate
 matches before any library write. Select valid cards and explicitly exclude bad
 forms. Duplicate identity uses NFC-normalized, whitespace-collapsed question and
-answer across the library; case, punctuation and diacritics remain significant.
-Notes do not create a distinct card identity. Import commits atomically against
+answer across ordinary decks; case, punctuation and diacritics remain significant.
+Managed spelling tasks do not exclude ordinary imports. Notes and question labels
+do not create a distinct card identity. Import commits atomically against
 the preview's library revision.
 
-Complete backups are a separate versioned UTF-8 JSON format, currently version 1
+Complete backups are a separate versioned UTF-8 JSON format, currently version 2
 with a shared 256 MiB export/restore limit. They include settings, decks, forms,
 progress, review/action/undo history, optimization profiles, model provenance and
-training reports. They are plaintext, with a canonical payload digest for
+training reports, spelling vocabulary, retained source contexts and exclusions.
+The reader also supports genuine v0.1.0 format-1 exports and verifies their original
+payload digest before upgrading defaults. Backups are plaintext, with a canonical payload digest for
 corruption detection. Export finalizes a collision-safe file in Downloads, or
 opens a native save dialog if that location is unavailable. Restore previews its
 counts, requires full-replacement confirmation and writes a safety backup first.

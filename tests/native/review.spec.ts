@@ -16,7 +16,7 @@ describe('native restart and live review', () => {
     const first = await $('.question-text').getText();
     await click('عرض الإجابة');
     await expect($('h2=الإجابة')).toBeFocused();
-    await expect($('.rating-again')).toHaveAttribute('aria-describedby');
+    await expect($('.rating-again')).not.toHaveAttribute('aria-describedby');
     await audit('native-revealed');
     await $('.rating-again').click();
     const parked = await $('.question-text').getText();

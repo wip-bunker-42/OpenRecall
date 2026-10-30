@@ -87,12 +87,12 @@ export function ExcludedWords({
                 <bdi lang="en" dir="ltr">
                   {w.canonical}
                 </bdi>{' '}
-                <button
-                  disabled={busy}
-                  aria-label={`السماح بجمع ${w.canonical} مجددًا`}
-                  onClick={() => void allow(w.canonical)}
-                >
-                  السماح مجددًا
+                <button disabled={busy} onClick={() => void allow(w.canonical)}>
+                  السماح بجمع{' '}
+                  <bdi lang="en" dir="ltr">
+                    {w.canonical}
+                  </bdi>{' '}
+                  مجددًا
                 </button>
               </li>
             ))}

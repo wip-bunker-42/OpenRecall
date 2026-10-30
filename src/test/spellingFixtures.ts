@@ -25,9 +25,17 @@ export const spellingResult: SpellingDeckResult = {
 };
 export const spellingCard = {
   ...cardFixture,
+  id: 'spelling-card-1',
   deckId: spellingDeck.id,
   forms: [
-    { ...cardFixture.forms[0], front: 'English', back: 'English', notes: '', language: 'en' },
+    {
+      ...cardFixture.forms[0],
+      id: 'spelling-form-1',
+      front: 'English',
+      back: 'English',
+      notes: '',
+      language: 'en',
+    },
   ],
 };
 export const spellingQuestion: Extract<ReviewView, { state: 'question' }> = {

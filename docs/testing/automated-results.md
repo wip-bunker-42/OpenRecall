@@ -2,7 +2,7 @@
 
 The release gate is `pnpm verify`, followed by `pnpm build:native-test` and `pnpm test:native` on Windows. The final GitHub Quality run must pass on the exact reviewed revision. Release preflight additionally requires all six checks on the tagged main commit.
 
-The final review fix suite includes 71 Rust workspace tests, the additional seven backup feature-compatibility cases, 53 frontend unit tests, 16 maintenance tests, seven browser scenarios, five native study-flow cases and two native startup-recovery probes. The browser and native study suites audit 25 and 11 UI states respectively and require zero detected axe violations. Every audit requires a nonzero number of passing rules.
+The v0.1.0 release gate covered 71 Rust workspace tests, the additional seven backup feature-compatibility cases, 53 frontend unit tests, 16 maintenance tests, seven browser scenarios, five native study-flow cases and two native startup-recovery probes. Its browser and native study suites audited 25 and 11 UI states respectively and require zero detected axe violations. Every audit requires a nonzero number of passing rules.
 
 ## Environments and test boundaries
 
@@ -26,11 +26,51 @@ The native suite exercises real create/import/duplicate exclusion, process resta
 
 Meaningful regressions were observed failing before repair: restore feedback lost on route unmount; accessible names differing from visible button text; stale updater status overwriting a newer event; feature-dependent backup digests; corrupt backup timestamps/undo snapshots; POSIX native pnpm detection; missing AppImage icon configuration.
 
-The final independent GPT-6.1 Sol review identified six Important findings. The retained regression suite covers deleted form references in ended/parked sessions and undo before-images; drafts surviving cross-profile membership changes; late review-start responses preserving later drafts; old training loads preserving the newer job and its cancellation control; backup memory satisfying the same FSRS invariant used during review; and Arabic native recovery when a future-schema or inaccessible library cannot open. The startup probes inspect only the test process's own native window captions, verify a retry control and retained file digest, and never operate a screen reader. They do not initialize a substitute empty study library.
+The v0.1.0 independent GPT-6.1 Sol review identified six Important findings. The retained regression suite covers deleted form references in ended/parked sessions and undo before-images; drafts surviving cross-profile membership changes; late review-start responses preserving later drafts; old training loads preserving the newer job and its cancellation control; backup memory satisfying the same FSRS invariant used during review; and Arabic native recovery when a future-schema or inaccessible library cannot open. The startup probes inspect only the test process's own native window captions, verify a retry control and retained file digest, and never operate a screen reader. They do not initialize a substitute empty study library.
 
 Two Minor review items remain deferred: adding start/end timestamps, final filter and an explicit observed-recall definition to the session summary; and expanding Arabic Log loss/RMSE and pooled-versus-per-deck improvement explanations. Existing durations/counts/ratings and per-deck metric tables remain available.
 
 The live release API exposed a further integration case after merge: the release-by-tag endpoint returned 404 for an owned draft visible in the authenticated release list. Publisher transport regressions were observed RED then GREEN for draft recovery and refusing ambiguous drafts without mutation. A manual retry uses publisher policy from its trusted main workflow revision while build jobs retain the original verified tag. No application code or released tag is changed by that policy repair.
+
+## Spelling feature acceptance on 2026-10-30
+
+The feature branch passed 106 core tests, 82 frontend unit tests and nine browser
+scenarios before release packaging. The full `pnpm verify` gate passed 115 Rust workspace tests, seven additional
+backup preserve-order cases, 82 frontend unit tests, 16 maintenance tests and
+nine browser scenarios. Its 36 browser axe audits have zero violations and
+at least 14 passing rules each; duplicated attachment copies are not counted.
+Rust formatting/Clippy, generated-contract drift, TypeScript, ESLint, Prettier,
+production notices, frontend build and workflow lint all passed. The genuine v0.1.0 export fixture is
+frozen with its original digest; compatibility tests verify that checksum before
+adding current defaults, including nested undo before-images.
+
+The real Windows suite passed seven study-flow cases and two native startup
+recovery probes on Windows 11 Pro 10.0.26300 x64, WebView2 156 and Node 24.21.0.
+The copied automation executable uses an isolated library and Downloads directory.
+Its 20 axe reports have zero violations and at least 20 passing rules each. Native
+artifacts for this acceptance run are under
+`target/native-tests/run-JINEkt`; the startup probes are under
+`target/startup-tests/run-iS8u7X` and `run-n0cQzu`.
+
+Spelling acceptance exercises real JSON with custom headings and legacy omitted
+headings, singleton backfill, an arriving word while another stays reserved,
+source editing/deletion with retained context, direct grading, six daily
+completions, summary undo, full format-2 export/delete/restore, genuine format-1
+restore with usable undo, explicit exclusion/rescan/reallow and fresh progress.
+The test closes the actual process, verifies it exited and restarts the same
+SQLite library. The presentation survives; the textarea contains only its target
+and newline, focused at collapsed caret zero. Distinct synthetic attempts are
+absent from exported JSON and SQLite/main-WAL bytes. No real study data is used.
+
+The additional expected-calendar-date and delay-caveat announcement was removed
+from all rating buttons at the user's request. Approximate interval names and
+actual committed due feedback remain. First-line prefill/focus and removal of the
+extra accessible description each have an observed failing-then-passing regression.
+
+A supplementary agent-browser presentation check reported 37 passing rules,
+zero violations and one incomplete decorative-mark color-contrast check. The
+versioned project acceptance uses axe 4.14 rather than that tool's bundled 4.12.1.
+These are automated accessibility results; no screen reader was run.
 
 ## Limits
 
