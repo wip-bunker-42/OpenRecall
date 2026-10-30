@@ -76,6 +76,7 @@ export const readyJobFixture: TrainingJob = {
   candidateParameters: Array(34).fill(0.9),
 };
 const empty = {
+  completedForDay: 0,
   attempts: 0,
   uniqueCards: 0,
   activeMs: 0,

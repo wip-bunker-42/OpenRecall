@@ -7,6 +7,7 @@ mod runtime;
 pub mod scheduling;
 mod services;
 pub mod spelling;
+pub mod statistics;
 mod storage;
 pub mod training;
 pub use app::App;

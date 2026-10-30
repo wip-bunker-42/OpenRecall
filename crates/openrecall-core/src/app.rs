@@ -105,6 +105,9 @@ impl App {
             Request::GetDeckStatistics { deck_id } => {
                 Ok(Response::GetDeckStatistics(self.deck_statistics(&deck_id)?))
             }
+            Request::GetLibraryStatistics {} => {
+                Ok(Response::GetLibraryStatistics(self.library_statistics()?))
+            }
             Request::StartTraining { profile_id } => {
                 Ok(Response::StartTraining(self.start_training(profile_id)?))
             }

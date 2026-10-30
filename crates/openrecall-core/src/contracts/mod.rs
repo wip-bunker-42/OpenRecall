@@ -72,6 +72,7 @@ pub enum Request {
         expected_revision: String,
     },
     GetDefaultSettings {},
+    GetLibraryStatistics {},
     GetDeckStatistics {
         deck_id: String,
     },
@@ -217,6 +218,7 @@ pub enum Response {
     SetSpellingSource(spelling::SpellingDeckResult),
     RescanSpellingSource(spelling::SpellingDeckResult),
     GetDefaultSettings(Settings),
+    GetLibraryStatistics(statistics::LibraryStatistics),
     GetDeckStatistics(statistics::DeckStatistics),
     StartTraining(TrainingJob),
     GetTrainingJob(TrainingJob),
