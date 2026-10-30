@@ -20,6 +20,7 @@ export function CardList({
   revision,
   timezone = 'Africa/Cairo',
   editingDisabled = false,
+  managed = false,
 }: {
   deckId: string;
   api: Api;
@@ -29,6 +30,7 @@ export function CardList({
   revision: number;
   timezone?: string;
   editingDisabled?: boolean;
+  managed?: boolean;
 }) {
   const [query, setQuery] = useState('');
   const [input, setInput] = useState('');
@@ -132,13 +134,15 @@ export function CardList({
                     ))}
                   </details>
                   <div className="actions">
-                    <button
-                      disabled={busy || editingDisabled}
-                      aria-label={`تعديل البطاقة ${ordinal}`}
-                      onClick={() => onEdit(card)}
-                    >
-                      تعديل
-                    </button>
+                    {!managed && (
+                      <button
+                        disabled={busy || editingDisabled}
+                        aria-label={`تعديل البطاقة ${ordinal}`}
+                        onClick={() => onEdit(card)}
+                      >
+                        تعديل
+                      </button>
+                    )}
                     <button
                       className="danger"
                       aria-label={`حذف البطاقة ${ordinal}`}
