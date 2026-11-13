@@ -5,21 +5,19 @@ use crate::{
         cards::{CardDraft, FormDraft},
         import::*,
     },
+    domain::{
+        card::CardForm,
+        questions::{
+            ChoiceSetDraft, QuestionType, SelectionMode, normalized, validate_choice_draft,
+        },
+    },
 };
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
-use unicode_normalization::UnicodeNormalization;
 pub(crate) fn fingerprint(front: &str, back: &str) -> String {
-    let normalize = |s: &str| {
-        s.nfc()
-            .collect::<String>()
-            .split_whitespace()
-            .collect::<Vec<_>>()
-            .join(" ")
-    };
-    let front = normalize(front);
-    let back = normalize(back);
+    let front = normalized(front);
+    let back = normalized(back);
     let mut hash = Sha256::new();
     for s in [&front, &back] {
         hash.update((s.len() as u64).to_be_bytes());
@@ -27,14 +25,78 @@ pub(crate) fn fingerprint(front: &str, back: &str) -> String {
     }
     hash.finalize().iter().map(|b| format!("{b:02x}")).collect()
 }
+
+fn typed_fingerprint(
+    kind: QuestionType,
+    front: &str,
+    back: &str,
+    mode: SelectionMode,
+    mut options: Vec<(String, bool)>,
+) -> String {
+    if kind == QuestionType::Recall {
+        return fingerprint(front, back);
+    }
+    options.sort_unstable();
+    let content = serde_json::json!([kind, normalized(front), mode, options]).to_string();
+    Sha256::digest(content.as_bytes())
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
+}
+
+fn form_fingerprint(form: &CardForm) -> String {
+    let (mode, options) = form
+        .multiple_choice
+        .as_ref()
+        .map(|set| {
+            (
+                set.selection_mode,
+                set.choices
+                    .iter()
+                    .map(|c| (normalized(&c.text), set.correct_choice_ids.contains(&c.id)))
+                    .collect(),
+            )
+        })
+        .unwrap_or_default();
+    typed_fingerprint(form.question_type, &form.front, &form.back, mode, options)
+}
+
+fn preview_fingerprint(form: &ImportForm) -> String {
+    let (mode, options) = form
+        .multiple_choice
+        .as_ref()
+        .map(|set| {
+            (
+                set.selection_mode,
+                set.choices
+                    .iter()
+                    .map(|c| {
+                        (
+                            normalized(&c.text),
+                            set.correct_choice_keys.contains(&c.key),
+                        )
+                    })
+                    .collect(),
+            )
+        })
+        .unwrap_or_default();
+    typed_fingerprint(form.question_type, &form.front, &form.back, mode, options)
+}
 fn issue(field: String, code: &str) -> FieldError {
     FieldError {
         field,
         code: code.into(),
     }
 }
-fn parse_form(value: &Value, path: &str, key: String, variant: bool) -> ImportForm {
+fn parse_form(
+    value: &Value,
+    path: &str,
+    key: String,
+    inherited: Option<QuestionType>,
+) -> ImportForm {
     let mut form = ImportForm {
+        question_type: inherited.unwrap_or_default(),
+        multiple_choice: None,
         question_title: None,
         key,
         front: String::new(),
@@ -51,9 +113,18 @@ fn parse_form(value: &Value, path: &str, key: String, variant: bool) -> ImportFo
         form.issues.push(issue(path.into(), "objectExpected"));
         return form;
     };
+    if let Some(kind) = object.get("questionType") {
+        match serde_json::from_value(kind.clone()) {
+            Ok(kind) => form.question_type = kind,
+            Err(_) => form
+                .issues
+                .push(issue(format!("{path}.questionType"), "invalidQuestionType")),
+        }
+    }
+    let recall = form.question_type == QuestionType::Recall;
     for (name, destination, required) in [
         ("front", &mut form.front, true),
-        ("back", &mut form.back, true),
+        ("back", &mut form.back, recall),
         ("notes", &mut form.notes, false),
     ] {
         match object.get(name) {
@@ -73,7 +144,58 @@ fn parse_form(value: &Value, path: &str, key: String, variant: bool) -> ImportFo
                 .push(issue(format!("{path}.{name}"), "stringExpected")),
         }
     }
-    if variant && object.contains_key("variants") {
+    if !recall {
+        if form.back.trim().is_empty() {
+            form.back.clear();
+        } else {
+            form.issues
+                .push(issue(format!("{path}.back"), "unexpectedAnswer"));
+        }
+    }
+    let choice_fields = [
+        "choices",
+        "correctChoices",
+        "selectionMode",
+        "shuffleChoices",
+    ];
+    if form.question_type == QuestionType::MultipleChoice {
+        let mut draft = serde_json::json!({
+            "choices": object.get("choices"),
+            "correctChoiceKeys": object.get("correctChoices")
+        });
+        for name in ["selectionMode", "shuffleChoices"] {
+            if let Some(field) = object.get(name) {
+                draft[name] = field.clone();
+            }
+        }
+        match serde_json::from_value::<ChoiceSetDraft>(draft) {
+            Ok(set) => {
+                if set.choices.iter().any(|c| c.id.is_some()) {
+                    form.issues
+                        .push(issue(format!("{path}.choices"), "invalidOwner"));
+                }
+                if let Err(error) = validate_choice_draft(&set) {
+                    form.issues.extend(error.fields.into_iter().map(|field| {
+                        let name = field.field.trim_start_matches("multipleChoice.");
+                        let name = if name == "correctChoiceKeys" {
+                            "correctChoices"
+                        } else {
+                            name
+                        };
+                        issue(format!("{path}.{name}"), &field.code)
+                    }));
+                }
+                form.multiple_choice = Some(set);
+            }
+            Err(_) => form
+                .issues
+                .push(issue(format!("{path}.choices"), "invalidChoices")),
+        }
+    } else if choice_fields.iter().any(|name| object.contains_key(*name)) {
+        form.issues
+            .push(issue(format!("{path}.choices"), "unexpectedChoices"));
+    }
+    if inherited.is_some() && object.contains_key("variants") {
         form.issues
             .push(issue(format!("{path}.variants"), "nestedVariants"));
     }
@@ -92,7 +214,17 @@ fn parse_form(value: &Value, path: &str, key: String, variant: bool) -> ImportFo
             .push(issue(format!("{path}.questionTitle"), code)),
     }
     for name in object.keys() {
-        if !["front", "back", "notes", "variants", "questionTitle"].contains(&name.as_str()) {
+        if ![
+            "front",
+            "back",
+            "notes",
+            "variants",
+            "questionTitle",
+            "questionType",
+        ]
+        .contains(&name.as_str())
+            && !choice_fields.contains(&name.as_str())
+        {
             form.warnings
                 .push(issue(format!("{path}.{name}"), "unknownField"));
         }
@@ -104,7 +236,7 @@ fn mark_duplicate(form: &mut ImportForm, seen: &mut HashMap<String, DuplicateRef
     if !form.valid {
         return;
     }
-    let key = fingerprint(&form.front, &form.back);
+    let key = preview_fingerprint(form);
     if let Some(reference) = seen.get(&key) {
         form.duplicate = true;
         form.duplicate_of = Some(reference.clone());
@@ -124,25 +256,24 @@ fn mark_duplicate(form: &mut ImportForm, seen: &mut HashMap<String, DuplicateRef
 impl App {
     fn existing_forms(&self) -> AppResult<HashMap<String, DuplicateRef>> {
         let mut result = HashMap::new();
-        let mut stmt=self.store.conn.prepare("SELECT c.id,c.deck_id,json_extract(f.value,'$.id'),json_extract(f.value,'$.front'),json_extract(f.value,'$.back') FROM cards c JOIN decks d ON d.id=c.deck_id,json_each(c.payload,'$.forms') f WHERE d.kind='standard'")?;
+        let mut stmt=self.store.conn.prepare("SELECT c.id,c.deck_id,f.value FROM cards c JOIN decks d ON d.id=c.deck_id,json_each(c.payload,'$.forms') f WHERE d.kind='standard'")?;
         let rows = stmt.query_map([], |r| {
             Ok((
                 r.get::<_, String>(0)?,
                 r.get::<_, String>(1)?,
                 r.get::<_, String>(2)?,
-                r.get::<_, String>(3)?,
-                r.get::<_, String>(4)?,
             ))
         })?;
         for row in rows {
-            let (card, deck, form, front, back) = row?;
+            let (card, deck, raw) = row?;
+            let form: CardForm = serde_json::from_str(&raw)?;
             result
-                .entry(fingerprint(&front, &back))
+                .entry(form_fingerprint(&form))
                 .or_insert(DuplicateRef {
                     scope: "library".into(),
                     card_id: Some(card),
                     deck_id: Some(deck),
-                    form_id: Some(form),
+                    form_id: Some(form.id),
                     source_key: None,
                 });
         }
@@ -173,7 +304,7 @@ impl App {
         for (i, row) in rows.iter().enumerate() {
             let key = format!("card-{i}");
             let path = format!("$[{i}]");
-            let mut primary = parse_form(row, &path, format!("{key}-primary"), false);
+            let mut primary = parse_form(row, &path, format!("{key}-primary"), None);
             let mut issues = vec![];
             if row
                 .as_object()
@@ -190,7 +321,7 @@ impl App {
                         item,
                         &format!("{path}.variants[{v}]"),
                         format!("{key}-variant-{v}"),
-                        true,
+                        Some(primary.question_type),
                     );
                     if item
                         .as_object()
@@ -289,7 +420,7 @@ impl App {
                 if !form.valid || form.duplicate {
                     return Err(AppError::new("invalidSelection"));
                 }
-                let key = fingerprint(&form.front, &form.back);
+                let key = preview_fingerprint(form);
                 if seen.contains_key(&key) {
                     return Err(AppError::new("conflict"));
                 }
@@ -304,8 +435,8 @@ impl App {
                     },
                 );
                 forms.push(FormDraft {
-                    question_type: Default::default(),
-                    multiple_choice: None,
+                    question_type: form.question_type,
+                    multiple_choice: form.multiple_choice.clone(),
                     question_title: form.question_title.clone(),
                     id: None,
                     front: form.front.clone(),

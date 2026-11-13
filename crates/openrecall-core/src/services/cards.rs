@@ -203,7 +203,11 @@ impl App {
         if page == 0 || ![10, 20, 50, 100].contains(&page_size) {
             return Err(AppError::field("page", "range"));
         }
-        let filter = "deck_id=?1 AND (?2='' OR EXISTS(SELECT 1 FROM json_each(cards.payload,'$.forms') f WHERE instr(lower(json_extract(f.value,'$.front')||' '||json_extract(f.value,'$.back')||' '||json_extract(f.value,'$.notes')),lower(?2))>0))";
+        let filter = "deck_id=?1 AND (?2='' OR EXISTS(
+            SELECT 1 FROM json_each(cards.payload,'$.forms') f
+            WHERE instr(lower(json_extract(f.value,'$.front')||' '||json_extract(f.value,'$.back')||' '||json_extract(f.value,'$.notes')),lower(?2))>0
+            OR EXISTS(SELECT 1 FROM json_each(f.value,'$.multipleChoice.choices') c
+                WHERE instr(lower(json_extract(c.value,'$.text')),lower(?2))>0)))";
         let total = self.store.conn.query_row(
             &format!("SELECT count(*) FROM cards WHERE {filter}"),
             rusqlite::params![deck_id, query],

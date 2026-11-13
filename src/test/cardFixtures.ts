@@ -37,6 +37,8 @@ export const cardFixture: CardDetail = {
   bag: { remaining: [], consumed: [], lastConsumed: null, reserved: null, cycle: 0 },
 };
 const primary = {
+  questionType: 'recall' as const,
+  multipleChoice: null,
   questionTitle: null,
   key: 'p1',
   front: 'سؤال عربي English',

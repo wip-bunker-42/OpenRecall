@@ -13,6 +13,8 @@ pub struct DuplicateRef {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ImportForm {
+    pub question_type: crate::domain::questions::QuestionType,
+    pub multiple_choice: Option<crate::domain::questions::ChoiceSetDraft>,
     pub question_title: Option<String>,
     pub key: String,
     pub front: String,
