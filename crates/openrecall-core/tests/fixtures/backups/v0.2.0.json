@@ -1,0 +1,715 @@
+{
+  "appVersion": "0.2.0",
+  "data": {
+    "actions": [
+      {
+        "id": "64105c4d-428a-4920-8a9d-a371f72d860f",
+        "session_id": "899c5e28-2456-46dc-94a5-e4e700c0b9c5",
+        "signature": "{\"sessionId\":\"899c5e28-2456-46dc-94a5-e4e700c0b9c5\",\"presentationId\":\"18f2cd84-cc76-4b98-b7ee-29fe765b1bc4\",\"rating\":\"good\",\"actionId\":\"64105c4d-428a-4920-8a9d-a371f72d860f\",\"expectedCardRevision\":\"eb3734a3-ea54-4169-8fb8-c77e77d41027\"}",
+        "status": "applied"
+      }
+    ],
+    "cards": [
+      {
+        "bag": {
+          "consumed": [],
+          "cycle": 0,
+          "lastConsumed": null,
+          "remaining": [],
+          "reserved": null
+        },
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "deckId": "a84d3dd2-c86a-4d5a-8b9e-88edf5b2ba07",
+        "dueAt": "2026-10-24T00:00:00+00:00",
+        "forms": [
+          {
+            "back": "أحمر أزرق",
+            "front": "red blue",
+            "id": "43851eac-5a3d-44d1-a2d7-f52a7e251918",
+            "language": null,
+            "notes": "",
+            "questionTitle": "ترجم"
+          },
+          {
+            "back": "أخضر",
+            "front": "green",
+            "id": "4a0b70d5-ae23-4ddd-ba7c-c2e1959d5db0",
+            "language": null,
+            "notes": "",
+            "questionTitle": "اذكر المعنى"
+          }
+        ],
+        "hasGraduated": false,
+        "id": "08aff1d7-f626-4cc3-860d-112aa57f7c72",
+        "lapseCount": 0,
+        "memory": null,
+        "phase": "new",
+        "reviewCount": 0,
+        "reviewedAt": null,
+        "revision": "85320fd2-ceeb-4556-ad34-cfe3c9716f69"
+      },
+      {
+        "bag": {
+          "consumed": [
+            "2d293ac0-00b9-40d8-815a-2446b615047d"
+          ],
+          "cycle": 1,
+          "lastConsumed": "2d293ac0-00b9-40d8-815a-2446b615047d",
+          "remaining": [],
+          "reserved": null
+        },
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+        "dueAt": "2026-10-28T18:39:55.418+00:00",
+        "forms": [
+          {
+            "back": "red",
+            "front": "red",
+            "id": "2d293ac0-00b9-40d8-815a-2446b615047d",
+            "language": "en",
+            "notes": "",
+            "questionTitle": null
+          }
+        ],
+        "hasGraduated": true,
+        "id": "ab0f7f65-6367-427a-8646-69065ad3fc04",
+        "lapseCount": 0,
+        "memory": {
+          "difficulty": 3.530724287033081,
+          "stability": 3.922100067138672,
+          "stabilityFast": 3.1376800537109375
+        },
+        "phase": "review",
+        "reviewCount": 1,
+        "reviewedAt": "2026-10-24T00:00:00+00:00",
+        "revision": "e923197d-4cd0-4658-8949-74c9fc34a86b"
+      },
+      {
+        "bag": {
+          "consumed": [],
+          "cycle": 1,
+          "lastConsumed": null,
+          "remaining": [
+            "8dc9f7d9-ee51-44b0-bca6-2b0d55e8a411"
+          ],
+          "reserved": "8dc9f7d9-ee51-44b0-bca6-2b0d55e8a411"
+        },
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+        "dueAt": "2026-10-24T00:00:00+00:00",
+        "forms": [
+          {
+            "back": "blue",
+            "front": "blue",
+            "id": "8dc9f7d9-ee51-44b0-bca6-2b0d55e8a411",
+            "language": "en",
+            "notes": "",
+            "questionTitle": null
+          }
+        ],
+        "hasGraduated": false,
+        "id": "cf56f477-04bf-4b4e-99d3-f68e62dfcece",
+        "lapseCount": 0,
+        "memory": null,
+        "phase": "new",
+        "reviewCount": 0,
+        "reviewedAt": null,
+        "revision": "11c3665d-5d4b-4d6c-b2de-9f2625914bd5"
+      }
+    ],
+    "decks": [
+      {
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "dataRevision": "146a27ad-20b6-4e1f-8c4b-7017ffe72745",
+        "desiredRetention": null,
+        "dueNow": 0,
+        "id": "a84d3dd2-c86a-4d5a-8b9e-88edf5b2ba07",
+        "kind": "standard",
+        "logicalCards": 0,
+        "maxIntervalDays": null,
+        "minIntervalSeconds": null,
+        "name": "Synthetic source",
+        "newCards": 0,
+        "profileId": "35c76332-f8e6-447f-96c4-ba1044686de2",
+        "revision": "a07aef08-617f-47be-8c97-2ef77a000e9f"
+      },
+      {
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "dataRevision": "17d72929-6d8b-46ca-baa2-c7e3767b35e1",
+        "desiredRetention": null,
+        "dueNow": 0,
+        "id": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+        "kind": "spelling",
+        "logicalCards": 0,
+        "maxIntervalDays": null,
+        "minIntervalSeconds": null,
+        "name": "مجموعة التدرب على الكتابة",
+        "newCards": 0,
+        "profileId": "3b79e7d5-af5d-43ec-80f4-8ffad5b5292c",
+        "revision": "b899d9fc-6b3e-4d69-9ef9-702391feec62"
+      }
+    ],
+    "libraryRevision": "867d15e2-be95-40a1-a7d1-0e26eefb91c7",
+    "models": [
+      {
+        "contributingDeckIds": [],
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "engineRevision": "0fd59949e9168af7194418c2dba99836b5548e87",
+        "id": "32f98cf1-b0a5-48d4-918f-41a6b3506d1c",
+        "modelVersion": "FSRS-7",
+        "origin": "default",
+        "parameters": [
+          0.1103999987244606,
+          2.239500045776367,
+          3.922100067138672,
+          11.784099578857422,
+          6.168600082397461,
+          0.6456999778747559,
+          3.6807000637054443,
+          1.9795000553131104,
+          0.0,
+          1.382599949836731,
+          0.7024000287055969,
+          0.5999000072479248,
+          0.8145999908447266,
+          0.6398000121116638,
+          1.0,
+          1.3207000494003296,
+          0.6707000136375427,
+          3.86680006980896,
+          0.4415999948978424,
+          0.0934000015258789,
+          1.8631000518798828,
+          0.6161999702453613,
+          1.086899995803833,
+          0.156700000166893,
+          0.08009999990463257,
+          0.24210000038146973,
+          0.946399986743927,
+          0.14329999685287476,
+          0.7145000100135803,
+          0.0,
+          0.5666999816894531,
+          0.3734000027179718,
+          0.53329998254776,
+          0.30480000376701355
+        ],
+        "trainingRunId": null
+      },
+      {
+        "contributingDeckIds": [],
+        "createdAt": "2026-10-24T00:00:00+00:00",
+        "engineRevision": "0fd59949e9168af7194418c2dba99836b5548e87",
+        "id": "8314f89d-8e25-4e02-89cd-b1ff3c95ac9b",
+        "modelVersion": "FSRS-7",
+        "origin": "default",
+        "parameters": [
+          0.1103999987244606,
+          2.239500045776367,
+          3.922100067138672,
+          11.784099578857422,
+          6.168600082397461,
+          0.6456999778747559,
+          3.6807000637054443,
+          1.9795000553131104,
+          0.0,
+          1.382599949836731,
+          0.7024000287055969,
+          0.5999000072479248,
+          0.8145999908447266,
+          0.6398000121116638,
+          1.0,
+          1.3207000494003296,
+          0.6707000136375427,
+          3.86680006980896,
+          0.4415999948978424,
+          0.0934000015258789,
+          1.8631000518798828,
+          0.6161999702453613,
+          1.086899995803833,
+          0.156700000166893,
+          0.08009999990463257,
+          0.24210000038146973,
+          0.946399986743927,
+          0.14329999685287476,
+          0.7145000100135803,
+          0.0,
+          0.5666999816894531,
+          0.3734000027179718,
+          0.53329998254776,
+          0.30480000376701355
+        ],
+        "trainingRunId": null
+      }
+    ],
+    "profiles": [
+      {
+        "activeModelRevision": "32f98cf1-b0a5-48d4-918f-41a6b3506d1c",
+        "config": {
+          "batchSize": 512,
+          "gamma": 1.0,
+          "learningRate": null,
+          "maxSeqLen": 256,
+          "numEpochs": null,
+          "schedulePenalties": true,
+          "seed": 2023
+        },
+        "id": "35c76332-f8e6-447f-96c4-ba1044686de2",
+        "memberDeckIds": [
+          "a84d3dd2-c86a-4d5a-8b9e-88edf5b2ba07"
+        ],
+        "modelOrigin": "default",
+        "modelRevision": {
+          "contributingDeckIds": [],
+          "createdAt": "2026-10-24T00:00:00+00:00",
+          "engineRevision": "0fd59949e9168af7194418c2dba99836b5548e87",
+          "id": "32f98cf1-b0a5-48d4-918f-41a6b3506d1c",
+          "modelVersion": "FSRS-7",
+          "origin": "default",
+          "parameters": [
+            0.1103999987244606,
+            2.239500045776367,
+            3.922100067138672,
+            11.784099578857422,
+            6.168600082397461,
+            0.6456999778747559,
+            3.6807000637054443,
+            1.9795000553131104,
+            0.0,
+            1.382599949836731,
+            0.7024000287055969,
+            0.5999000072479248,
+            0.8145999908447266,
+            0.6398000121116638,
+            1.0,
+            1.3207000494003296,
+            0.6707000136375427,
+            3.86680006980896,
+            0.4415999948978424,
+            0.0934000015258789,
+            1.8631000518798828,
+            0.6161999702453613,
+            1.086899995803833,
+            0.156700000166893,
+            0.08009999990463257,
+            0.24210000038146973,
+            0.946399986743927,
+            0.14329999685287476,
+            0.7145000100135803,
+            0.0,
+            0.5666999816894531,
+            0.3734000027179718,
+            0.53329998254776,
+            0.30480000376701355
+          ],
+          "trainingRunId": null
+        },
+        "name": "تحسين — Synthetic source",
+        "parameters": [
+          0.1103999987244606,
+          2.239500045776367,
+          3.922100067138672,
+          11.784099578857422,
+          6.168600082397461,
+          0.6456999778747559,
+          3.6807000637054443,
+          1.9795000553131104,
+          0.0,
+          1.382599949836731,
+          0.7024000287055969,
+          0.5999000072479248,
+          0.8145999908447266,
+          0.6398000121116638,
+          1.0,
+          1.3207000494003296,
+          0.6707000136375427,
+          3.86680006980896,
+          0.4415999948978424,
+          0.0934000015258789,
+          1.8631000518798828,
+          0.6161999702453613,
+          1.086899995803833,
+          0.156700000166893,
+          0.08009999990463257,
+          0.24210000038146973,
+          0.946399986743927,
+          0.14329999685287476,
+          0.7145000100135803,
+          0.0,
+          0.5666999816894531,
+          0.3734000027179718,
+          0.53329998254776,
+          0.30480000376701355
+        ],
+        "revision": "0aee7657-61e4-4814-ad9f-0bda0b218c47"
+      },
+      {
+        "activeModelRevision": "8314f89d-8e25-4e02-89cd-b1ff3c95ac9b",
+        "config": {
+          "batchSize": 512,
+          "gamma": 1.0,
+          "learningRate": null,
+          "maxSeqLen": 256,
+          "numEpochs": null,
+          "schedulePenalties": true,
+          "seed": 2023
+        },
+        "id": "3b79e7d5-af5d-43ec-80f4-8ffad5b5292c",
+        "memberDeckIds": [
+          "4038abd2-1c84-48c4-b31c-20d5b8a70b9c"
+        ],
+        "modelOrigin": "default",
+        "modelRevision": {
+          "contributingDeckIds": [],
+          "createdAt": "2026-10-24T00:00:00+00:00",
+          "engineRevision": "0fd59949e9168af7194418c2dba99836b5548e87",
+          "id": "8314f89d-8e25-4e02-89cd-b1ff3c95ac9b",
+          "modelVersion": "FSRS-7",
+          "origin": "default",
+          "parameters": [
+            0.1103999987244606,
+            2.239500045776367,
+            3.922100067138672,
+            11.784099578857422,
+            6.168600082397461,
+            0.6456999778747559,
+            3.6807000637054443,
+            1.9795000553131104,
+            0.0,
+            1.382599949836731,
+            0.7024000287055969,
+            0.5999000072479248,
+            0.8145999908447266,
+            0.6398000121116638,
+            1.0,
+            1.3207000494003296,
+            0.6707000136375427,
+            3.86680006980896,
+            0.4415999948978424,
+            0.0934000015258789,
+            1.8631000518798828,
+            0.6161999702453613,
+            1.086899995803833,
+            0.156700000166893,
+            0.08009999990463257,
+            0.24210000038146973,
+            0.946399986743927,
+            0.14329999685287476,
+            0.7145000100135803,
+            0.0,
+            0.5666999816894531,
+            0.3734000027179718,
+            0.53329998254776,
+            0.30480000376701355
+          ],
+          "trainingRunId": null
+        },
+        "name": "تحسين — مجموعة التدرب على الكتابة",
+        "parameters": [
+          0.1103999987244606,
+          2.239500045776367,
+          3.922100067138672,
+          11.784099578857422,
+          6.168600082397461,
+          0.6456999778747559,
+          3.6807000637054443,
+          1.9795000553131104,
+          0.0,
+          1.382599949836731,
+          0.7024000287055969,
+          0.5999000072479248,
+          0.8145999908447266,
+          0.6398000121116638,
+          1.0,
+          1.3207000494003296,
+          0.6707000136375427,
+          3.86680006980896,
+          0.4415999948978424,
+          0.0934000015258789,
+          1.8631000518798828,
+          0.6161999702453613,
+          1.086899995803833,
+          0.156700000166893,
+          0.08009999990463257,
+          0.24210000038146973,
+          0.946399986743927,
+          0.14329999685287476,
+          0.7145000100135803,
+          0.0,
+          0.5666999816894531,
+          0.3734000027179718,
+          0.53329998254776,
+          0.30480000376701355
+        ],
+        "revision": "f874415b-f5da-4317-9ef3-a7c5f30aa612"
+      }
+    ],
+    "reviews": [
+      {
+        "cardId": "ab0f7f65-6367-427a-8646-69065ad3fc04",
+        "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+        "elapsedDays": 0.0,
+        "formId": "2d293ac0-00b9-40d8-815a-2446b615047d",
+        "id": "50c79060-9d83-4e73-914d-102be8128e67",
+        "memory": {
+          "difficulty": 3.530724287033081,
+          "stability": 3.922100067138672,
+          "stabilityFast": 3.1376800537109375
+        },
+        "modelRevision": "8314f89d-8e25-4e02-89cd-b1ff3c95ac9b",
+        "nextDueAt": "2026-10-28T18:39:55.418+00:00",
+        "phase": "review",
+        "policy": {
+          "desiredRetention": 0.9,
+          "maxIntervalDays": 36500,
+          "minIntervalSeconds": 60
+        },
+        "previousDueAt": "2026-10-24T00:00:00+00:00",
+        "previousMemory": null,
+        "previousPhase": "new",
+        "rating": "good",
+        "responseMs": 0,
+        "reviewedAt": "2026-10-24T00:00:00+00:00",
+        "sessionId": "899c5e28-2456-46dc-94a5-e4e700c0b9c5",
+        "wasNew": true
+      }
+    ],
+    "sessions": [
+      {
+        "activeMs": 0,
+        "attempts": 1,
+        "clockCheckpoint": 0,
+        "current": {
+          "activeMs": 0,
+          "answerRevealed": false,
+          "cardId": "cf56f477-04bf-4b4e-99d3-f68e62dfcece",
+          "cardRevision": "11c3665d-5d4b-4d6c-b2de-9f2625914bd5",
+          "formId": "8dc9f7d9-ee51-44b0-bca6-2b0d55e8a411",
+          "id": "2e2e8deb-0c76-4e96-be65-9329acac50df"
+        },
+        "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+        "endedAt": null,
+        "filter": "all",
+        "filterChanges": [],
+        "id": "899c5e28-2456-46dc-94a5-e4e700c0b9c5",
+        "isActive": true,
+        "keepEmptyFilter": false,
+        "lastReview": {
+          "cardId": "ab0f7f65-6367-427a-8646-69065ad3fc04",
+          "dueAt": "2026-10-28T18:39:55.418+00:00",
+          "intervalSeconds": 412795.41778564453,
+          "rating": "good"
+        },
+        "newCardIds": [
+          "ab0f7f65-6367-427a-8646-69065ad3fc04"
+        ],
+        "parked": [],
+        "ratings": [
+          0,
+          0,
+          1,
+          0
+        ],
+        "responseMs": 0,
+        "runtimeId": "90d16b52-4740-4949-b5bf-4cf090f2652d",
+        "startedAt": "2026-10-24T00:00:00+00:00",
+        "status": "active",
+        "undoId": "6413b036-22f8-40ab-8e1c-c79fc58dbd45",
+        "uniqueCardIds": [
+          "ab0f7f65-6367-427a-8646-69065ad3fc04"
+        ]
+      }
+    ],
+    "settings": {
+      "dayStartMinute": 60,
+      "desiredRetention": 0.9,
+      "maxIntervalDays": 36500,
+      "minIntervalSeconds": 60,
+      "pageSize": 20,
+      "reducedMotion": "followSystem",
+      "revision": "5d71e353-ab4b-494e-9668-b421eec8cd8b",
+      "shortcutsEnabled": true,
+      "textScale": 1.0,
+      "timezone": "Africa/Cairo"
+    },
+    "spelling": {
+      "configs": [
+        {
+          "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+          "extractionPolicyVersion": 1,
+          "revision": "b8b8a0e2-4a45-4ee5-98c2-a743c2f4e967",
+          "sourceDeckId": "a84d3dd2-c86a-4d5a-8b9e-88edf5b2ba07",
+          "sourceDeckName": "Synthetic source"
+        }
+      ],
+      "exclusions": [
+        {
+          "canonical": "green",
+          "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+          "excludedAt": "2026-10-24T00:00:00+00:00"
+        }
+      ],
+      "origins": [
+        {
+          "firstSeenAt": "2026-10-24T00:00:00+00:00",
+          "snapshotId": "712fd26c-8193-41d2-a867-771c9180b1b8",
+          "sourceCardId": "08aff1d7-f626-4cc3-860d-112aa57f7c72",
+          "sourceFormId": "43851eac-5a3d-44d1-a2d7-f52a7e251918",
+          "spellingCardId": "ab0f7f65-6367-427a-8646-69065ad3fc04"
+        },
+        {
+          "firstSeenAt": "2026-10-24T00:00:00+00:00",
+          "snapshotId": "712fd26c-8193-41d2-a867-771c9180b1b8",
+          "sourceCardId": "08aff1d7-f626-4cc3-860d-112aa57f7c72",
+          "sourceFormId": "43851eac-5a3d-44d1-a2d7-f52a7e251918",
+          "spellingCardId": "cf56f477-04bf-4b4e-99d3-f68e62dfcece"
+        }
+      ],
+      "snapshots": [
+        {
+          "back": "أحمر أزرق",
+          "capturedAt": "2026-10-24T00:00:00+00:00",
+          "contentSha256": "f20df2a33c5fa420057573c391989f365054ebfc2254cf4ce973fef1033427b3",
+          "extractionPolicyVersion": 1,
+          "front": "red blue",
+          "id": "712fd26c-8193-41d2-a867-771c9180b1b8",
+          "language": null,
+          "notes": "",
+          "questionTitle": "ترجم",
+          "sourceCardId": "08aff1d7-f626-4cc3-860d-112aa57f7c72",
+          "sourceCardRevision": "85320fd2-ceeb-4556-ad34-cfe3c9716f69",
+          "sourceDeckId": "a84d3dd2-c86a-4d5a-8b9e-88edf5b2ba07",
+          "sourceDeckName": "Synthetic source",
+          "sourceFormId": "43851eac-5a3d-44d1-a2d7-f52a7e251918",
+          "sourceFormIndex": 0,
+          "spellingDeckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c"
+        }
+      ],
+      "words": [
+        {
+          "canonical": "red",
+          "cardId": "ab0f7f65-6367-427a-8646-69065ad3fc04",
+          "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+          "display": "red"
+        },
+        {
+          "canonical": "blue",
+          "cardId": "cf56f477-04bf-4b4e-99d3-f68e62dfcece",
+          "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+          "display": "blue"
+        }
+      ]
+    },
+    "trainingRuns": [],
+    "undoRecords": [
+      {
+        "actionId": "64105c4d-428a-4920-8a9d-a371f72d860f",
+        "cardBefore": {
+          "bag": {
+            "consumed": [],
+            "cycle": 1,
+            "lastConsumed": null,
+            "remaining": [
+              "2d293ac0-00b9-40d8-815a-2446b615047d"
+            ],
+            "reserved": "2d293ac0-00b9-40d8-815a-2446b615047d"
+          },
+          "createdAt": "2026-10-24T00:00:00+00:00",
+          "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+          "dueAt": "2026-10-24T00:00:00+00:00",
+          "forms": [
+            {
+              "back": "red",
+              "front": "red",
+              "id": "2d293ac0-00b9-40d8-815a-2446b615047d",
+              "language": "en",
+              "notes": "",
+              "questionTitle": null
+            }
+          ],
+          "hasGraduated": false,
+          "id": "ab0f7f65-6367-427a-8646-69065ad3fc04",
+          "lapseCount": 0,
+          "memory": null,
+          "phase": "new",
+          "reviewCount": 0,
+          "reviewedAt": null,
+          "revision": "eb3734a3-ea54-4169-8fb8-c77e77d41027"
+        },
+        "id": "6413b036-22f8-40ab-8e1c-c79fc58dbd45",
+        "logId": "50c79060-9d83-4e73-914d-102be8128e67",
+        "modelRevision": "8314f89d-8e25-4e02-89cd-b1ff3c95ac9b",
+        "nextCardBefore": {
+          "bag": {
+            "consumed": [],
+            "cycle": 0,
+            "lastConsumed": null,
+            "remaining": [],
+            "reserved": null
+          },
+          "createdAt": "2026-10-24T00:00:00+00:00",
+          "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+          "dueAt": "2026-10-24T00:00:00+00:00",
+          "forms": [
+            {
+              "back": "blue",
+              "front": "blue",
+              "id": "8dc9f7d9-ee51-44b0-bca6-2b0d55e8a411",
+              "language": "en",
+              "notes": "",
+              "questionTitle": null
+            }
+          ],
+          "hasGraduated": false,
+          "id": "cf56f477-04bf-4b4e-99d3-f68e62dfcece",
+          "lapseCount": 0,
+          "memory": null,
+          "phase": "new",
+          "reviewCount": 0,
+          "reviewedAt": null,
+          "revision": "11c3665d-5d4b-4d6c-b2de-9f2625914bd5"
+        },
+        "sessionBefore": {
+          "activeMs": 0,
+          "attempts": 0,
+          "clockCheckpoint": 0,
+          "current": {
+            "activeMs": 0,
+            "answerRevealed": false,
+            "cardId": "ab0f7f65-6367-427a-8646-69065ad3fc04",
+            "cardRevision": "eb3734a3-ea54-4169-8fb8-c77e77d41027",
+            "formId": "2d293ac0-00b9-40d8-815a-2446b615047d",
+            "id": "18f2cd84-cc76-4b98-b7ee-29fe765b1bc4"
+          },
+          "deckId": "4038abd2-1c84-48c4-b31c-20d5b8a70b9c",
+          "endedAt": null,
+          "filter": "all",
+          "filterChanges": [],
+          "id": "899c5e28-2456-46dc-94a5-e4e700c0b9c5",
+          "isActive": true,
+          "keepEmptyFilter": false,
+          "lastReview": null,
+          "newCardIds": [],
+          "parked": [],
+          "ratings": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "responseMs": 0,
+          "runtimeId": "90d16b52-4740-4949-b5bf-4cf090f2652d",
+          "startedAt": "2026-10-24T00:00:00+00:00",
+          "status": "active",
+          "undoId": null,
+          "uniqueCardIds": []
+        },
+        "sessionId": "899c5e28-2456-46dc-94a5-e4e700c0b9c5"
+      }
+    ]
+  },
+  "exportedAt": "2026-10-24T00:00:00+00:00",
+  "formatVersion": 2,
+  "payloadSha256": "2dd9325a002225d0e6300c6a60503d05026c03f9f5bb4fff82a8d79bfe4d7bbc",
+  "schemaVersion": 9
+}

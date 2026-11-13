@@ -9,3 +9,11 @@ No real study data was used. Preserve these original bytes; do not regenerate
 them through a later serializer.
 
 SHA256: `53e3d7530ce1de12fa152818bbd1d74052d2f1579c29e695cd8482c9d32f2bea`
+
+`v0.2.0.json` is a genuine format-2/schema-9 export produced on 2026-11-13
+with the unchanged Rust core from `ffd7a80bc58fea2465a533e38558741d670bba7c`.
+It contains synthetic bilingual source forms with custom titles, retained
+spelling contexts, one exclusion, a real FSRS rating and a usable undo for
+direct spelling grading. Preserve the original bytes.
+
+SHA256: `8a1d49f6a8e88c6111df5cbbd60186ec16bb6350549bcaa522564cee8167da64`
