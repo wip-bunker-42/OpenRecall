@@ -1,7 +1,7 @@
 # Essay and multiple-choice questions
 
-Status: proposed design, awaiting the owner's approval. One independent
-GPT-6.1 Sol / Max builder check completed: "nothing important left".
+Status: approved by the owner on 2026-11-13. One independent
+GPT-6.1 Sol / Max builder check found no remaining design questions.
 Date: 2026-10-30. Baseline: published v0.2.0, commit
 `ffd7a80bc58fea2465a533e38558741d670bba7c`.
 
