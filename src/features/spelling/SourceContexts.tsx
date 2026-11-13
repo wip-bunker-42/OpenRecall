@@ -74,10 +74,28 @@ export function SourceContexts({ api, cardId }: { api: Api; cardId: string }) {
                   <p className="study-text" dir="auto" lang={s.language ?? undefined}>
                     {s.front}
                   </p>
-                  <h3>الإجابة</h3>
-                  <p className="study-text" dir="auto" lang={s.language ?? undefined}>
-                    {s.back}
-                  </p>
+                  {s.multipleChoice ? (
+                    <>
+                      <h3>الاختيارات</h3>
+                      <ol>
+                        {s.multipleChoice.choices.map((choice) => (
+                          <li key={choice.id}>
+                            <bdi lang={s.language ?? undefined}>{choice.text}</bdi>{' '}
+                            {s.multipleChoice?.correctChoiceIds.includes(choice.id) && (
+                              <span>إجابة صحيحة</span>
+                            )}
+                          </li>
+                        ))}
+                      </ol>
+                    </>
+                  ) : s.questionType === 'recall' ? (
+                    <>
+                      <h3>الإجابة</h3>
+                      <p className="study-text" dir="auto" lang={s.language ?? undefined}>
+                        {s.back}
+                      </p>
+                    </>
+                  ) : null}
                   {s.notes && (
                     <>
                       <h3>الملاحظات</h3>
