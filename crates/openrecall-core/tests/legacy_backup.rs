@@ -45,6 +45,8 @@ fn legacy_checksum_precedes_defaults_and_nested_undo_survives() {
             if let Some(forms) = undo[key]["forms"].as_array_mut() {
                 for form in forms {
                     form["questionTitle"] = Value::Null;
+                    form["questionType"] = json!("recall");
+                    form["multipleChoice"] = Value::Null;
                 }
             }
         }

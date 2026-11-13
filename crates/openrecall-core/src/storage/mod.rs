@@ -2,7 +2,7 @@ use crate::{AppError, AppResult, domain::settings::Settings};
 mod backup;
 use rusqlite::Connection;
 use std::{path::Path, time::Duration};
-pub(crate) const SCHEMA_VERSION: u32 = 9;
+pub(crate) const SCHEMA_VERSION: u32 = 10;
 pub(crate) struct Store {
     pub conn: Connection,
 }

@@ -52,6 +52,9 @@ export const spellingQuestion: Extract<ReviewView, { state: 'question' }> = {
 export const sourceContext: SpellingSourceView = {
   availability: 'deleted',
   snapshot: {
+    contentVersion: 1,
+    questionType: 'recall',
+    multipleChoice: null,
     id: 'snapshot-1',
     spellingDeckId: spellingDeck.id,
     sourceDeckId: deckFixture.id,

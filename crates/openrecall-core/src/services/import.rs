@@ -304,6 +304,8 @@ impl App {
                     },
                 );
                 forms.push(FormDraft {
+                    question_type: Default::default(),
+                    multiple_choice: None,
                     question_title: form.question_title.clone(),
                     id: None,
                     front: form.front.clone(),

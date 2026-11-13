@@ -11,6 +11,10 @@ pub struct MemoryState {
 #[serde(rename_all = "camelCase")]
 pub struct CardForm {
     #[serde(default)]
+    pub question_type: super::questions::QuestionType,
+    #[serde(default)]
+    pub multiple_choice: Option<super::questions::ChoiceSet>,
+    #[serde(default)]
     pub question_title: Option<String>,
     pub id: String,
     pub front: String,

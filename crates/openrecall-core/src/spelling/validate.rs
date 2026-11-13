@@ -1,5 +1,5 @@
 use super::{
-    collect::snapshot_fingerprint,
+    collect::{snapshot_eligible_texts, snapshot_fingerprint},
     extract::{EXTRACTION_POLICY_VERSION, canonical_word, extract_words},
 };
 use crate::{
@@ -108,7 +108,8 @@ pub fn validate(d: &BackupData) -> AppResult<()> {
                 && form.back == word.display
                 && form.notes.is_empty()
                 && form.language.as_deref() == Some("en")
-                && form.question_title.is_none(),
+                && form.question_title.is_none()
+                && form.question_type == crate::domain::questions::QuestionType::Recall,
         )?;
     }
     let words: HashMap<_, _> = data
@@ -128,8 +129,22 @@ pub fn validate(d: &BackupData) -> AppResult<()> {
         at(&s.captured_at)?;
         check(
             name(&s.source_deck_name)
-                && !s.front.trim().is_empty()
-                && !s.back.trim().is_empty()
+                && matches!(
+                    (s.content_version, s.question_type),
+                    (1, crate::domain::questions::QuestionType::Recall)
+                        | (
+                            2,
+                            crate::domain::questions::QuestionType::Essay
+                                | crate::domain::questions::QuestionType::MultipleChoice
+                        )
+                )
+                && crate::domain::questions::validate_content(
+                    s.question_type,
+                    &s.front,
+                    &s.back,
+                    s.multiple_choice.as_ref(),
+                )
+                .is_ok()
                 && s.language
                     .as_ref()
                     .is_none_or(|language| !language.trim().is_empty())
@@ -146,7 +161,7 @@ pub fn validate(d: &BackupData) -> AppResult<()> {
             check(card.deck_id == s.source_deck_id)?;
         }
         // Extract once per shared snapshot, then prove each edge by set membership.
-        let terms: HashSet<_> = [&s.front, &s.back, &s.notes]
+        let terms: HashSet<_> = snapshot_eligible_texts(s)
             .into_iter()
             .flat_map(|text| extract_words(text))
             .map(|word| word.canonical)

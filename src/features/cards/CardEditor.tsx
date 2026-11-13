@@ -8,6 +8,8 @@ import { number } from '../../shared/format';
 import { useUnsaved } from '../../app/unsaved';
 type EditForm = FormDraft & { key: string };
 const empty = (): EditForm => ({
+  questionType: 'recall',
+  multipleChoice: null,
   questionTitle: null,
   key: crypto.randomUUID(),
   id: null,
@@ -30,7 +32,18 @@ export function CardEditor({
   onCancel: () => void;
 }) {
   const [initial] = useState<EditForm[]>(() =>
-    card ? card.forms.map((f) => ({ ...f, key: f.id })) : [empty()],
+    card
+      ? card.forms.map(({ multipleChoice, ...f }) => ({
+          ...f,
+          key: f.id,
+          multipleChoice: multipleChoice && {
+            selectionMode: multipleChoice.selectionMode,
+            shuffleChoices: multipleChoice.shuffleChoices,
+            correctChoiceKeys: multipleChoice.correctChoiceIds,
+            choices: multipleChoice.choices.map((choice) => ({ ...choice, key: choice.id })),
+          },
+        }))
+      : [empty()],
   );
   const [forms, setForms] = useState(initial);
   const [error, setError] = useState<unknown>(null);

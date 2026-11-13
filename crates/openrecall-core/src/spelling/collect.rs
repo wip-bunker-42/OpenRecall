@@ -7,6 +7,7 @@ use crate::{
     contracts::library::DeckDetail,
     domain::{
         card::{CardDetail, CardForm},
+        questions::{ChoiceSet, QuestionType},
         spelling::*,
     },
 };
@@ -31,10 +32,56 @@ pub(crate) fn snapshot_fingerprint(s: &SourceSnapshot) -> AppResult<String> {
         &s.question_title,
         &s.language,
     );
-    Ok(Sha256::digest(serde_json::to_vec(&content)?)
+    let bytes = if s.content_version == 1 {
+        serde_json::to_vec(&content)?
+    } else {
+        serde_json::to_vec(&(
+            "openrecall-source-context-v2",
+            content,
+            s.question_type,
+            &s.multiple_choice,
+        ))?
+    };
+    Ok(Sha256::digest(bytes)
         .iter()
         .map(|b| format!("{b:02x}"))
         .collect())
+}
+
+fn projected_texts<'a>(
+    front: &'a str,
+    back: &'a str,
+    notes: &'a str,
+    choices: Option<&'a ChoiceSet>,
+) -> Vec<&'a str> {
+    let mut texts = vec![front, back, notes];
+    if let Some(set) = choices {
+        texts.extend(
+            set.choices
+                .iter()
+                .filter(|choice| set.correct_choice_ids.contains(&choice.id))
+                .map(|choice| choice.text.as_str()),
+        );
+    }
+    texts
+}
+
+pub(crate) fn eligible_texts(form: &CardForm) -> Vec<&str> {
+    projected_texts(
+        &form.front,
+        &form.back,
+        &form.notes,
+        form.multiple_choice.as_ref(),
+    )
+}
+
+pub(crate) fn snapshot_eligible_texts(snapshot: &SourceSnapshot) -> Vec<&str> {
+    projected_texts(
+        &snapshot.front,
+        &snapshot.back,
+        &snapshot.notes,
+        snapshot.multiple_choice.as_ref(),
+    )
 }
 
 impl App {
@@ -57,7 +104,7 @@ impl App {
         let mut added = 0;
         for (index, form) in source_card.forms.iter().enumerate() {
             let mut seen = HashSet::new();
-            let terms = [&form.front, &form.back, &form.notes]
+            let terms = eligible_texts(form)
                 .into_iter()
                 .flat_map(|text| extract_words(text))
                 .filter(|word| seen.insert(word.canonical.clone()))
@@ -94,6 +141,8 @@ impl App {
                             id: word.card_id.clone(),
                             deck_id: word.deck_id.clone(),
                             forms: vec![CardForm {
+                                question_type: QuestionType::Recall,
+                                multiple_choice: None,
                                 question_title: None,
                                 id: id(),
                                 front: word.display.clone(),
@@ -120,6 +169,13 @@ impl App {
                 };
                 if snapshot.is_none() {
                     let mut captured = SourceSnapshot {
+                        content_version: if form.question_type == QuestionType::Recall {
+                            1
+                        } else {
+                            2
+                        },
+                        question_type: form.question_type,
+                        multiple_choice: form.multiple_choice.clone(),
                         id: id(),
                         spelling_deck_id: config.deck_id.clone(),
                         source_deck_id: source.id.clone(),

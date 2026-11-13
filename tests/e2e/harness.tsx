@@ -81,7 +81,24 @@ const api = createApi(async (r) => {
       const card = {
         ...cardFixture,
         id: r.kind === 'updateCard' ? r.payload.cardId : crypto.randomUUID(),
-        forms: r.payload.draft.forms.map((f) => ({ ...f, id: f.id ?? crypto.randomUUID() })),
+        forms: r.payload.draft.forms.map(({ multipleChoice, ...form }) => {
+          const choices =
+            multipleChoice?.choices.map(({ id, key, text }) => ({ id: id ?? key, text })) ?? [];
+          return {
+            ...form,
+            id: form.id ?? crypto.randomUUID(),
+            multipleChoice: multipleChoice && {
+              choices,
+              selectionMode: multipleChoice.selectionMode,
+              shuffleChoices: multipleChoice.shuffleChoices,
+              correctChoiceIds: choices
+                .filter((_, index) =>
+                  multipleChoice.correctChoiceKeys.includes(multipleChoice.choices[index].key),
+                )
+                .map((choice) => choice.id),
+            },
+          };
+        }),
       };
       cards = [...cards.filter((c) => c.id !== card.id), card];
       payload = card;

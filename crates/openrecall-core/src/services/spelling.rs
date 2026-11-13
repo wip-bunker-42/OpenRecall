@@ -55,6 +55,8 @@ impl App {
                         && form.notes == snapshot.notes
                         && form.question_title == snapshot.question_title
                         && form.language == snapshot.language
+                        && form.question_type == snapshot.question_type
+                        && form.multiple_choice == snapshot.multiple_choice
                 }) {
                     SourceAvailability::Current
                 } else {

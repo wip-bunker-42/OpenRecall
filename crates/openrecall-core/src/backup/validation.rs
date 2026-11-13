@@ -46,7 +46,7 @@ fn card(c: &CardDetail) -> AppResult<()> {
     )?;
     let form_ids = ids(c.forms.iter().map(|f| f.id.as_str()))?;
     for f in &c.forms {
-        check(!f.front.trim().is_empty() && !f.back.trim().is_empty())?;
+        check(crate::domain::questions::validate_form(f).is_ok())?;
         check(
             crate::domain::card::normalize_question_title(f.question_title.clone())
                 .is_ok_and(|title| title == f.question_title),

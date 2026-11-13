@@ -37,6 +37,12 @@ pub struct SpellingWord {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct SourceSnapshot {
+    #[serde(default = "legacy_content_version")]
+    pub content_version: u16,
+    #[serde(default)]
+    pub question_type: super::questions::QuestionType,
+    #[serde(default)]
+    pub multiple_choice: Option<super::questions::ChoiceSet>,
     pub id: String,
     pub spelling_deck_id: String,
     pub source_deck_id: String,
@@ -53,6 +59,9 @@ pub struct SourceSnapshot {
     pub question_title: Option<String>,
     pub language: Option<String>,
     pub content_sha256: String,
+}
+fn legacy_content_version() -> u16 {
+    1
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

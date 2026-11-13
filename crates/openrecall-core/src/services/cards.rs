@@ -30,12 +30,6 @@ impl App {
             .into_iter()
             .enumerate()
             .map(|(i, f)| {
-                if f.front.trim().is_empty() {
-                    return Err(AppError::field(&format!("forms.{i}.front"), "required"));
-                }
-                if f.back.trim().is_empty() {
-                    return Err(AppError::field(&format!("forms.{i}.back"), "required"));
-                }
                 let form_id = match f.id {
                     Some(existing) => {
                         if old.is_none_or(|c| !c.forms.iter().any(|item| item.id == existing)) {
@@ -48,20 +42,42 @@ impl App {
                 if !used.insert(form_id.clone()) {
                     return Err(AppError::field("forms", "duplicateId"));
                 }
-                Ok(CardForm {
+                let prior = old.and_then(|card| card.forms.iter().find(|form| form.id == form_id));
+                let indexed = |mut error: AppError| {
+                    for field in &mut error.fields {
+                        field.field = format!("forms.{i}.{}", field.field);
+                    }
+                    error
+                };
+                let multiple_choice = f
+                    .multiple_choice
+                    .map(|draft| {
+                        crate::domain::questions::resolve_choices(
+                            draft,
+                            prior.and_then(|form| form.multiple_choice.as_ref()),
+                        )
+                    })
+                    .transpose()
+                    .map_err(indexed)?;
+                let form = CardForm {
+                    question_type: f.question_type,
+                    multiple_choice,
                     question_title: crate::domain::card::normalize_question_title(f.question_title)
-                        .map_err(|mut error| {
-                            for field in &mut error.fields {
-                                field.field = format!("forms.{i}.questionTitle");
-                            }
-                            error
-                        })?,
+                        .map_err(indexed)?,
                     id: form_id,
                     front: f.front,
-                    back: f.back,
+                    back: if f.question_type != crate::domain::questions::QuestionType::Recall
+                        && f.back.trim().is_empty()
+                    {
+                        String::new()
+                    } else {
+                        f.back
+                    },
                     notes: f.notes,
                     language: f.language.filter(|s| !s.trim().is_empty()),
-                })
+                };
+                crate::domain::questions::validate_form(&form).map_err(indexed)?;
+                Ok(form)
             })
             .collect()
     }

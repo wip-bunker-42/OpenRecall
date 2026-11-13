@@ -43,6 +43,7 @@ pub fn decode(bytes: &[u8]) -> AppResult<ValidatedBackup> {
     let data = match (source.format_version, source.schema_version) {
         (1, 8) => super::legacy_v1::upgrade(source.data)?,
         (2, 9) => super::legacy_v2::upgrade(source.data)?,
+        (2, 10) => serde_json::from_value(source.data)?,
         _ => return Err(AppError::new("unsupportedSchema")),
     };
     super::validation::validate(&data)?;

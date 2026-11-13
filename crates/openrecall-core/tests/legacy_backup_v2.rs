@@ -33,10 +33,13 @@ fn released_v2_preserves_spelling_and_undo() {
         .unwrap();
     let restored = spelling::snapshot(&mut f);
     assert_eq!(restored["spelling"]["exclusions"][0]["canonical"], "green");
-    assert_eq!(
-        restored["spelling"]["snapshots"],
-        raw["data"]["spelling"]["snapshots"]
-    );
+    let mut snapshots = raw["data"]["spelling"]["snapshots"].clone();
+    for snapshot in snapshots.as_array_mut().unwrap() {
+        snapshot["contentVersion"] = json!(1);
+        snapshot["questionType"] = json!("recall");
+        snapshot["multipleChoice"] = Value::Null;
+    }
+    assert_eq!(restored["spelling"]["snapshots"], snapshots);
     assert_eq!(restored["reviews"], raw["data"]["reviews"]);
     assert!(restored["reviews"][0]["memory"]["stabilityFast"].is_number());
     assert!(
