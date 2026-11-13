@@ -180,6 +180,7 @@ export function App({ api, native }: { api: Api; native: NativeApi }) {
                 sessionId={route.sessionId}
                 deckId={route.deckId}
                 api={api}
+                native={native}
                 navigate={requestNavigation}
                 onBusyChange={setReviewBusy}
                 externalBusy={navigationBusy}

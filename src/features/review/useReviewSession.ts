@@ -4,19 +4,25 @@ import type { ReviewView } from '../../shared/generated/ReviewView';
 import type { RateInput } from '../../shared/generated/RateInput';
 import type { Rating } from '../../shared/generated/Rating';
 import type { ReviewFilter } from '../../shared/generated/ReviewFilter';
+import type { ChoiceSubmission } from '../../shared/generated/ChoiceSubmission';
+import type { ConfirmChoicesInput } from '../../shared/generated/ConfirmChoicesInput';
+
+type ReviewAction =
+  { kind: 'rateCard'; input: RateInput } | { kind: 'confirmChoices'; input: ConfirmChoicesInput };
+
 export function useReviewSession(api: Api, sessionId: string) {
   const [view, setView] = useState<ReviewView | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [errorIsBackground, setErrorIsBackground] = useState(false);
   const errorSource = useRef<{ code: string; background: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [pendingRating, setPendingRating] = useState(false);
+  const [pendingAction, setPendingAction] = useState<ReviewAction['kind'] | null>(null);
   const [message, setMessage] = useState('');
   const current = useRef<ReviewView | null>(null);
   const alive = useRef(true);
   const humanBusy = useRef(false);
   const pollBusy = useRef(false);
-  const pending = useRef<RateInput | null>(null);
+  const pending = useRef<ReviewAction | null>(null);
   const queue = useRef<Promise<void>>(Promise.resolve());
   const clearError = useCallback(() => {
     errorSource.current = null;
@@ -48,11 +54,13 @@ export function useReviewSession(api: Api, sessionId: string) {
         setBusy(true);
         clearError();
       } else pollBusy.current = true;
+      let result: ReviewView | undefined;
       await serialize(async () => {
         if (!alive.current) return;
         try {
           const response = await operation();
           if (alive.current) {
+            result = response;
             current.current = response;
             setView(response);
             if (human) {
@@ -71,6 +79,7 @@ export function useReviewSession(api: Api, sessionId: string) {
           } else pollBusy.current = false;
         }
       });
+      return result;
     },
     [serialize, clearError, reportError],
   );
@@ -96,7 +105,7 @@ export function useReviewSession(api: Api, sessionId: string) {
     current.current = null;
     setView(null);
     pending.current = null;
-    setPendingRating(false);
+    setPendingAction(null);
     void refresh();
     void activity(document.visibilityState === 'visible' && document.hasFocus());
     const focus = () => {
@@ -136,39 +145,71 @@ export function useReviewSession(api: Api, sessionId: string) {
     return () => clearTimeout(timer);
   }, [nextDue, state, filter, refresh]);
   const reveal = () => run(() => api.call('revealAnswer', { sessionId }));
-  const rate = (rating: Rating) =>
+  const sendAction = (action: ReviewAction) =>
     run(
       async () => {
         if (!pending.current) {
-          const v = current.current;
-          if (v?.state !== 'question' || !v.payload.canRate) throw { code: 'noQuestion' };
-          pending.current = {
-            sessionId,
-            presentationId: v.payload.presentationId,
-            rating,
-            actionId: crypto.randomUUID(),
-            expectedCardRevision: v.payload.cardRevision,
-          };
-          setPendingRating(true);
+          const latest = current.current;
+          if (
+            latest?.state !== 'question' ||
+            latest.payload.presentationId !== action.input.presentationId ||
+            latest.payload.cardRevision !== action.input.expectedCardRevision
+          )
+            throw { code: 'conflict' };
+          pending.current = action;
+          setPendingAction(action.kind);
         }
-        const response = await api.call('rateCard', pending.current);
+        if (pending.current !== action) throw { code: 'conflict' };
+        const response =
+          action.kind === 'rateCard'
+            ? await api.call('rateCard', action.input)
+            : await api.call('confirmChoices', action.input);
         pending.current = null;
-        setPendingRating(false);
+        setPendingAction(null);
         return response;
       },
       true,
-      'حُفظ التقييم.',
+      action.kind === 'rateCard' ? 'حُفظ التقييم.' : '',
     );
-  const retryRating = () => {
-    if (pending.current) return rate(pending.current.rating);
+  const identity = (frame: Extract<ReviewView, { state: 'question' }>['payload']) => ({
+    sessionId,
+    presentationId: frame.presentationId,
+    expectedCardRevision: frame.cardRevision,
+    actionId: crypto.randomUUID(),
+  });
+  const rate = (rating: Rating) => {
+    if (view?.state === 'question' && view.payload.canRate && !pending.current)
+      return sendAction({ kind: 'rateCard', input: { ...identity(view.payload), rating } });
     return Promise.resolve();
+  };
+  const confirmChoices = (submission: ChoiceSubmission) => {
+    if (
+      view?.state === 'question' &&
+      view.payload.choices &&
+      !view.payload.choices.confirmedCorrect &&
+      !pending.current
+    )
+      return sendAction({
+        kind: 'confirmChoices',
+        input: { ...identity(view.payload), submission },
+      });
+    return Promise.resolve();
+  };
+  const retryRating = () => {
+    if (pending.current) return sendAction(pending.current);
+    return Promise.resolve();
+  };
+  const continueFeedback = () => {
+    if (view?.state !== 'choiceFeedback') return Promise.resolve();
+    const { feedbackId } = view.payload;
+    return run(() => api.call('continueChoiceFeedback', { sessionId, feedbackId }));
   };
   const recover = () =>
     run(
       async () => {
         const response = await api.call('readSession', { sessionId });
         pending.current = null;
-        setPendingRating(false);
+        setPendingAction(null);
         return response;
       },
       true,
@@ -188,10 +229,13 @@ export function useReviewSession(api: Api, sessionId: string) {
     error,
     errorIsBackground,
     busy,
-    pendingRating,
+    pendingRating: pendingAction !== null,
+    pendingAction,
     message,
     reveal,
     rate,
+    confirmChoices,
+    continueFeedback,
     retryRating,
     recover,
     undo,
