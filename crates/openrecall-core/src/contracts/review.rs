@@ -45,6 +45,7 @@ pub struct Progress {
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ReviewFrame {
+    pub choices: Option<crate::domain::session::ChoicePresentation>,
     pub mode: ReviewMode,
     pub can_rate: bool,
     pub preview_due_at: Option<RatingDueDates>,

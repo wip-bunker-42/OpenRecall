@@ -137,6 +137,7 @@ impl App {
                             display: term.display,
                         };
                         let card = CardDetail {
+                            previous_choice_orders: Default::default(),
                             bag: Default::default(),
                             id: word.card_id.clone(),
                             deck_id: word.deck_id.clone(),

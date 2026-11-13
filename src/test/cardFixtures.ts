@@ -1,6 +1,7 @@
 import type { CardDetail } from '../shared/generated/CardDetail';
 import type { ImportPreview } from '../shared/generated/ImportPreview';
 export const cardFixture: CardDetail = {
+  previousChoiceOrders: {},
   id: 'card-1',
   deckId: 'deck-1',
   forms: [

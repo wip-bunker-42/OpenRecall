@@ -4,6 +4,7 @@ import type { SessionSummary } from '../shared/generated/SessionSummary';
 import { cardFixture } from './cardFixtures';
 const memory = { stability: 1, stabilityFast: 0, difficulty: 5 };
 export const frameFixture: ReviewFrame = {
+  choices: null,
   mode: 'standard',
   canRate: false,
   lastReview: null,

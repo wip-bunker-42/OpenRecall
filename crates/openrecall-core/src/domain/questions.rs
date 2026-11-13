@@ -61,6 +61,26 @@ fn default_shuffle() -> bool {
     true
 }
 
+pub(crate) fn is_choice_permutation(set: &ChoiceSet, order: &[String]) -> bool {
+    order.len() == set.choices.len()
+        && order.iter().collect::<HashSet<_>>() == set.choices.iter().map(|c| &c.id).collect()
+}
+
+pub(crate) fn reserve_choice_order(
+    set: &ChoiceSet,
+    previous: Option<&[String]>,
+    random: &mut dyn crate::RandomSource,
+) -> Vec<String> {
+    let mut order: Vec<_> = set.choices.iter().map(|c| c.id.clone()).collect();
+    if set.shuffle_choices {
+        random.shuffle(&mut order);
+        if order.len() > 1 && previous == Some(order.as_slice()) {
+            order.rotate_left(1);
+        }
+    }
+    order
+}
+
 pub(crate) fn normalized(text: &str) -> String {
     text.nfc()
         .collect::<String>()

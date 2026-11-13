@@ -1,6 +1,17 @@
 use super::{card::CardForm, questions::QuestionType, spelling::DeckKind};
 use crate::{contracts::review::FilterChange, scheduling::queue::ReviewFilter};
 use serde::{Deserialize, Serialize};
+use ts_rs::TS;
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ChoicePresentation {
+    pub order: Vec<String>,
+    #[serde(default)]
+    pub selected_ids: Vec<String>,
+    #[serde(default)]
+    pub confirmed_correct: bool,
+}
 
 pub(crate) fn manual_grade_allowed(
     deck: DeckKind,
@@ -17,6 +28,8 @@ pub(crate) fn manual_grade_allowed(
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Presentation {
+    #[serde(default)]
+    pub choices: Option<ChoicePresentation>,
     pub id: String,
     pub card_id: String,
     pub form_id: String,

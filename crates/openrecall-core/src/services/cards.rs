@@ -130,6 +130,7 @@ impl App {
         let forms = self.form_drafts(draft, None)?;
         let now = at.to_rfc3339();
         let card = CardDetail {
+            previous_choice_orders: Default::default(),
             bag: Default::default(),
             id: id(),
             deck_id: deck_id.clone(),
@@ -162,6 +163,13 @@ impl App {
         let forms = self.form_drafts(draft, Some(&card))?;
         self.retain_spelling_before_source_delete(std::slice::from_ref(&card.id))?;
         card.forms = forms;
+        card.previous_choice_orders.retain(|id, order| {
+            card.forms
+                .iter()
+                .find(|form| &form.id == id)
+                .and_then(|form| form.multiple_choice.as_ref())
+                .is_some_and(|set| crate::domain::questions::is_choice_permutation(set, order))
+        });
         self.invalidate_card_undo(&card.id)?;
         let ids = card.forms.iter().map(|f| f.id.clone()).collect::<Vec<_>>();
         crate::scheduling::forms::reconcile_forms(&mut card.bag, &ids, self.random.as_mut())?;

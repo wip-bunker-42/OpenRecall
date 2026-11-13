@@ -52,6 +52,15 @@ fn card(c: &CardDetail) -> AppResult<()> {
                 .is_ok_and(|title| title == f.question_title),
         )?;
     }
+    for (id, order) in &c.previous_choice_orders {
+        check(
+            c.forms
+                .iter()
+                .find(|f| &f.id == id)
+                .and_then(|f| f.multiple_choice.as_ref())
+                .is_some_and(|set| crate::domain::questions::is_choice_permutation(set, order)),
+        )?;
+    }
     let remaining = ids(c.bag.remaining.iter().map(String::as_str))?;
     let consumed = ids(c.bag.consumed.iter().map(String::as_str))?;
     check(
@@ -68,7 +77,24 @@ fn presentation(p: &Presentation, deck: &str, cards: &HashMap<&str, &CardDetail>
     let c = cards
         .get(p.card_id.as_str())
         .ok_or_else(|| AppError::new("invalidBackup"))?;
-    check(c.deck_id == deck && c.forms.iter().any(|f| f.id == p.form_id))
+    let form = c
+        .forms
+        .iter()
+        .find(|f| f.id == p.form_id)
+        .ok_or_else(|| AppError::new("invalidBackup"))?;
+    check(c.deck_id == deck)?;
+    match (&form.multiple_choice, &p.choices) {
+        (Some(set), Some(choices)) => check(
+            !p.answer_revealed
+                && !choices.confirmed_correct
+                && choices.selected_ids.is_empty()
+                && crate::domain::questions::is_choice_permutation(set, &choices.order)
+                && (set.shuffle_choices
+                    || choices.order.iter().eq(set.choices.iter().map(|c| &c.id))),
+        ),
+        (_, None) => Ok(()),
+        (None, Some(_)) => Err(AppError::new("invalidBackup")),
+    }
 }
 fn session(s: &Session, cards: &HashMap<&str, &CardDetail>) -> AppResult<()> {
     at(&s.started_at)?;

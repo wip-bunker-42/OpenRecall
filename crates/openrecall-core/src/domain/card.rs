@@ -46,6 +46,8 @@ pub fn normalize_question_title(value: Option<String>) -> crate::AppResult<Optio
 #[serde(rename_all = "camelCase")]
 pub struct CardDetail {
     #[serde(default)]
+    pub previous_choice_orders: std::collections::BTreeMap<String, Vec<String>>,
+    #[serde(default)]
     pub bag: crate::scheduling::forms::FormBag,
     pub id: String,
     pub deck_id: String,

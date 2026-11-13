@@ -63,7 +63,14 @@ impl App {
             }
             let parked_count = session.parked.len();
             session.parked.retain(|p| !invalid(p));
-            if current_invalid || parked_count != session.parked.len() {
+            let mut cleared_choices = false;
+            for p in session.current.iter_mut().chain(&mut session.parked) {
+                if p.card_id == card.id && p.choices.take().is_some() {
+                    p.answer_revealed = false;
+                    cleared_choices = true;
+                }
+            }
+            if current_invalid || parked_count != session.parked.len() || cleared_choices {
                 self.save_session(&session)?;
             }
         }
@@ -190,6 +197,10 @@ impl App {
         let card_before = card.clone();
         let was_new = card.review_count == 0;
         crate::scheduling::forms::consume_form(&mut card.bag, &presentation.form_id)?;
+        if let Some(choices) = &presentation.choices {
+            card.previous_choice_orders
+                .insert(presentation.form_id.clone(), choices.order.clone());
+        }
         card.memory = Some(outcome.memory.clone());
         card.reviewed_at = Some(now.to_rfc3339());
         card.due_at = (now

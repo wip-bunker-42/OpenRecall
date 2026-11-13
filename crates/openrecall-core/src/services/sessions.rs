@@ -5,8 +5,8 @@ use crate::{
     domain::{
         card::CardDetail,
         profile::ProfileDetail,
-        questions::QuestionType,
-        session::{Presentation, Session, manual_grade_allowed},
+        questions::{QuestionType, reserve_choice_order},
+        session::{ChoicePresentation, Presentation, Session, manual_grade_allowed},
         spelling::DeckKind,
     },
     scheduling::{
@@ -253,6 +253,7 @@ impl App {
                     Some(s.parked.remove(at))
                 } else {
                     Some(Presentation {
+                        choices: None,
                         id: id(),
                         card_id: next.id.clone(),
                         form_id: String::new(),
@@ -285,6 +286,7 @@ impl App {
             if !p.form_id.is_empty() && (p.form_id != selected || p.card_revision != card.revision)
             {
                 p.answer_revealed = false;
+                p.choices = None;
             }
             p.form_id = selected;
             p.card_revision = card.revision.clone();
@@ -294,6 +296,21 @@ impl App {
                 .find(|f| f.id == p.form_id)
                 .cloned()
                 .ok_or_else(|| AppError::new("noForms"))?;
+            if let Some(set) = &form.multiple_choice {
+                if p.choices.is_none() {
+                    p.choices = Some(ChoicePresentation {
+                        order: reserve_choice_order(
+                            set,
+                            card.previous_choice_orders.get(&form.id).map(Vec::as_slice),
+                            self.random.as_mut(),
+                        ),
+                        selected_ids: vec![],
+                        confirmed_correct: false,
+                    });
+                }
+            } else {
+                p.choices = None;
+            }
             let preview_time = self.clock.now();
             let mode = self.review_mode(&s.deck_id)?;
             let kind = if mode == ReviewMode::Spelling {
@@ -308,6 +325,7 @@ impl App {
                 None
             };
             let frame = ReviewFrame {
+                choices: p.choices.clone(),
                 mode,
                 can_rate,
                 preview_due_at: previews.as_ref().map(|previews| {
