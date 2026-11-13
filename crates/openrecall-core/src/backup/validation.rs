@@ -1,10 +1,13 @@
 use super::format::BackupData;
 use crate::{
     AppError, AppResult,
+    contracts::review::{ChoiceSubmission, ConfirmChoicesInput, RateInput},
+    domain::review::ChoiceOutcome,
     domain::{
         card::{CardDetail, MemoryState},
         session::{Presentation, Session},
     },
+    scheduling::fsrs::Rating,
     scheduling::fsrs::{FsrsScheduler, valid_memory},
 };
 use std::collections::{HashMap, HashSet};
@@ -86,8 +89,16 @@ fn presentation(p: &Presentation, deck: &str, cards: &HashMap<&str, &CardDetail>
     match (&form.multiple_choice, &p.choices) {
         (Some(set), Some(choices)) => check(
             !p.answer_revealed
-                && !choices.confirmed_correct
-                && choices.selected_ids.is_empty()
+                && ((!choices.confirmed_correct && choices.selected_ids.is_empty())
+                    || crate::services::choice_reviews::validate_submission(
+                        set,
+                        &ChoiceSubmission::Selected {
+                            choice_ids: choices.selected_ids.clone(),
+                        },
+                    )
+                    .is_ok_and(|outcome| {
+                        choices.confirmed_correct == (outcome == ChoiceOutcome::Correct)
+                    }))
                 && crate::domain::questions::is_choice_permutation(set, &choices.order)
                 && (set.shuffle_choices
                     || choices.order.iter().eq(set.choices.iter().map(|c| &c.id))),
@@ -310,8 +321,87 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
             sessions.contains(a.session_id.as_str())
                 && ["applied", "undone"].contains(&a.status.as_str()),
         )?;
-        let input: crate::contracts::review::RateInput = serde_json::from_str(&a.signature)?;
-        check(input.action_id == a.id && input.session_id == a.session_id)?;
+        if let Some(outcome) = a.choice_outcome {
+            let input: ConfirmChoicesInput = serde_json::from_str(&a.signature)?;
+            check(
+                input.action_id == a.id
+                    && input.session_id == a.session_id
+                    && uuid::Uuid::parse_str(&input.presentation_id).is_ok()
+                    && !input.expected_card_revision.is_empty()
+                    && (outcome != ChoiceOutcome::Correct || a.status == "applied"),
+            )?;
+            match input.submission {
+                ChoiceSubmission::Unknown => check(outcome == ChoiceOutcome::Unknown)?,
+                ChoiceSubmission::Selected { choice_ids } => {
+                    check(
+                        outcome != ChoiceOutcome::Unknown
+                            && !choice_ids.is_empty()
+                            && choice_ids.len() <= 128
+                            && choice_ids.windows(2).all(|pair| pair[0] < pair[1]),
+                    )?;
+                    ids(choice_ids.iter().map(String::as_str))?;
+                }
+            }
+        } else {
+            let input: RateInput = serde_json::from_str(&a.signature)?;
+            check(input.action_id == a.id && input.session_id == a.session_id)?;
+        }
+    }
+    for s in &d.sessions {
+        let Some(f) = &s.choice_feedback else {
+            continue;
+        };
+        let c = card_map
+            .get(f.card_id.as_str())
+            .ok_or_else(|| AppError::new("invalidBackup"))?;
+        let log = logs_by_id
+            .get(f.review_id.as_str())
+            .ok_or_else(|| AppError::new("invalidBackup"))?;
+        let action = actions_by_id
+            .get(f.action_id.as_str())
+            .ok_or_else(|| AppError::new("invalidBackup"))?;
+        let set = f
+            .form
+            .multiple_choice
+            .as_ref()
+            .ok_or_else(|| AppError::new("invalidBackup"))?;
+        let input: ConfirmChoicesInput = serde_json::from_str(&action.signature)?;
+        let submission = if f.unknown {
+            ChoiceSubmission::Unknown
+        } else {
+            ChoiceSubmission::Selected {
+                choice_ids: f.choices.selected_ids.clone(),
+            }
+        };
+        let outcome = crate::services::choice_reviews::validate_submission(set, &submission)?;
+        check(
+            s.status == "active"
+                && s.current.is_none()
+                && uuid::Uuid::parse_str(&f.id).is_ok()
+                && c.deck_id == s.deck_id
+                && c.revision == f.card_revision
+                && c.forms.contains(&f.form)
+                && !f.choices.confirmed_correct
+                && crate::domain::questions::is_choice_permutation(set, &f.choices.order)
+                && (set.shuffle_choices
+                    || f.choices.order.iter().eq(set.choices.iter().map(|c| &c.id)))
+                && (!f.unknown || f.choices.selected_ids.is_empty())
+                && log.card_id == c.id
+                && log.form_id == f.form.id
+                && log.session_id == s.id
+                && log.rating == Rating::Again
+                && log.next_due_at == c.due_at
+                && action.status == "applied"
+                && action.session_id == s.id
+                && action.choice_outcome == Some(outcome)
+                && outcome != ChoiceOutcome::Correct
+                && input.submission == submission
+                && s.last_review.as_ref().is_some_and(|last| {
+                    last.card_id == c.id
+                        && last.rating == Rating::Again
+                        && last.due_at == log.next_due_at
+                }),
+        )?;
     }
     for u in &d.undo_records {
         check(
@@ -389,26 +479,75 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
             .get(u.action_id.as_str())
             .ok_or_else(|| AppError::new("invalidBackup"))?;
         check(action.status == "applied" && action.session_id == u.session_id)?;
-        let input: crate::contracts::review::RateInput = serde_json::from_str(&action.signature)?;
         let p = u
             .session_before
             .current
             .as_ref()
             .ok_or_else(|| AppError::new("invalidBackup"))?;
-        check(
-            input.presentation_id == p.id
-                && input.expected_card_revision == u.card_before.revision
-                && p.card_id == log.card_id
-                && p.form_id == log.form_id
-                && d.decks
-                    .iter()
-                    .find(|deck| deck.id == u.card_before.deck_id)
-                    .zip(u.card_before.forms.iter().find(|form| form.id == p.form_id))
-                    .is_some_and(|(deck, form)| {
-                        crate::domain::session::manual_grade_allowed(deck.kind, form, p)
-                    })
-                && input.rating == log.rating,
-        )?;
+        check(p.card_id == log.card_id && p.form_id == log.form_id)?;
+        let form = u
+            .card_before
+            .forms
+            .iter()
+            .find(|form| form.id == p.form_id)
+            .ok_or_else(|| AppError::new("invalidBackup"))?;
+        if let Some(outcome) = action.choice_outcome {
+            let input: ConfirmChoicesInput = serde_json::from_str(&action.signature)?;
+            let set = form
+                .multiple_choice
+                .as_ref()
+                .ok_or_else(|| AppError::new("invalidBackup"))?;
+            let choices = p
+                .choices
+                .as_ref()
+                .ok_or_else(|| AppError::new("invalidBackup"))?;
+            check(
+                input.presentation_id == p.id
+                    && input.expected_card_revision == u.card_before.revision
+                    && log.rating == Rating::Again
+                    && outcome != ChoiceOutcome::Correct
+                    && !choices.confirmed_correct
+                    && outcome
+                        == crate::services::choice_reviews::validate_submission(
+                            set,
+                            &input.submission,
+                        )?
+                    && match input.submission {
+                        ChoiceSubmission::Selected { choice_ids } => {
+                            choice_ids == choices.selected_ids
+                        }
+                        ChoiceSubmission::Unknown => choices.selected_ids.is_empty(),
+                    },
+            )?;
+        } else {
+            let input: RateInput = serde_json::from_str(&action.signature)?;
+            check(
+                input.presentation_id == p.id
+                    && input.expected_card_revision == u.card_before.revision
+                    && input.rating == log.rating
+                    && d.decks
+                        .iter()
+                        .find(|deck| deck.id == u.card_before.deck_id)
+                        .is_some_and(|deck| {
+                            crate::domain::session::manual_grade_allowed(deck.kind, form, p)
+                        }),
+            )?;
+            check(u.deferred_card_befores.is_empty())?;
+        }
+        ids(u.deferred_card_befores.iter().map(|card| card.id.as_str()))?;
+        for deferred in &u.deferred_card_befores {
+            card(deferred)?;
+            let current = card_map
+                .get(deferred.id.as_str())
+                .ok_or_else(|| AppError::new("invalidBackup"))?;
+            let mut before = deferred.clone();
+            before.bag = current.bag.clone();
+            check(
+                deferred.id != u.card_before.id
+                    && deferred.deck_id == u.card_before.deck_id
+                    && before == **current,
+            )?;
+        }
     }
     for j in &d.training_runs {
         check(

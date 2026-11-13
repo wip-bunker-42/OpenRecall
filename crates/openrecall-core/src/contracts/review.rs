@@ -26,6 +26,48 @@ pub struct RateInput {
     pub action_id: String,
     pub expected_card_revision: String,
 }
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, TS)]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase",
+    deny_unknown_fields
+)]
+pub enum ChoiceSubmission {
+    Selected { choice_ids: Vec<String> },
+    Unknown,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ConfirmChoicesInput {
+    pub session_id: String,
+    pub presentation_id: String,
+    pub expected_card_revision: String,
+    pub action_id: String,
+    pub submission: ChoiceSubmission,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+pub struct ChoiceFeedbackFrame {
+    pub feedback_id: String,
+    pub card_id: String,
+    pub card_revision: String,
+    pub session_id: String,
+    pub form: CardForm,
+    pub order: Vec<String>,
+    pub selected_ids: Vec<String>,
+    pub missed_ids: Vec<String>,
+    pub incorrect_ids: Vec<String>,
+    pub unknown: bool,
+    pub last_review: Option<ReviewResult>,
+    pub filter: ReviewFilter,
+    pub progress: Progress,
+    pub next_due_at: Option<String>,
+    pub can_undo: bool,
+}
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, TS)]
@@ -105,6 +147,7 @@ pub struct SessionSummary {
 #[serde(tag = "state", content = "payload", rename_all = "camelCase")]
 pub enum ReviewView {
     Question(Box<ReviewFrame>),
+    ChoiceFeedback(Box<ChoiceFeedbackFrame>),
     EmptyFilter(EmptyFilterView),
     Summary(SessionSummary),
 }

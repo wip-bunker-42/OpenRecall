@@ -17,7 +17,7 @@ pub mod review;
 use crate::domain::profile::TrainingConfig;
 use crate::scheduling::queue::ReviewFilter;
 use profiles::{AssignProfileInput, SaveDeckPolicyInput};
-use review::{RateInput, ResumableSession, ReviewView, SessionTiming};
+use review::{ConfirmChoicesInput, RateInput, ResumableSession, ReviewView, SessionTiming};
 pub mod library;
 use crate::domain::card::CardDetail;
 use crate::domain::profile::ProfileDetail;
@@ -133,6 +133,11 @@ pub enum Request {
     },
     CommitImport(CommitImportInput),
     RateCard(RateInput),
+    ConfirmChoices(ConfirmChoicesInput),
+    ContinueChoiceFeedback {
+        session_id: String,
+        feedback_id: String,
+    },
     UndoReview {
         session_id: String,
     },
@@ -239,6 +244,8 @@ pub enum Response {
     PreviewImport(ImportPreview),
     CommitImport(ImportReport),
     RateCard(ReviewView),
+    ConfirmChoices(ReviewView),
+    ContinueChoiceFeedback(ReviewView),
     UndoReview(ReviewView),
     CloseSession(DeleteReport),
     StartSession(ReviewView),

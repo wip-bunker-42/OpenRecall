@@ -194,6 +194,8 @@ export function ReviewPage({
                 <p>الاستحقاق القادم لهذا الفلتر: {dateTime(view.payload.nextDueAt, timezone)}</p>
               )}
             </>
+          ) : view.state === 'choiceFeedback' ? (
+            <h1 tabIndex={-1}>النتيجة</h1>
           ) : (
             <ReviewSummary summary={view.payload} timezone={timezone} />
           )}

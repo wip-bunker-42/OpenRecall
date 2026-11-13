@@ -112,6 +112,7 @@ impl App {
         }
         self.clear_deck_undos(std::slice::from_ref(&deck_id))?;
         let mut s = Session {
+            choice_feedback: None,
             last_review: None,
             id: id(),
             deck_id,
@@ -202,6 +203,7 @@ impl App {
     pub(crate) fn end_session(&mut self, session_id: String) -> AppResult<ReviewView> {
         let mut s: Session = self.store.get("sessions", &session_id)?;
         self.checkpoint(&mut s);
+        s.choice_feedback = None;
         s.status = "ended".into();
         s.ended_at = Some(self.clock.now().to_rfc3339());
         self.save_session(&s)?;
@@ -241,6 +243,47 @@ impl App {
             return Ok(ReviewView::Summary(self.session_summary(s)?));
         }
         let due = self.due_cards(&s.deck_id, s.filter)?;
+        if let Some(feedback) = &s.choice_feedback {
+            let set = feedback
+                .form
+                .multiple_choice
+                .as_ref()
+                .ok_or_else(|| AppError::new("noChoices"))?;
+            let view = ChoiceFeedbackFrame {
+                feedback_id: feedback.id.clone(),
+                card_id: feedback.card_id.clone(),
+                card_revision: feedback.card_revision.clone(),
+                session_id: s.id.clone(),
+                form: feedback.form.clone(),
+                order: feedback.choices.order.clone(),
+                selected_ids: feedback.choices.selected_ids.clone(),
+                missed_ids: set
+                    .correct_choice_ids
+                    .iter()
+                    .filter(|id| !feedback.choices.selected_ids.contains(id))
+                    .cloned()
+                    .collect(),
+                incorrect_ids: feedback
+                    .choices
+                    .selected_ids
+                    .iter()
+                    .filter(|id| !set.correct_choice_ids.contains(id))
+                    .cloned()
+                    .collect(),
+                unknown: feedback.unknown,
+                last_review: s.last_review.clone(),
+                filter: s.filter,
+                progress: Progress {
+                    current: s.attempts,
+                    total: s.attempts + due.len() as u32,
+                    completed: s.attempts,
+                },
+                next_due_at: self.next_due(&s.deck_id, s.filter)?,
+                can_undo: s.undo_id.is_some(),
+            };
+            self.save_session(s)?;
+            return Ok(ReviewView::ChoiceFeedback(Box::new(view)));
+        }
         if s.current
             .as_ref()
             .is_some_and(|p| self.store.get::<CardDetail>("cards", &p.card_id).is_err())
@@ -281,6 +324,26 @@ impl App {
             let ids = card.forms.iter().map(|f| f.id.clone()).collect::<Vec<_>>();
             let selected = reserve_form(&mut card.bag, &ids, self.random.as_mut())?;
             if card.bag != old_bag {
+                if let Some(undo_id) = &s.undo_id {
+                    use crate::domain::review::{ActionRecord, UndoRecord};
+                    let mut undo: UndoRecord = self.store.get("undo_records", undo_id)?;
+                    let action: ActionRecord = self.store.get("actions", &undo.action_id)?;
+                    if action.choice_outcome.is_some()
+                        && card.id != undo.card_before.id
+                        && !undo
+                            .deferred_card_befores
+                            .iter()
+                            .any(|before| before.id == card.id)
+                    {
+                        let mut before = card.clone();
+                        before.bag = old_bag;
+                        undo.deferred_card_befores.push(before);
+                        self.store.conn.execute(
+                            "UPDATE undo_records SET payload=?1 WHERE id=?2",
+                            rusqlite::params![serde_json::to_string(&undo)?, undo_id],
+                        )?;
+                    }
+                }
                 self.save_card(&card)?;
             }
             if !p.form_id.is_empty() && (p.form_id != selected || p.card_revision != card.revision)

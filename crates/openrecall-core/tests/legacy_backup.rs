@@ -41,7 +41,9 @@ fn legacy_checksum_precedes_defaults_and_nested_undo_survives() {
     );
     let mut upgraded_undo = raw["data"]["undoRecords"].clone();
     for undo in upgraded_undo.as_array_mut().unwrap() {
+        undo["deferredCardBefores"] = json!([]);
         let session = &mut undo["sessionBefore"];
+        session["choiceFeedback"] = Value::Null;
         if session["current"].is_object() {
             session["current"]["choices"] = Value::Null;
         }

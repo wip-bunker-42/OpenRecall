@@ -22,7 +22,10 @@ pub(crate) fn manual_grade_allowed(
         || match form.question_type {
             QuestionType::Essay => true,
             QuestionType::Recall => presentation.answer_revealed,
-            QuestionType::MultipleChoice => false,
+            QuestionType::MultipleChoice => presentation
+                .choices
+                .as_ref()
+                .is_some_and(|choices| choices.confirmed_correct),
         }
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -40,6 +43,8 @@ pub struct Presentation {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Session {
+    #[serde(default)]
+    pub choice_feedback: Option<ChoiceFeedback>,
     #[serde(default)]
     pub last_review: Option<crate::contracts::review::ReviewResult>,
     pub id: String,
@@ -62,4 +67,17 @@ pub struct Session {
     pub runtime_id: String,
     pub keep_empty_filter: bool,
     pub undo_id: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ChoiceFeedback {
+    pub id: String,
+    pub review_id: String,
+    pub action_id: String,
+    pub card_id: String,
+    pub card_revision: String,
+    pub form: CardForm,
+    pub choices: ChoicePresentation,
+    pub unknown: bool,
 }
