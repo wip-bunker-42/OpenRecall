@@ -8,7 +8,7 @@ use crate::{
     domain::{
         card::CardDetail,
         review::{ActionRecord, ReviewLog, UndoRecord},
-        session::{Presentation, Session},
+        session::{Presentation, Session, manual_grade_allowed},
     },
     scheduling::fsrs::Rating,
 };
@@ -150,16 +150,21 @@ impl App {
         if presentation.id != input.presentation_id {
             return Err(AppError::new("invalidPresentation"));
         }
-        if !presentation.answer_revealed
-            && self.review_mode(&session.deck_id)? == crate::contracts::review::ReviewMode::Standard
-        {
-            return Err(AppError::new("answerHidden"));
-        }
         let mut card: CardDetail = self.store.get("cards", &presentation.card_id)?;
         if card.revision != input.expected_card_revision
             || card.revision != presentation.card_revision
         {
             return Err(AppError::new("conflict"));
+        }
+        let deck: crate::contracts::library::DeckDetail =
+            self.store.get("decks", &session.deck_id)?;
+        let form = card
+            .forms
+            .iter()
+            .find(|form| form.id == presentation.form_id)
+            .ok_or_else(|| AppError::new("noForms"))?;
+        if !manual_grade_allowed(deck.kind, form, &presentation) {
+            return Err(AppError::new("answerHidden"));
         }
         let now = self.clock.now();
         let elapsed = if let Some(previous) = &card.reviewed_at {

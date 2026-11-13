@@ -374,11 +374,13 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
                 && input.expected_card_revision == u.card_before.revision
                 && p.card_id == log.card_id
                 && p.form_id == log.form_id
-                && (p.answer_revealed
-                    || d.decks.iter().any(|deck| {
-                        deck.id == u.card_before.deck_id
-                            && deck.kind == crate::domain::spelling::DeckKind::Spelling
-                    }))
+                && d.decks
+                    .iter()
+                    .find(|deck| deck.id == u.card_before.deck_id)
+                    .zip(u.card_before.forms.iter().find(|form| form.id == p.form_id))
+                    .is_some_and(|(deck, form)| {
+                        crate::domain::session::manual_grade_allowed(deck.kind, form, p)
+                    })
                 && input.rating == log.rating,
         )?;
     }

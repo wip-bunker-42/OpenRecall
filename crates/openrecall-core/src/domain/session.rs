@@ -1,5 +1,19 @@
+use super::{card::CardForm, questions::QuestionType, spelling::DeckKind};
 use crate::{contracts::review::FilterChange, scheduling::queue::ReviewFilter};
 use serde::{Deserialize, Serialize};
+
+pub(crate) fn manual_grade_allowed(
+    deck: DeckKind,
+    form: &CardForm,
+    presentation: &Presentation,
+) -> bool {
+    deck == DeckKind::Spelling
+        || match form.question_type {
+            QuestionType::Essay => true,
+            QuestionType::Recall => presentation.answer_revealed,
+            QuestionType::MultipleChoice => false,
+        }
+}
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Presentation {

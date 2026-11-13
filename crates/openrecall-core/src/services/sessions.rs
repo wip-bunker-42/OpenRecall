@@ -5,7 +5,9 @@ use crate::{
     domain::{
         card::CardDetail,
         profile::ProfileDetail,
-        session::{Presentation, Session},
+        questions::QuestionType,
+        session::{Presentation, Session, manual_grade_allowed},
+        spelling::DeckKind,
     },
     scheduling::{
         forms::reserve_form,
@@ -174,6 +176,22 @@ impl App {
         if self.review_mode(&s.deck_id)? == ReviewMode::Spelling {
             return Err(AppError::new("spellingRevealNotApplicable"));
         }
+        let current = s
+            .current
+            .as_ref()
+            .ok_or_else(|| AppError::new("noQuestion"))?;
+        let card: CardDetail = self.store.get("cards", &current.card_id)?;
+        if card.revision != current.card_revision {
+            return Err(AppError::new("conflict"));
+        }
+        let form = card
+            .forms
+            .iter()
+            .find(|f| f.id == current.form_id)
+            .ok_or_else(|| AppError::new("noForms"))?;
+        if form.question_type != QuestionType::Recall {
+            return Err(AppError::new("revealNotApplicable"));
+        }
         self.checkpoint(&mut s);
         s.current
             .as_mut()
@@ -278,7 +296,12 @@ impl App {
                 .ok_or_else(|| AppError::new("noForms"))?;
             let preview_time = self.clock.now();
             let mode = self.review_mode(&s.deck_id)?;
-            let can_rate = mode == ReviewMode::Spelling || p.answer_revealed;
+            let kind = if mode == ReviewMode::Spelling {
+                DeckKind::Spelling
+            } else {
+                DeckKind::Standard
+            };
+            let can_rate = manual_grade_allowed(kind, &form, p);
             let previews = if can_rate {
                 Some(self.card_previews(&card, preview_time)?)
             } else {
