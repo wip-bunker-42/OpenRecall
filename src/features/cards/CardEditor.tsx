@@ -6,6 +6,10 @@ import { Dialog } from '../../components/Dialog';
 import { FormErrors } from '../../components/FormErrors';
 import { number } from '../../shared/format';
 import { useUnsaved } from '../../app/unsaved';
+import { ChoiceEditor, newChoice } from './ChoiceEditor';
+import type { QuestionType } from '../../shared/generated/QuestionType';
+import { questionTypeLabel } from '../../shared/questionTypes';
+import { errorText, fieldErrors } from '../../shared/errors';
 type EditForm = FormDraft & { key: string };
 const empty = (): EditForm => ({
   questionType: 'recall',
@@ -50,11 +54,13 @@ export function CardEditor({
   const [attempted, setAttempted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [discard, setDiscard] = useState(false);
+  const [typeChange, setTypeChange] = useState<{ key: string; kind: QuestionType } | null>(null);
   const [focusKey, setFocusKey] = useState<string | null>(null);
   const inputs = useRef(new Map<string, HTMLTextAreaElement>());
   const id = useId();
   const { setDirty } = useUnsaved();
   const dirty = JSON.stringify(forms) !== JSON.stringify(initial);
+  const issues = fieldErrors(error);
   useEffect(() => {
     setDirty(dirty);
     return () => setDirty(false);
@@ -82,9 +88,32 @@ export function CardEditor({
     if (dirty) setDiscard(true);
     else onCancel();
   }
+  function applyType(key: string, kind: QuestionType) {
+    setForms((items) =>
+      items.map((form) =>
+        form.key === key
+          ? {
+              ...form,
+              questionType: kind,
+              back: '',
+              multipleChoice:
+                kind === 'multipleChoice'
+                  ? {
+                      choices: [newChoice(), newChoice()],
+                      correctChoiceKeys: [],
+                      selectionMode: 'single',
+                      shuffleChoices: true,
+                    }
+                  : null,
+            }
+          : form,
+      ),
+    );
+    setTypeChange(null);
+  }
   async function save() {
     setAttempted(true);
-    if (forms.some((f) => !f.front.trim() || !f.back.trim())) {
+    if (forms.some((f) => !f.front.trim() || (f.questionType === 'recall' && !f.back.trim()))) {
       setError({ code: 'requiredCardFields' });
       return;
     }
@@ -126,9 +155,40 @@ export function CardEditor({
           {forms.map((form, i) => (
             <fieldset key={form.key} disabled={busy}>
               <legend>{i === 0 ? 'الصيغة الأساسية' : `صيغة بديلة ${number(i)}`}</legend>
+              {issues
+                .filter((issue) => issue.field.startsWith(`forms.${i}.`))
+                .map((issue) => (
+                  <p className="error" key={issue.field}>
+                    {errorText(issue)}
+                  </p>
+                ))}
+              <label>
+                نوع السؤال
+                <select
+                  value={form.questionType}
+                  onChange={(event) => {
+                    const kind = event.target.value as QuestionType;
+                    if (kind === form.questionType) return;
+                    if (
+                      form.back.trim() ||
+                      form.multipleChoice?.choices.some((c) => c.text.trim()) ||
+                      form.multipleChoice?.correctChoiceKeys.length
+                    ) {
+                      setTypeChange({ key: form.key, kind });
+                    } else applyType(form.key, kind);
+                  }}
+                >
+                  {Object.entries(questionTypeLabel).map(([kind, label]) => (
+                    <option key={kind} value={kind}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label htmlFor={`${id}-${form.key}-front`}>السؤال، الصيغة {number(i + 1)}</label>
               <textarea
                 id={`${id}-${form.key}-front`}
+                data-autofocus={i === 0 || undefined}
                 ref={(node) => {
                   if (node) inputs.current.set(form.key, node);
                   else inputs.current.delete(form.key);
@@ -140,17 +200,31 @@ export function CardEditor({
                 dir="auto"
                 lang={form.language ?? undefined}
               />
-              <label>
-                الإجابة، الصيغة {number(i + 1)}
-                <textarea
-                  required
-                  aria-invalid={(attempted && !form.back.trim()) || undefined}
-                  value={form.back}
-                  onChange={(e) => change(form.key, 'back', e.target.value)}
-                  dir="auto"
-                  lang={form.language ?? undefined}
+              {form.questionType === 'recall' && (
+                <label>
+                  الإجابة، الصيغة {number(i + 1)}
+                  <textarea
+                    required
+                    aria-invalid={(attempted && !form.back.trim()) || undefined}
+                    value={form.back}
+                    onChange={(e) => change(form.key, 'back', e.target.value)}
+                    dir="auto"
+                    lang={form.language ?? undefined}
+                  />
+                </label>
+              )}
+              {form.multipleChoice && (
+                <ChoiceEditor
+                  value={form.multipleChoice}
+                  onChange={(multipleChoice) =>
+                    setForms((items) =>
+                      items.map((item) =>
+                        item.key === form.key ? { ...item, multipleChoice } : item,
+                      ),
+                    )
+                  }
                 />
-              </label>
+              )}
               <label>
                 الملاحظات، الصيغة {number(i + 1)}
                 <textarea
@@ -218,6 +292,19 @@ export function CardEditor({
           </div>
         </form>
       </Dialog>
+      {typeChange && (
+        <Dialog title="تغيير نوع السؤال" onDismiss={() => setTypeChange(null)}>
+          <p>سيزيل تغيير النوع الإجابة أو الاختيارات الحالية من هذه الصيغة.</p>
+          <div className="actions">
+            <button data-autofocus onClick={() => setTypeChange(null)}>
+              الاحتفاظ بالنوع الحالي
+            </button>
+            <button className="danger" onClick={() => applyType(typeChange.key, typeChange.kind)}>
+              تغيير النوع
+            </button>
+          </div>
+        </Dialog>
+      )}
       {discard && (
         <Dialog title="تغييرات غير محفوظة" onDismiss={() => setDiscard(false)}>
           <p>لم تُحفظ تعديلات البطاقة. هل تريد تجاهلها؟</p>
