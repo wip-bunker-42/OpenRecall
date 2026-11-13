@@ -3,6 +3,10 @@ identifier = "allow-execute"
 description = "Execute validated local study requests"
 commands.allow = ["execute"]
 [[permission]]
+identifier = "allow-copy-question"
+description = "Copy the currently displayed question as plain text"
+commands.allow = ["copy_question"]
+[[permission]]
 identifier = "allow-get-system-info"
 description = "Read application version and resolved data directory"
 commands.allow = ["get_system_info"]

@@ -49,6 +49,14 @@ pub struct ConfirmChoicesInput {
     pub submission: ChoiceSubmission,
 }
 
+#[derive(Clone, Debug, Deserialize, TS)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct CopyQuestionInput {
+    pub session_id: String,
+    pub display_id: String,
+    pub expected_card_revision: String,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[serde(rename_all = "camelCase")]
 pub struct ChoiceFeedbackFrame {

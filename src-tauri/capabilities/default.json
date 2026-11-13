@@ -5,6 +5,7 @@
   "permissions": [
     "core:default",
     "allow-execute",
+    "allow-copy-question",
     "allow-get-system-info",
     "allow-pick-import-file",
     "allow-backup",

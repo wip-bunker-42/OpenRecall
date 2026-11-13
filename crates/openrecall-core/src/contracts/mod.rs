@@ -275,6 +275,7 @@ pub fn export(output: &Path) -> AppResult<()> {
     Request::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     Response::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     AppError::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
+    review::CopyQuestionInput::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     system::SystemInfo::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     system::PickedImportFile::export_all(&config).map_err(|_| AppError::new("contractExport"))?;
     backup::ExportReport::export_all(&config).map_err(|_| AppError::new("contractExport"))?;

@@ -3,6 +3,7 @@ mod commands;
 pub mod files;
 pub mod lifecycle;
 pub mod paths;
+mod question_copy;
 mod startup;
 pub mod updates;
 use std::sync::{Arc, Mutex};
@@ -16,6 +17,7 @@ pub fn run() {
         .plugin(tauri_plugin_wdio_webdriver::init());
     builder
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_single_instance::init(|app, _, _| {
             if let Some(window) = app.get_webview_window("main") {
@@ -100,6 +102,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::execute,
+            question_copy::copy_question,
             commands::get_system_info,
             files::pick_import_file,
             lifecycle::set_edit_state,
