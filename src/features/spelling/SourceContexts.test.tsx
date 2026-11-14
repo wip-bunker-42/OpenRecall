@@ -4,6 +4,48 @@ import { ReviewPage } from '../review/ReviewPage';
 import { fixtureApi } from '../../test/mockApi';
 import { spellingQuestion, sourceContext } from '../../test/spellingFixtures';
 import type { Response } from '../../shared/generated/Response';
+import { SourceContexts } from './SourceContexts';
+
+it('shows the authored options and key of a deleted multiple-choice source', async () => {
+  const user = userEvent.setup();
+  const api = fixtureApi((r) => {
+    if (r.kind === 'listSpellingSources')
+      return {
+        kind: r.kind,
+        payload: {
+          total: 1,
+          page: 1,
+          pageSize: 20,
+          items: [
+            {
+              ...sourceContext,
+              snapshot: {
+                ...sourceContext.snapshot,
+                back: '',
+                questionType: 'multipleChoice',
+                contentVersion: 2,
+                multipleChoice: {
+                  choices: [
+                    { id: 'a', text: '<b>English</b>' },
+                    { id: 'b', text: 'Another option' },
+                  ],
+                  correctChoiceIds: ['a'],
+                  selectionMode: 'single',
+                  shuffleChoices: true,
+                },
+              },
+            },
+          ],
+        },
+      };
+  });
+  render(<SourceContexts api={api} cardId="word" />);
+  await user.click(screen.getByText('عرض البطاقة الأصلية'));
+  expect(await screen.findByText('<b>English</b>')).toBeVisible();
+  expect(screen.getByText('Another option')).toBeVisible();
+  expect(screen.getByText('إجابة صحيحة')).toBeVisible();
+  expect(screen.getByText('<b>English</b>').querySelector('b')).toBeNull();
+});
 it('loads bounded retained contexts on request and paginates plain saved versions', async () => {
   const user = userEvent.setup();
   const pages: number[] = [];

@@ -3,4 +3,4 @@ import type { CardForm } from "./CardForm";
 import type { FormBag } from "./FormBag";
 import type { MemoryState } from "./MemoryState";
 
-export type CardDetail = { bag: FormBag, id: string, deckId: string, forms: Array<CardForm>, phase: string, memory: MemoryState | null, dueAt: string, createdAt: string, reviewedAt: string | null, reviewCount: number, lapseCount: number, hasGraduated: boolean, revision: string, };
+export type CardDetail = { previousChoiceOrders: { [key in string]: Array<string> }, bag: FormBag, id: string, deckId: string, forms: Array<CardForm>, phase: string, memory: MemoryState | null, dueAt: string, createdAt: string, reviewedAt: string | null, reviewCount: number, lapseCount: number, hasGraduated: boolean, revision: string, };

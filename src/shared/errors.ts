@@ -1,3 +1,16 @@
+export function fieldErrors(error: unknown): { field: string; code: string }[] {
+  if (
+    typeof error !== 'object' ||
+    error === null ||
+    !('fields' in error) ||
+    !Array.isArray(error.fields)
+  )
+    return [];
+  return error.fields.filter(
+    (field) => typeof field?.field === 'string' && typeof field?.code === 'string',
+  );
+}
+
 export function errorText(error: unknown): string {
   const code =
     typeof error === 'object' && error !== null && 'code' in error ? String(error.code) : 'unknown';
@@ -32,7 +45,14 @@ export function errorText(error: unknown): string {
     trainingNotReady: 'نتيجة التدريب غير جاهزة للتطبيق أو لم تجتز المقارنة.',
     cancelled: 'أُلغيت العملية. البيانات المحفوظة لم تتغير.',
     profileInUse: 'هذا النموذج مرتبط بمجموعات. افصلها أو انقلها إلى نموذج آخر قبل حذفه.',
-    requiredCardFields: 'السؤال والإجابة مطلوبان في كل صيغة. أكمل الحقول الفارغة ثم احفظ البطاقة.',
+    requiredCardFields: 'أدخل السؤال في كل صيغة والإجابة في صيغ السؤال والإجابة.',
+    invalidChoiceText: 'أدخل نصًا فريدًا لكل اختيار. الحد ١٦ كيلوبايت لكل نص.',
+    invalidChoiceAnswer: 'حدد الإجابات الصحيحة وفق العدد المسموح به.',
+    invalidChoiceKey: 'تحقق من الاختيارات أو أعد إضافتها.',
+    choiceCount: 'أدخل من اختيارين إلى ١٢٨ اختيارًا.',
+    invalidQuestionTitle: 'أدخل عنوانًا من ١٦٠ حرفًا على الأكثر في سطر واحد.',
+    invalidChoiceSelection: 'تحقق من الاختيارات المحددة وأعد المحاولة.',
+    clipboardWrite: 'تعذر نسخ السؤال إلى الحافظة. حاول مرة أخرى.',
     invalidJson: 'محتوى JSON غير صحيح. راجع علامات التنصيص والفواصل والأقواس ثم افحصه مرة أخرى.',
     arrayExpected: 'يجب أن يبدأ الملف بمصفوفة بطاقات بين قوسين مربعين [ ].',
     importTooLarge: 'حجم ملف البطاقات أكبر من ٥٠ ميبيبايت. قسّمه إلى ملفات أصغر.',

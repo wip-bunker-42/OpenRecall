@@ -1,4 +1,4 @@
-use super::format::{BackupData, FORMAT_VERSION, digest_value};
+use super::format::{BackupData, digest_value};
 use crate::{AppError, AppResult};
 use serde::Deserialize;
 
@@ -40,9 +40,10 @@ pub fn decode(bytes: &[u8]) -> AppResult<ValidatedBackup> {
     if source.payload_sha256 != digest_value(&source.data)? {
         return Err(AppError::new("backupDigest"));
     }
-    let data = match source.format_version {
-        1 if source.schema_version == 8 => super::legacy_v1::upgrade(source.data)?,
-        FORMAT_VERSION => serde_json::from_value(source.data)?,
+    let data = match (source.format_version, source.schema_version) {
+        (1, 8) => super::legacy_v1::upgrade(source.data)?,
+        (2, 9) => super::legacy_v2::upgrade(source.data)?,
+        (2, 10) => serde_json::from_value(source.data)?,
         _ => return Err(AppError::new("unsupportedSchema")),
     };
     super::validation::validate(&data)?;

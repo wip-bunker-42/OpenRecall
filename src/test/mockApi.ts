@@ -51,6 +51,7 @@ export function fixtureApi(
   });
 }
 export const nativeFixture: NativeApi = {
+  copyQuestion: async () => {},
   async getUpdateStatus() {
     return {
       phase: 'idle',

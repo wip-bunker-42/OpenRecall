@@ -2,11 +2,121 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReviewPage } from './ReviewPage';
 import { fixtureApi, nativeFixture, deckFixture } from '../../test/mockApi';
-import { questionFixture, revealedFixture, completedFixture } from '../../test/reviewFixtures';
+import {
+  questionFixture,
+  revealedFixture,
+  completedFixture,
+  essayFixture,
+  choiceFixture,
+  choiceFeedbackFixture,
+} from '../../test/reviewFixtures';
 import type { Request } from '../../shared/generated/Request';
 import type { Response } from '../../shared/generated/Response';
 import { App } from '../../app/App';
 import { ReviewQuestion } from './ReviewQuestion';
+
+it('copies an essay from the active display and offers direct ratings', async () => {
+  const copyQuestion = vi.fn().mockResolvedValue(undefined);
+  const api = fixtureApi((r) => {
+    if (r.kind === 'readSession' || r.kind === 'startSession')
+      return { kind: r.kind, payload: essayFixture };
+    if (r.kind === 'setSessionActivity')
+      return { kind: r.kind, payload: { activeMs: 0, questionMs: 0 } };
+  });
+  const user = userEvent.setup();
+  render(<App api={api} native={{ ...nativeFixture, copyQuestion }} />);
+  await user.click(await screen.findByRole('button', { name: 'بدء المراجعة، طب' }));
+  const copy = await screen.findByRole('button', { name: 'نسخ السؤال' });
+  expect(screen.getByRole('heading', { name: 'السؤال', level: 1 })).toHaveFocus();
+  await user.click(copy);
+  expect(copyQuestion).toHaveBeenCalledWith({
+    sessionId: 'session-1',
+    displayId: 'presentation-1',
+    expectedCardRevision: 'card-revision',
+  });
+  expect(await screen.findByText('نُسخ السؤال إلى الحافظة.')).toBeVisible();
+  expect(copy).toHaveFocus();
+  expect(screen.getByRole('button', { name: /افتكرتها بسهولة/ })).toBeEnabled();
+  expect(screen.queryByRole('button', { name: 'عرض الإجابة' })).not.toBeInTheDocument();
+});
+
+it('retries the same choice confirmation and continues wrong feedback without manual grading', async () => {
+  const calls: Request[] = [];
+  let count = 0;
+  let failBackground = false;
+  const api = fixtureApi((r) => {
+    calls.push(r);
+    if (r.kind === 'readSession') return { kind: r.kind, payload: choiceFixture };
+    if (r.kind === 'setSessionActivity') {
+      if (failBackground) {
+        failBackground = false;
+        throw { code: 'storageBusy' };
+      }
+      return { kind: r.kind, payload: { activeMs: 0, questionMs: 0 } };
+    }
+    if (r.kind === 'confirmChoices') {
+      if (++count === 1) throw { code: 'storage' };
+      return { kind: r.kind, payload: choiceFeedbackFixture };
+    }
+    if (r.kind === 'continueChoiceFeedback') return { kind: r.kind, payload: completedFixture };
+  });
+  const user = userEvent.setup();
+  render(<ReviewPage sessionId="session-1" api={api} navigate={vi.fn()} />);
+  await user.click(await screen.findByRole('radio', { name: 'Rome' }));
+  await user.click(screen.getByRole('button', { name: 'تحقق من الإجابة' }));
+  await screen.findByRole('button', { name: 'إعادة محاولة تأكيد الإجابة' });
+  failBackground = true;
+  await act(async () => {
+    window.dispatchEvent(new Event('focus'));
+  });
+  expect(failBackground).toBe(false);
+  await user.click(await screen.findByRole('button', { name: 'إعادة محاولة تأكيد الإجابة' }));
+  expect(await screen.findByRole('heading', { level: 2, name: 'النتيجة' })).toHaveFocus();
+  expect(screen.queryByRole('group', { name: 'تقييم التذكر' })).not.toBeInTheDocument();
+  await user.keyboard('4');
+  expect(calls.filter((r) => r.kind === 'rateCard')).toHaveLength(0);
+  const confirms = calls.filter((r) => r.kind === 'confirmChoices');
+  expect(confirms).toHaveLength(2);
+  expect(confirms[0]).toEqual(confirms[1]);
+  await user.click(screen.getByRole('button', { name: 'متابعة المراجعة' }));
+  expect(await screen.findByRole('heading', { name: 'ملخص الجلسة' })).toBeVisible();
+});
+
+it('retains a choice across a focus refresh and filter parking', async () => {
+  const user = userEvent.setup();
+  let active = true;
+  const empty = {
+    state: 'emptyFilter' as const,
+    payload: {
+      sessionId: 'session-1',
+      filter: 'previouslyReviewed' as const,
+      canUndo: false,
+      lastReview: null,
+      nextDueAt: null,
+      progress: { current: 0, total: 0, completed: 0 },
+    },
+  };
+  const api = fixtureApi((r) => {
+    if (r.kind === 'setSessionActivity')
+      return { kind: r.kind, payload: { activeMs: 0, questionMs: 0 } };
+    if (r.kind === 'setReviewFilter') active = r.payload.filter === 'all';
+    if (r.kind === 'readSession' || r.kind === 'setReviewFilter')
+      return { kind: r.kind, payload: active ? choiceFixture : empty };
+  });
+  render(<ReviewPage sessionId="session-1" api={api} navigate={vi.fn()} />);
+  const choice = await screen.findByRole('radio', { name: 'Rome' });
+  await user.click(choice);
+  await act(async () => {
+    window.dispatchEvent(new Event('blur'));
+    window.dispatchEvent(new Event('focus'));
+  });
+  expect(choice).toBeChecked();
+  expect(choice).toHaveFocus();
+  await user.click(screen.getByRole('radio', { name: 'بطاقات سبق تقييمها' }));
+  await screen.findByRole('heading', { name: 'لا توجد بطاقات مطابقة الآن' });
+  await user.click(screen.getByRole('radio', { name: 'كل البطاقات المستحقة' }));
+  expect(await screen.findByRole('radio', { name: 'Rome' })).toBeChecked();
+});
 it('review_uses_custom_h1_with_default_fallback', async () => {
   const user = userEvent.setup();
   const form = { ...revealedFixture.payload.form, questionTitle: 'ترجم', front: 'unpredictable' };

@@ -12,6 +12,7 @@ export const config = {
     './tests/native/offline.spec.ts',
     './tests/native/focus.spec.ts',
     './tests/native/spelling.spec.ts',
+    './tests/native/question-types.spec.ts',
   ],
   maxInstances: 1,
   logLevel: 'warn',

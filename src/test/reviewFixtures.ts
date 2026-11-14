@@ -4,6 +4,7 @@ import type { SessionSummary } from '../shared/generated/SessionSummary';
 import { cardFixture } from './cardFixtures';
 const memory = { stability: 1, stabilityFast: 0, difficulty: 5 };
 export const frameFixture: ReviewFrame = {
+  choices: null,
   mode: 'standard',
   canRate: false,
   lastReview: null,
@@ -71,4 +72,49 @@ export const summaryFixture: SessionSummary = {
 export const completedFixture: Extract<ReviewView, { state: 'summary' }> = {
   state: 'summary',
   payload: summaryFixture,
+};
+export const essayFixture: typeof questionFixture = {
+  state: 'question',
+  payload: {
+    ...revealedFixture.payload,
+    answerRevealed: false,
+    form: { ...frameFixture.form, questionType: 'essay', back: '', front: 'Explain the orbit.' },
+  },
+};
+export const choiceFixture: typeof questionFixture = {
+  state: 'question',
+  payload: {
+    ...frameFixture,
+    form: {
+      ...frameFixture.form,
+      questionType: 'multipleChoice',
+      front: 'Choose a city.',
+      back: '',
+      multipleChoice: {
+        choices: [
+          { id: 'a', text: 'Cairo' },
+          { id: 'b', text: 'Rome' },
+        ],
+        correctChoiceIds: ['a'],
+        selectionMode: 'single',
+        shuffleChoices: true,
+      },
+    },
+    choices: { order: ['b', 'a'], selectedIds: [], confirmedCorrect: false },
+  },
+};
+export const choiceFeedbackFixture: Extract<ReviewView, { state: 'choiceFeedback' }> = {
+  state: 'choiceFeedback',
+  payload: {
+    ...choiceFixture.payload,
+    feedbackId: 'feedback-1',
+    cardId: cardFixture.id,
+    canUndo: true,
+    order: ['b', 'a'],
+    selectedIds: ['b'],
+    missedIds: ['a'],
+    incorrectIds: ['b'],
+    unknown: false,
+    lastReview: { ...summaryFixture.lastReview!, rating: 'again', intervalSeconds: 60 },
+  },
 };

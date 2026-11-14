@@ -2,6 +2,7 @@ pub mod decode;
 pub(crate) mod files;
 pub mod format;
 mod legacy_v1;
+mod legacy_v2;
 mod validation;
 #[derive(Clone, Copy)]
 pub struct BackupLimits {

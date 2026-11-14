@@ -1,6 +1,7 @@
 import type { CardDetail } from '../shared/generated/CardDetail';
 import type { ImportPreview } from '../shared/generated/ImportPreview';
 export const cardFixture: CardDetail = {
+  previousChoiceOrders: {},
   id: 'card-1',
   deckId: 'deck-1',
   forms: [
@@ -11,8 +12,19 @@ export const cardFixture: CardDetail = {
       notes: 'ملاحظة',
       language: null,
       questionTitle: null,
+      questionType: 'recall',
+      multipleChoice: null,
     },
-    { id: 'form-2', front: '日本語', back: 'عربي', notes: '', language: 'ja', questionTitle: null },
+    {
+      id: 'form-2',
+      front: '日本語',
+      back: 'عربي',
+      notes: '',
+      language: 'ja',
+      questionTitle: null,
+      questionType: 'recall',
+      multipleChoice: null,
+    },
   ],
   phase: 'new',
   memory: null,
@@ -26,6 +38,8 @@ export const cardFixture: CardDetail = {
   bag: { remaining: [], consumed: [], lastConsumed: null, reserved: null, cycle: 0 },
 };
 const primary = {
+  questionType: 'recall' as const,
+  multipleChoice: null,
   questionTitle: null,
   key: 'p1',
   front: 'سؤال عربي English',

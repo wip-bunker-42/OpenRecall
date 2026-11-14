@@ -4,6 +4,49 @@ import { CardEditor } from './CardEditor';
 import { DeckPage } from './DeckPage';
 import { fixtureApi, nativeFixture, deckFixture } from '../../test/mockApi';
 import { cardFixture } from '../../test/cardFixtures';
+import { choiceFixture } from '../../test/reviewFixtures';
+
+it('keeps owned choice identities and removes deleted answers from the key', async () => {
+  const card = { ...cardFixture, forms: [choiceFixture.payload.form] };
+  const sent = vi.fn();
+  const api = fixtureApi((request) => {
+    if (request.kind === 'updateCard') {
+      sent(request.payload.draft.forms[0].multipleChoice);
+      return { kind: request.kind, payload: card };
+    }
+  });
+  const user = userEvent.setup();
+  render(
+    <CardEditor
+      card={card}
+      deckId={deckFixture.id}
+      api={api}
+      onSaved={vi.fn()}
+      onCancel={vi.fn()}
+    />,
+  );
+  await user.selectOptions(screen.getByLabelText('نوع السؤال'), 'essay');
+  await user.click(screen.getByRole('button', { name: 'الاحتفاظ بالنوع الحالي' }));
+  expect(screen.getByLabelText('نوع السؤال')).toHaveValue('multipleChoice');
+  await user.selectOptions(screen.getByLabelText('عدد الإجابات الصحيحة'), 'multiple');
+  await user.click(screen.getByRole('button', { name: 'إضافة اختيار' }));
+  expect(screen.getByLabelText('نص الاختيار ٣')).toHaveFocus();
+  await user.type(screen.getByLabelText('نص الاختيار ٣'), 'Tokyo');
+  await user.click(screen.getByLabelText('الاختيار ٢ إجابة صحيحة'));
+  await user.click(screen.getByLabelText('خلط ترتيب الاختيارات'));
+  await user.click(screen.getByRole('button', { name: 'حذف الاختيار ١' }));
+  expect(screen.getByLabelText('نص الاختيار ١')).toHaveFocus();
+  await user.click(screen.getByRole('button', { name: 'حفظ البطاقة' }));
+  expect(sent).toHaveBeenCalledWith({
+    selectionMode: 'multiple',
+    shuffleChoices: false,
+    correctChoiceKeys: ['b'],
+    choices: [
+      { id: 'b', key: 'b', text: 'Rome' },
+      { id: null, key: expect.any(String), text: 'Tokyo' },
+    ],
+  });
+});
 it('edits_each_form_title_without_losing_other_drafts', async () => {
   const calls: unknown[] = [];
   const api = fixtureApi((request) => {
@@ -143,4 +186,22 @@ it('loads paginated literal multilingual cards only when the closed card section
   expect(
     within(content.closest('li')!).getByRole('button', { name: 'تعديل البطاقة ٢١' }),
   ).toBeVisible();
+});
+it('creates an essay without an answer field', async () => {
+  const user = userEvent.setup();
+  let sent: unknown;
+  const api = fixtureApi((r) => {
+    if (r.kind === 'createCard') {
+      sent = r.payload.draft.forms[0];
+      return { kind: r.kind, payload: cardFixture };
+    }
+  });
+  render(
+    <CardEditor card={null} deckId="deck-1" api={api} onSaved={() => {}} onCancel={() => {}} />,
+  );
+  await user.selectOptions(screen.getByLabelText('نوع السؤال'), 'essay');
+  await user.type(screen.getByLabelText('السؤال، الصيغة ١'), 'Explain');
+  expect(screen.queryByLabelText('الإجابة، الصيغة ١')).toBeNull();
+  await user.click(screen.getByRole('button', { name: 'حفظ البطاقة' }));
+  expect(sent).toMatchObject({ questionType: 'essay', front: 'Explain', back: '' });
 });

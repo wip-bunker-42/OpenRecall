@@ -8,6 +8,7 @@ import type { PickedImportFile } from './generated/PickedImportFile';
 import type { ExportReport } from './generated/ExportReport';
 import type { RestorePreview } from './generated/RestorePreview';
 import type { RestoreReport } from './generated/RestoreReport';
+import type { CopyQuestionInput } from './generated/CopyQuestionInput';
 export type Kind = Request['kind'];
 export type Input<K extends Kind> = Extract<Request, { kind: K }>['payload'];
 export type Output<K extends Kind> = Extract<Response, { kind: K }>['payload'];
@@ -34,6 +35,7 @@ export function createTauriApi(): Api {
   return createApi((request) => invoke('execute', { request }));
 }
 export interface NativeApi {
+  copyQuestion(input: CopyQuestionInput): Promise<void>;
   getUpdateStatus(): Promise<UpdateStatus>;
   onUpdateStatus(listener: (status: UpdateStatus) => void): Promise<() => void>;
   checkForUpdate(): Promise<UpdateStatus>;
@@ -52,6 +54,7 @@ export interface NativeApi {
 }
 export function createNativeApi(): NativeApi {
   return {
+    copyQuestion: (input) => invoke('copy_question', { input }),
     getUpdateStatus: () => invoke('get_update_status'),
     onUpdateStatus: (listener) =>
       listen<UpdateStatus>('openrecall-update', (event) => listener(event.payload)),

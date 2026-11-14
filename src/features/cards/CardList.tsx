@@ -5,6 +5,7 @@ import type { Page } from '../../shared/generated/Page';
 import { FormErrors } from '../../components/FormErrors';
 import { StatusRegion } from '../../components/StatusRegion';
 import { number, dateTime } from '../../shared/format';
+import { questionTypeLabel } from '../../shared/questionTypes';
 const phases: Record<string, string> = {
   new: 'جديدة',
   learning: 'تعلّم',
@@ -109,6 +110,7 @@ export function CardList({
                     {primary.front}
                   </p>
                   <p className="muted">
+                    {managed ? '' : `${questionTypeLabel[primary.questionType]}، `}
                     {phases[card.phase]}، {number(card.forms.length)} صيغة. الموعد:{' '}
                     {dateTime(card.dueAt, timezone)}
                   </p>
@@ -122,9 +124,24 @@ export function CardList({
                             {f.front}
                           </p>
                         )}
-                        <p className="study-text" dir="auto" lang={f.language ?? undefined}>
-                          {f.back}
-                        </p>
+                        {!managed && <p>{questionTypeLabel[f.questionType]}</p>}
+                        {f.back && (
+                          <p className="study-text" dir="auto" lang={f.language ?? undefined}>
+                            {f.back}
+                          </p>
+                        )}
+                        {f.multipleChoice && (
+                          <ol>
+                            {f.multipleChoice.choices.map((choice) => (
+                              <li key={choice.id}>
+                                <bdi lang={f.language ?? undefined}>{choice.text}</bdi>{' '}
+                                {f.multipleChoice?.correctChoiceIds.includes(choice.id) && (
+                                  <span>إجابة صحيحة</span>
+                                )}
+                              </li>
+                            ))}
+                          </ol>
+                        )}
                         {f.notes && (
                           <p className="study-text muted" dir="auto" lang={f.language ?? undefined}>
                             {f.notes}

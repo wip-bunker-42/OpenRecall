@@ -1,5 +1,31 @@
 # Automated verification
 
+## Essay and multiple-choice acceptance
+
+Two Playwright Chromium scenarios check essay authoring, the typed import preview,
+clipboard status and focus, checkbox keyboard input, wrong feedback, undo and
+correct feedback with manual grading. Their six axe reports each have 20–37
+passing rules and zero detected violations.
+
+The question-type acceptance launches the Tauri automation build twice on
+Windows 11 Pro 10.0.26300 x64 with WebView2 157. It uses a synthetic SQLite
+library behind the rejecting proxy. The first process exercises the native
+clipboard write, direct essay rating, JSON import, rejection of an unconfirmed
+choice grade, a single automatic Again and navigation back to saved feedback.
+After verifying process exit, the second process restores that feedback, continues
+to a newly due card, undoes the grade and its reservation, then rates a correct
+answer. The full native run passed nine study-flow cases and two startup probes.
+Across its 27 axe reports each audit had 20–46 passing rules and zero detected
+violations. Evidence is under `target/native-tests/run-yZfBn6`.
+The follow-up run under `target/native-tests/run-01bXVP` also exports and restores
+typed schema-10 data and restores the genuine v0.2.0 spelling session and undo
+through native backup IPC. The existing native spelling scenario restores v0.1.0.
+
+Rust tests exercise retry tokens, restored selections and reservations, complete
+undo, plain-text clipboard payloads, typed spelling contexts and format-2
+backups. Both immutable released backups are covered with their original hashes.
+Human NVDA and clipboard-paste checks remain in the separate checklist.
+
 The release gate is `pnpm verify`, followed by `pnpm build:native-test` and `pnpm test:native` on Windows. The final GitHub Quality run must pass on the exact reviewed revision. Release preflight additionally requires all six checks on the tagged main commit.
 
 The v0.1.0 release gate covered 71 Rust workspace tests, the additional seven backup feature-compatibility cases, 53 frontend unit tests, 16 maintenance tests, seven browser scenarios, five native study-flow cases and two native startup-recovery probes. Its browser and native study suites audited 25 and 11 UI states respectively and require zero detected axe violations. Every audit requires a nonzero number of passing rules.

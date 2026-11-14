@@ -4,9 +4,14 @@ use ts_rs::TS;
 #[serde(rename_all = "camelCase")]
 pub struct FormDraft {
     #[serde(default)]
+    pub question_type: crate::domain::questions::QuestionType,
+    #[serde(default)]
+    pub multiple_choice: Option<crate::domain::questions::ChoiceSetDraft>,
+    #[serde(default)]
     pub question_title: Option<String>,
     pub id: Option<String>,
     pub front: String,
+    #[serde(default)]
     pub back: String,
     #[serde(default)]
     pub notes: String,

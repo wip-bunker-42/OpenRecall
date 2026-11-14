@@ -41,11 +41,23 @@ fn legacy_checksum_precedes_defaults_and_nested_undo_survives() {
     );
     let mut upgraded_undo = raw["data"]["undoRecords"].clone();
     for undo in upgraded_undo.as_array_mut().unwrap() {
+        undo["deferredCardBefores"] = json!([]);
+        let session = &mut undo["sessionBefore"];
+        session["choiceFeedback"] = Value::Null;
+        if session["current"].is_object() {
+            session["current"]["choices"] = Value::Null;
+        }
+        for p in session["parked"].as_array_mut().unwrap() {
+            p["choices"] = Value::Null;
+        }
         for key in ["cardBefore", "nextCardBefore"] {
             if let Some(forms) = undo[key]["forms"].as_array_mut() {
                 for form in forms {
                     form["questionTitle"] = Value::Null;
+                    form["questionType"] = json!("recall");
+                    form["multipleChoice"] = Value::Null;
                 }
+                undo[key]["previousChoiceOrders"] = json!({});
             }
         }
     }

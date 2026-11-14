@@ -1,8 +1,10 @@
 mod backup;
 mod cards;
+pub(crate) mod choice_reviews;
 mod import;
 mod library;
 mod profiles;
+mod question_copy;
 mod restart;
 mod reviews;
 mod sessions;

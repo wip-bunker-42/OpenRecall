@@ -31,6 +31,8 @@ pub struct ReviewLog {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct UndoRecord {
+    #[serde(default)]
+    pub deferred_card_befores: Vec<CardDetail>,
     pub id: String,
     pub session_id: String,
     pub session_before: Session,
@@ -42,8 +44,22 @@ pub struct UndoRecord {
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ActionRecord {
+    #[serde(
+        default,
+        rename = "choiceOutcome",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub choice_outcome: Option<ChoiceOutcome>,
     pub id: String,
     pub session_id: String,
     pub signature: String,
     pub status: String,
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum ChoiceOutcome {
+    Correct,
+    Incorrect,
+    Unknown,
 }

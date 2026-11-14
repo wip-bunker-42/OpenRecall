@@ -186,6 +186,15 @@ impl App {
             }
             Request::CommitImport(input) => Ok(Response::CommitImport(self.commit_import(input)?)),
             Request::RateCard(input) => Ok(Response::RateCard(self.rate_card(input)?)),
+            Request::ConfirmChoices(input) => {
+                Ok(Response::ConfirmChoices(self.confirm_choices(input)?))
+            }
+            Request::ContinueChoiceFeedback {
+                session_id,
+                feedback_id,
+            } => Ok(Response::ContinueChoiceFeedback(
+                self.continue_choice_feedback(session_id, feedback_id)?,
+            )),
             Request::UndoReview { session_id } => {
                 Ok(Response::UndoReview(self.undo_review(session_id)?))
             }

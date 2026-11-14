@@ -18,12 +18,11 @@ export async function command<K extends Kind>(kind: K, payload: Input<K>): Promi
       native.__TAURI_INTERNALS__
         .invoke('execute', { request })
         .then(done)
-        .catch((error) => done({ error }));
+        .catch((error) => done({ rejected: true, detail: JSON.stringify(error) }));
     },
     { kind, payload } as Request,
-  )) as Response | { error: unknown };
-  if ('error' in result)
-    throw new Error(`Synthetic native ${kind}: ${JSON.stringify(result.error)}`);
+  )) as Response | { rejected: true; detail: string };
+  if ('rejected' in result) throw new Error(`Synthetic native ${kind}: ${result.detail}`);
   expect(result.kind).toBe(kind);
   return result.payload as Output<K>;
 }

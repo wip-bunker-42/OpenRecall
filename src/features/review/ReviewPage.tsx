@@ -1,9 +1,12 @@
-import { useEffect, useRef } from 'react';
-import type { Api } from '../../shared/api';
+import { useEffect, useRef, useState } from 'react';
+import type { Api, NativeApi } from '../../shared/api';
 import type { Navigate } from '../../app/navigation';
 import type { ReviewFilter } from '../../shared/generated/ReviewFilter';
 import { useReviewSession } from './useReviewSession';
 import { ReviewQuestion } from './ReviewQuestion';
+import { EssayQuestion } from './EssayQuestion';
+import { MultipleChoiceQuestion } from './MultipleChoiceQuestion';
+import { ChoiceFeedback } from './ChoiceFeedback';
 import { SpellingQuestion } from '../spelling/SpellingQuestion';
 import { ReviewSummary } from './ReviewSummary';
 import { ratings } from './RatingButtons';
@@ -18,6 +21,7 @@ const filters: { value: ReviewFilter; label: string }[] = [
 export function ReviewPage({
   sessionId,
   api,
+  native,
   navigate,
   shortcutsEnabled = true,
   timezone = 'Africa/Cairo',
@@ -27,6 +31,7 @@ export function ReviewPage({
 }: {
   sessionId: string;
   api: Api;
+  native?: NativeApi;
   navigate: Navigate;
   shortcutsEnabled?: boolean;
   timezone?: string;
@@ -40,6 +45,21 @@ export function ReviewPage({
   const latest = useRef(session);
   latest.current = session;
   const emptyHeading = useRef<HTMLHeadingElement>(null);
+  const [drafts, setDrafts] = useState<Record<string, { revision: string; ids: string[] }>>({});
+  const frame = view?.state === 'question' ? view.payload : null;
+  const displayKey = frame && `${frame.sessionId}:${frame.presentationId}:${frame.cardRevision}`;
+  const choiceDraft = frame ? drafts[frame.presentationId] : undefined;
+  const confirming = useRef<string | null>(null);
+  function clearConfirmedDraft() {
+    const id = confirming.current;
+    confirming.current = null;
+    if (!id) return;
+    setDrafts((values) => {
+      const next = { ...values };
+      delete next[id];
+      return next;
+    });
+  }
   useEffect(() => {
     onBusyChange?.(sessionBusy);
     return () => onBusyChange?.(false);
@@ -72,6 +92,7 @@ export function ReviewPage({
         !target.closest('button,summary') &&
         s.view?.state === 'question' &&
         s.view.payload.mode === 'standard' &&
+        s.view.payload.form.questionType === 'recall' &&
         !s.view.payload.answerRevealed
       ) {
         e.preventDefault();
@@ -84,7 +105,7 @@ export function ReviewPage({
     window.addEventListener('keydown', keydown);
     return () => window.removeEventListener('keydown', keydown);
   }, [shortcutsEnabled, externalBusy]);
-  const last = view?.payload.lastReview;
+  const last = view?.state === 'choiceFeedback' ? null : view?.payload.lastReview;
   const lastMessage = last
     ? `موعد المراجعة الجديد: ${dateTime(last.dueAt, timezone)}، ${interval(last.intervalSeconds)}.`
     : '';
@@ -113,11 +134,30 @@ export function ReviewPage({
       {session.error && (
         <div className="actions">
           {pendingRating && (
-            <button disabled={busy} onClick={() => void session.retryRating()}>
-              إعادة محاولة التقييم
+            <button
+              disabled={busy}
+              onClick={async () => {
+                if (await session.retryRating()) clearConfirmedDraft();
+              }}
+            >
+              {session.pendingAction === 'confirmChoices'
+                ? 'إعادة محاولة تأكيد الإجابة'
+                : 'إعادة محاولة التقييم'}
             </button>
           )}
-          <button disabled={busy} onClick={() => void session.recover()}>
+          <button
+            disabled={busy}
+            onClick={async () => {
+              const result = await session.recover();
+              if (
+                result &&
+                (result.state !== 'question' ||
+                  result.payload.choices?.confirmedCorrect ||
+                  result.payload.presentationId !== confirming.current)
+              )
+                clearConfirmedDraft();
+            }}
+          >
             تحديث الجلسة
           </button>
         </div>
@@ -174,6 +214,37 @@ export function ReviewPage({
               disabled={busy || pendingRating}
               onRate={(r) => void session.rate(r)}
             />
+          ) : frame?.form.questionType === 'essay' ? (
+            <EssayQuestion
+              key={displayKey}
+              frame={frame}
+              copy={native?.copyQuestion}
+              disabled={busy || pendingRating}
+              onRate={(rating) => void session.rate(rating)}
+            />
+          ) : frame?.form.questionType === 'multipleChoice' ? (
+            <MultipleChoiceQuestion
+              key={displayKey}
+              frame={frame}
+              copy={native?.copyQuestion}
+              disabled={busy || pendingRating}
+              selected={
+                choiceDraft?.revision === frame.cardRevision
+                  ? choiceDraft.ids
+                  : (frame.choices?.selectedIds ?? [])
+              }
+              onSelection={(ids) =>
+                setDrafts((values) => ({
+                  ...values,
+                  [frame.presentationId]: { revision: frame.cardRevision, ids },
+                }))
+              }
+              onConfirm={async (submission) => {
+                confirming.current = frame.presentationId;
+                if (await session.confirmChoices(submission)) clearConfirmedDraft();
+              }}
+              onRate={(rating) => void session.rate(rating)}
+            />
           ) : view.state === 'question' ? (
             <ReviewQuestion
               frame={view.payload}
@@ -194,6 +265,15 @@ export function ReviewPage({
                 <p>الاستحقاق القادم لهذا الفلتر: {dateTime(view.payload.nextDueAt, timezone)}</p>
               )}
             </>
+          ) : view.state === 'choiceFeedback' ? (
+            <ChoiceFeedback
+              key={`${view.payload.sessionId}:${view.payload.feedbackId}:${view.payload.cardRevision}`}
+              frame={view.payload}
+              copy={native?.copyQuestion}
+              disabled={busy || pendingRating}
+              onContinue={() => void session.continueFeedback()}
+              timezone={timezone}
+            />
           ) : (
             <ReviewSummary summary={view.payload} timezone={timezone} />
           )}

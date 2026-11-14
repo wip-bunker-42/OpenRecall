@@ -4,6 +4,7 @@ import type { CommitImportInput } from '../../shared/generated/CommitImportInput
 import type { ImportForm } from '../../shared/generated/ImportForm';
 import { number } from '../../shared/format';
 import { StatusRegion } from '../../components/StatusRegion';
+import { questionTypeLabel } from '../../shared/questionTypes';
 const reasons: Record<string, string> = {
   required: 'قيمة مطلوبة وغير فارغة',
   stringExpected: 'يلزم نص',
@@ -12,6 +13,17 @@ const reasons: Record<string, string> = {
   nestedVariants: 'الصيغ المتداخلة غير مسموحة',
   unknownField: 'حقل غير معروف سيُتجاهل',
   duplicate: 'صيغة مكررة',
+  invalidQuestionType: 'نوع السؤال غير معروف',
+  booleanExpected: 'استخدم قيمة منطقية true أو false',
+  invalidSelectionMode: 'استخدم single لإجابة واحدة أو multiple لعدة إجابات',
+  invalidOwner: 'استخدم مفتاح اختيار محليًا واحذف حقل id',
+  unknownChoiceField: 'هذا الحقل غير مدعوم داخل الاختيار',
+  invalidChoiceKey: 'مفتاح الاختيار فارغ أو مكرر أو غير صالح',
+  invalidChoiceText: 'نص الاختيار فارغ أو مكرر أو تجاوز الحد',
+  invalidChoiceAnswer: 'تحقق من مفاتيح الإجابات الصحيحة وعددها',
+  choiceCount: 'أدخل من اختيارين إلى ١٢٨ اختيارًا',
+  unexpectedChoices: 'هذا النوع لا يقبل اختيارات',
+  unexpectedAnswer: 'هذا النوع لا يقبل نصًا في حقل الإجابة',
   invalidQuestionTitle: 'يلزم عنوان من ١٦٠ حرفًا على الأكثر، دون أسطر جديدة أو محارف تحكم',
 };
 function FormPreview({ form }: { form: ImportForm }) {
@@ -20,20 +32,37 @@ function FormPreview({ form }: { form: ImportForm }) {
       <p>
         عنوان السؤال: <bdi dir="auto">{form.questionTitle ?? 'السؤال'}</bdi>
       </p>
+      <p>{questionTypeLabel[form.questionType]}</p>
       <p className="study-text" dir="auto">
         {form.front}
       </p>
-      <details>
-        <summary>عرض الإجابة والملاحظات</summary>
-        <p className="study-text" dir="auto">
-          {form.back}
-        </p>
-        {form.notes && (
-          <p className="study-text" dir="auto">
-            {form.notes}
-          </p>
-        )}
-      </details>
+      {(form.back || form.notes || form.multipleChoice) && (
+        <details>
+          <summary>عرض الإجابة والملاحظات</summary>
+          {form.back && (
+            <p className="study-text" dir="auto">
+              {form.back}
+            </p>
+          )}
+          {form.multipleChoice && (
+            <ol>
+              {form.multipleChoice.choices.map((choice, index) => (
+                <li key={index}>
+                  <bdi>{choice.text}</bdi>{' '}
+                  {form.multipleChoice?.correctChoiceKeys.includes(choice.key) && (
+                    <span>إجابة صحيحة</span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          )}
+          {form.notes && (
+            <p className="study-text" dir="auto">
+              {form.notes}
+            </p>
+          )}
+        </details>
+      )}
       {form.duplicate && (
         <p className="error">
           صيغة مكررة{' '}

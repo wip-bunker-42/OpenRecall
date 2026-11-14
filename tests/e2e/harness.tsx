@@ -12,7 +12,14 @@ import {
   eligibilityFixture,
   statisticsFixture,
 } from '../../src/test/profileFixtures';
-import { questionFixture, revealedFixture, completedFixture } from '../../src/test/reviewFixtures';
+import {
+  questionFixture,
+  revealedFixture,
+  completedFixture,
+  essayFixture,
+  choiceFixture,
+  choiceFeedbackFixture,
+} from '../../src/test/reviewFixtures';
 import type { Request } from '../../src/shared/generated/Request';
 import type { Response } from '../../src/shared/generated/Response';
 import type { ReviewView } from '../../src/shared/generated/ReviewView';
@@ -33,6 +40,7 @@ const decks = structuredClone([deckFixture]);
 let cards: CardDetail[] = structuredClone([cardFixture]);
 let settings = structuredClone(bootstrapFixture.settings);
 let review: ReviewView = structuredClone(questionFixture);
+const typed = new URLSearchParams(location.search).get('typed');
 const profiles = structuredClone([profileFixture]);
 const calls: Request[] = [];
 Object.assign(window, { presentationCalls: calls });
@@ -81,7 +89,24 @@ const api = createApi(async (r) => {
       const card = {
         ...cardFixture,
         id: r.kind === 'updateCard' ? r.payload.cardId : crypto.randomUUID(),
-        forms: r.payload.draft.forms.map((f) => ({ ...f, id: f.id ?? crypto.randomUUID() })),
+        forms: r.payload.draft.forms.map(({ multipleChoice, ...form }) => {
+          const choices =
+            multipleChoice?.choices.map(({ id, key, text }) => ({ id: id ?? key, text })) ?? [];
+          return {
+            ...form,
+            id: form.id ?? crypto.randomUUID(),
+            multipleChoice: multipleChoice && {
+              choices,
+              selectionMode: multipleChoice.selectionMode,
+              shuffleChoices: multipleChoice.shuffleChoices,
+              correctChoiceIds: choices
+                .filter((_, index) =>
+                  multipleChoice.correctChoiceKeys.includes(multipleChoice.choices[index].key),
+                )
+                .map((choice) => choice.id),
+            },
+          };
+        }),
       };
       cards = [...cards.filter((c) => c.id !== card.id), card];
       payload = card;
@@ -162,7 +187,32 @@ const api = createApi(async (r) => {
       break;
     case 'previewImport':
       if (r.payload.text === 'invalid') throw { code: 'invalidJson' };
-      payload = importFixture;
+      payload = typed
+        ? {
+            ...importFixture,
+            cards: [
+              {
+                ...importFixture.cards[0],
+                variants: [],
+                primary: {
+                  ...importFixture.cards[0].primary,
+                  front: 'Which city?',
+                  back: '',
+                  questionType: 'multipleChoice',
+                  multipleChoice: {
+                    selectionMode: 'multiple',
+                    shuffleChoices: true,
+                    choices: [
+                      { key: 'a', id: null, text: 'Cairo' },
+                      { key: 'b', id: null, text: 'Rome' },
+                    ],
+                    correctChoiceKeys: ['a'],
+                  },
+                },
+              },
+            ],
+          }
+        : importFixture;
       break;
     case 'commitImport':
       payload = { insertedCards: 1, insertedForms: 1, excludedCards: 1, excludedForms: 2 };
@@ -202,7 +252,17 @@ const api = createApi(async (r) => {
     }
     case 'startSession':
       spellingMode = decks.find((d) => d.id === r.payload.deckId)?.kind === 'spelling';
-      review = structuredClone(spellingMode ? spellingQuestion : questionFixture);
+      review = structuredClone(
+        spellingMode
+          ? spellingQuestion
+          : typed === 'essay'
+            ? essayFixture
+            : typed === 'choice'
+              ? choiceFixture
+              : questionFixture,
+      );
+      if (typed === 'choice' && review.state === 'question' && review.payload.form.multipleChoice)
+        review.payload.form.multipleChoice.selectionMode = 'multiple';
       payload = review;
       break;
     case 'readSession':
@@ -211,6 +271,30 @@ const api = createApi(async (r) => {
       break;
     case 'revealAnswer':
       review = structuredClone(revealedFixture);
+      payload = review;
+      break;
+    case 'confirmChoices':
+      beforeGrade = structuredClone(review);
+      if (review.state !== 'question' || !review.payload.choices)
+        throw new Error('No choice fixture');
+      if (
+        r.payload.submission.kind === 'selected' &&
+        r.payload.submission.choiceIds.join() === 'a'
+      ) {
+        review = {
+          ...review,
+          payload: {
+            ...review.payload,
+            canRate: true,
+            previews: revealedFixture.payload.previews,
+            choices: { ...review.payload.choices, selectedIds: ['a'], confirmedCorrect: true },
+          },
+        };
+      } else review = structuredClone(choiceFeedbackFixture);
+      payload = review;
+      break;
+    case 'continueChoiceFeedback':
+      review = structuredClone(completedFixture);
       payload = review;
       break;
     case 'rateCard':
@@ -225,7 +309,7 @@ const api = createApi(async (r) => {
       break;
     case 'undoReview':
       spellingReviewed = false;
-      review = structuredClone(spellingMode ? beforeGrade : revealedFixture);
+      review = structuredClone(spellingMode || typed ? beforeGrade : revealedFixture);
       payload = review;
       break;
     case 'setReviewFilter':

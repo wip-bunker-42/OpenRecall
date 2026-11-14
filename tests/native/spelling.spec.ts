@@ -176,8 +176,14 @@ describe('native spelling privacy, portability and process restart', () => {
         cardId: sourceCard.id,
         expectedRevision: sourceCard.revision,
         draft: {
-          forms: sourceCard.forms.map((f) => ({
+          forms: sourceCard.forms.map(({ multipleChoice, ...f }) => ({
             ...f,
+            multipleChoice: multipleChoice && {
+              choices: multipleChoice.choices.map((choice) => ({ ...choice, key: choice.id })),
+              correctChoiceKeys: multipleChoice.correctChoiceIds,
+              selectionMode: multipleChoice.selectionMode,
+              shuffleChoices: multipleChoice.shuffleChoices,
+            },
             notes: f.id === origins.items[0].snapshot.sourceFormId ? `${f.notes} orange` : f.notes,
           })),
         },

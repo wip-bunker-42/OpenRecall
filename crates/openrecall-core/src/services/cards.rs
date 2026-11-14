@@ -30,12 +30,6 @@ impl App {
             .into_iter()
             .enumerate()
             .map(|(i, f)| {
-                if f.front.trim().is_empty() {
-                    return Err(AppError::field(&format!("forms.{i}.front"), "required"));
-                }
-                if f.back.trim().is_empty() {
-                    return Err(AppError::field(&format!("forms.{i}.back"), "required"));
-                }
                 let form_id = match f.id {
                     Some(existing) => {
                         if old.is_none_or(|c| !c.forms.iter().any(|item| item.id == existing)) {
@@ -48,20 +42,42 @@ impl App {
                 if !used.insert(form_id.clone()) {
                     return Err(AppError::field("forms", "duplicateId"));
                 }
-                Ok(CardForm {
+                let prior = old.and_then(|card| card.forms.iter().find(|form| form.id == form_id));
+                let indexed = |mut error: AppError| {
+                    for field in &mut error.fields {
+                        field.field = format!("forms.{i}.{}", field.field);
+                    }
+                    error
+                };
+                let multiple_choice = f
+                    .multiple_choice
+                    .map(|draft| {
+                        crate::domain::questions::resolve_choices(
+                            draft,
+                            prior.and_then(|form| form.multiple_choice.as_ref()),
+                        )
+                    })
+                    .transpose()
+                    .map_err(indexed)?;
+                let form = CardForm {
+                    question_type: f.question_type,
+                    multiple_choice,
                     question_title: crate::domain::card::normalize_question_title(f.question_title)
-                        .map_err(|mut error| {
-                            for field in &mut error.fields {
-                                field.field = format!("forms.{i}.questionTitle");
-                            }
-                            error
-                        })?,
+                        .map_err(indexed)?,
                     id: form_id,
                     front: f.front,
-                    back: f.back,
+                    back: if f.question_type != crate::domain::questions::QuestionType::Recall
+                        && f.back.trim().is_empty()
+                    {
+                        String::new()
+                    } else {
+                        f.back
+                    },
                     notes: f.notes,
                     language: f.language.filter(|s| !s.trim().is_empty()),
-                })
+                };
+                crate::domain::questions::validate_form(&form).map_err(indexed)?;
+                Ok(form)
             })
             .collect()
     }
@@ -114,6 +130,7 @@ impl App {
         let forms = self.form_drafts(draft, None)?;
         let now = at.to_rfc3339();
         let card = CardDetail {
+            previous_choice_orders: Default::default(),
             bag: Default::default(),
             id: id(),
             deck_id: deck_id.clone(),
@@ -146,6 +163,13 @@ impl App {
         let forms = self.form_drafts(draft, Some(&card))?;
         self.retain_spelling_before_source_delete(std::slice::from_ref(&card.id))?;
         card.forms = forms;
+        card.previous_choice_orders.retain(|id, order| {
+            card.forms
+                .iter()
+                .find(|form| &form.id == id)
+                .and_then(|form| form.multiple_choice.as_ref())
+                .is_some_and(|set| crate::domain::questions::is_choice_permutation(set, order))
+        });
         self.invalidate_card_undo(&card.id)?;
         let ids = card.forms.iter().map(|f| f.id.clone()).collect::<Vec<_>>();
         crate::scheduling::forms::reconcile_forms(&mut card.bag, &ids, self.random.as_mut())?;
@@ -187,7 +211,11 @@ impl App {
         if page == 0 || ![10, 20, 50, 100].contains(&page_size) {
             return Err(AppError::field("page", "range"));
         }
-        let filter = "deck_id=?1 AND (?2='' OR EXISTS(SELECT 1 FROM json_each(cards.payload,'$.forms') f WHERE instr(lower(json_extract(f.value,'$.front')||' '||json_extract(f.value,'$.back')||' '||json_extract(f.value,'$.notes')),lower(?2))>0))";
+        let filter = "deck_id=?1 AND (?2='' OR EXISTS(
+            SELECT 1 FROM json_each(cards.payload,'$.forms') f
+            WHERE instr(lower(json_extract(f.value,'$.front')||' '||json_extract(f.value,'$.back')||' '||json_extract(f.value,'$.notes')),lower(?2))>0
+            OR EXISTS(SELECT 1 FROM json_each(f.value,'$.multipleChoice.choices') c
+                WHERE instr(lower(json_extract(c.value,'$.text')),lower(?2))>0)))";
         let total = self.store.conn.query_row(
             &format!("SELECT count(*) FROM cards WHERE {filter}"),
             rusqlite::params![deck_id, query],
