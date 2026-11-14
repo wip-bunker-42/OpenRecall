@@ -69,6 +69,42 @@ it('retries the same choice confirmation and continues wrong feedback without ma
   await user.click(screen.getByRole('button', { name: 'متابعة المراجعة' }));
   expect(await screen.findByRole('heading', { name: 'ملخص الجلسة' })).toBeVisible();
 });
+
+it('retains a choice across a focus refresh and filter parking', async () => {
+  const user = userEvent.setup();
+  let active = true;
+  const empty = {
+    state: 'emptyFilter' as const,
+    payload: {
+      sessionId: 'session-1',
+      filter: 'previouslyReviewed' as const,
+      canUndo: false,
+      lastReview: null,
+      nextDueAt: null,
+      progress: { current: 0, total: 0, completed: 0 },
+    },
+  };
+  const api = fixtureApi((r) => {
+    if (r.kind === 'setSessionActivity')
+      return { kind: r.kind, payload: { activeMs: 0, questionMs: 0 } };
+    if (r.kind === 'setReviewFilter') active = r.payload.filter === 'all';
+    if (r.kind === 'readSession' || r.kind === 'setReviewFilter')
+      return { kind: r.kind, payload: active ? choiceFixture : empty };
+  });
+  render(<ReviewPage sessionId="session-1" api={api} navigate={vi.fn()} />);
+  const choice = await screen.findByRole('radio', { name: 'Rome' });
+  await user.click(choice);
+  await act(async () => {
+    window.dispatchEvent(new Event('blur'));
+    window.dispatchEvent(new Event('focus'));
+  });
+  expect(choice).toBeChecked();
+  expect(choice).toHaveFocus();
+  await user.click(screen.getByRole('radio', { name: 'بطاقات سبق تقييمها' }));
+  await screen.findByRole('heading', { name: 'لا توجد بطاقات مطابقة الآن' });
+  await user.click(screen.getByRole('radio', { name: 'كل البطاقات المستحقة' }));
+  expect(await screen.findByRole('radio', { name: 'Rome' })).toBeChecked();
+});
 it('review_uses_custom_h1_with_default_fallback', async () => {
   const user = userEvent.setup();
   const form = { ...revealedFixture.payload.form, questionTitle: 'ترجم', front: 'unpredictable' };

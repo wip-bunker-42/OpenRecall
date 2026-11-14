@@ -18,15 +18,41 @@ describe('native typed questions and durable feedback', () => {
       expect(view.state).toBe('choiceFeedback');
       if (view.state !== 'choiceFeedback') throw new Error('Native feedback was not retained');
       expect(view.payload.feedbackId).toBe(saved.feedbackId);
-      expect((await command('getCard', { cardId: view.payload.cardId })).reviewCount).toBe(1);
+      const gradedCard = await command('getCard', { cardId: view.payload.cardId });
+      expect(gradedCard.reviewCount).toBe(1);
       await audit('native-choice-feedback-restart');
+      const arrival = await command('createCard', {
+        deckId: gradedCard.deckId,
+        draft: {
+          forms: [
+            {
+              id: null,
+              front: 'Newly due during correction.',
+              back: 'Arrived.',
+              notes: '',
+              language: 'en',
+              questionTitle: 'وصلت بطاقة',
+              questionType: 'recall',
+              multipleChoice: null,
+            },
+          ],
+        },
+      });
+      await $('input[value="new"]').click();
+      await expect($('input[value="new"]')).toBeChecked();
+      await click('متابعة المراجعة');
+      await heading('وصلت بطاقة');
       await click('التراجع عن آخر تقييم');
       await expect($('.choice-options input:checked')).toExist();
       expect((await command('getCard', { cardId: view.payload.cardId })).reviewCount).toBe(0);
+      expect((await command('getCard', { cardId: arrival.id })).bag).toEqual(arrival.bag);
       await (await containing('.choice-options label', 'Cairo')).click();
       await click('تحقق من الإجابة');
       await expect($('h2=النتيجة')).toBeFocused();
       await audit('native-choice-correct');
+      await $('.rating-easy').click();
+      await heading('وصلت بطاقة');
+      await click('عرض الإجابة');
       await $('.rating-easy').click();
       await heading('ملخص الجلسة');
       expect((await command('getCard', { cardId: view.payload.cardId })).reviewCount).toBe(1);
