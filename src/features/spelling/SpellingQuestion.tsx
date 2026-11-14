@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { useId, useLayoutEffect, useRef } from 'react';
 import type { Api } from '../../shared/api';
 import type { ReviewFrame } from '../../shared/generated/ReviewFrame';
 import type { Rating } from '../../shared/generated/Rating';
@@ -17,7 +17,7 @@ export function SpellingQuestion({
 }) {
   const input = useRef<HTMLTextAreaElement>(null);
   const id = useId();
-  useEffect(() => {
+  useLayoutEffect(() => {
     input.current?.focus();
     input.current?.setSelectionRange(0, 0);
   }, [frame.presentationId]);
