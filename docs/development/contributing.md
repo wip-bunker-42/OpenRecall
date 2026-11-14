@@ -37,6 +37,6 @@ after real compatibility tests; it does not change the source pin itself.
 
 Release from an existing tag whose commit is on main and has every required check
 green. Keep Cargo, npm and Tauri app versions synchronized. The release pipeline
-requires signing secrets and all four updater targets plus offline Windows media.
+requires signing secrets, the Windows and Linux updater targets and offline Windows media.
 It publishes a complete verified draft and refuses to overwrite a public release.
 See `docs/releases/signing.md` for credential custody and key rotation.

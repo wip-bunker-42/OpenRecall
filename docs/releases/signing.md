@@ -98,16 +98,15 @@ and version verification remains required before publication.
 The helper uses Tauri's official `Update::verify`, the public key embedded in the
 checked-out configuration, and signed-version enforcement. Release automation
 verifies every updater package before creating `latest.json` with
-`scripts/release.mjs`. The manifest requires all four supported updater targets:
-Windows x64, macOS ARM64, macOS x64, and Linux x64. Linux `.deb` and macOS `.dmg`
-are additional install media; updater entries use the supported updater package.
+`scripts/release.mjs`. Starting with 0.3.0, the manifest requires Windows x64 and
+Linux x64. The Linux `.deb` is additional install media. Updater entries use the
+Windows NSIS installer and Linux AppImage. Previously published manifests include
+the two macOS architectures.
 
 ## Publisher identity and rotation
 
-Updater signatures do not provide a Windows Authenticode identity or Apple
-notarization. Without paid/organization signing credentials, Windows installers
-have no verified publisher certificate and macOS uses ad-hoc signing. Report this
-distribution status with the release; do not describe it as OS notarization.
+Updater signatures verify the release package and version. Windows installers
+ship without a verified Authenticode publisher certificate.
 
 To rotate a key, publish a transition build containing the new public key while
 signing that transition package with the previous private key. Back up both key
