@@ -8,7 +8,8 @@ use crate::{
     domain::{
         card::CardForm,
         questions::{
-            ChoiceSetDraft, QuestionType, SelectionMode, normalized, validate_choice_draft,
+            ChoiceDraft, ChoiceSetDraft, QuestionType, SelectionMode, normalized,
+            validate_choice_draft,
         },
     },
 };
@@ -88,6 +89,124 @@ fn issue(field: String, code: &str) -> FieldError {
         code: code.into(),
     }
 }
+fn parse_choices(
+    object: &serde_json::Map<String, Value>,
+    path: &str,
+    issues: &mut Vec<FieldError>,
+) -> ChoiceSetDraft {
+    let before = issues.len();
+    let mut required_array = |name: &str| match object.get(name) {
+        Some(Value::Array(items)) => Some(items),
+        value => {
+            let code = if value.is_none() {
+                "required"
+            } else {
+                "arrayExpected"
+            };
+            issues.push(issue(format!("{path}.{name}"), code));
+            None
+        }
+    };
+    let options = required_array("choices");
+    let answers = required_array("correctChoices");
+    let choices = options
+        .into_iter()
+        .flatten()
+        .enumerate()
+        .filter_map(|(index, value)| {
+            let prefix = format!("{path}.choices.{index}");
+            let Some(entry) = value.as_object() else {
+                issues.push(issue(prefix, "objectExpected"));
+                return None;
+            };
+            for name in entry
+                .keys()
+                .filter(|name| !["key", "text"].contains(&name.as_str()))
+            {
+                let code = if name == "id" {
+                    "invalidOwner"
+                } else {
+                    "unknownChoiceField"
+                };
+                issues.push(issue(format!("{prefix}.{name}"), code));
+            }
+            let mut text = |name: &str| match entry.get(name) {
+                Some(Value::String(text)) => text.clone(),
+                value => {
+                    let code = if value.is_none() {
+                        "required"
+                    } else {
+                        "stringExpected"
+                    };
+                    issues.push(issue(format!("{prefix}.{name}"), code));
+                    String::new()
+                }
+            };
+            Some(ChoiceDraft {
+                id: None,
+                key: text("key"),
+                text: text("text"),
+            })
+        })
+        .collect();
+    let correct_choice_keys = answers
+        .into_iter()
+        .flatten()
+        .enumerate()
+        .filter_map(|(index, value)| match value {
+            Value::String(key) => Some(key.clone()),
+            _ => {
+                issues.push(issue(
+                    format!("{path}.correctChoices.{index}"),
+                    "stringExpected",
+                ));
+                None
+            }
+        })
+        .collect();
+    let selection_mode = match object.get("selectionMode").and_then(Value::as_str) {
+        Some("multiple") => SelectionMode::Multiple,
+        Some("single") => SelectionMode::Single,
+        _ => {
+            if object.contains_key("selectionMode") {
+                issues.push(issue(
+                    format!("{path}.selectionMode"),
+                    "invalidSelectionMode",
+                ));
+            }
+            SelectionMode::Single
+        }
+    };
+    let shuffle_choices = match object.get("shuffleChoices") {
+        Some(Value::Bool(value)) => *value,
+        value => {
+            if value.is_some() {
+                issues.push(issue(format!("{path}.shuffleChoices"), "booleanExpected"));
+            }
+            true
+        }
+    };
+    let set = ChoiceSetDraft {
+        choices,
+        correct_choice_keys,
+        selection_mode,
+        shuffle_choices,
+    };
+    if issues.len() == before
+        && let Err(error) = validate_choice_draft(&set)
+    {
+        issues.extend(error.fields.into_iter().map(|field| {
+            let name = field.field.trim_start_matches("multipleChoice.");
+            let name = if name == "correctChoiceKeys" {
+                "correctChoices"
+            } else {
+                name
+            };
+            issue(format!("{path}.{name}"), &field.code)
+        }));
+    }
+    set
+}
 fn parse_form(
     value: &Value,
     path: &str,
@@ -159,38 +278,7 @@ fn parse_form(
         "shuffleChoices",
     ];
     if form.question_type == QuestionType::MultipleChoice {
-        let mut draft = serde_json::json!({
-            "choices": object.get("choices"),
-            "correctChoiceKeys": object.get("correctChoices")
-        });
-        for name in ["selectionMode", "shuffleChoices"] {
-            if let Some(field) = object.get(name) {
-                draft[name] = field.clone();
-            }
-        }
-        match serde_json::from_value::<ChoiceSetDraft>(draft) {
-            Ok(set) => {
-                if set.choices.iter().any(|c| c.id.is_some()) {
-                    form.issues
-                        .push(issue(format!("{path}.choices"), "invalidOwner"));
-                }
-                if let Err(error) = validate_choice_draft(&set) {
-                    form.issues.extend(error.fields.into_iter().map(|field| {
-                        let name = field.field.trim_start_matches("multipleChoice.");
-                        let name = if name == "correctChoiceKeys" {
-                            "correctChoices"
-                        } else {
-                            name
-                        };
-                        issue(format!("{path}.{name}"), &field.code)
-                    }));
-                }
-                form.multiple_choice = Some(set);
-            }
-            Err(_) => form
-                .issues
-                .push(issue(format!("{path}.choices"), "invalidChoices")),
-        }
+        form.multiple_choice = Some(parse_choices(object, path, &mut form.issues));
     } else if choice_fields.iter().any(|name| object.contains_key(*name)) {
         form.issues
             .push(issue(format!("{path}.choices"), "unexpectedChoices"));

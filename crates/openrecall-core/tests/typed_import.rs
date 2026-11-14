@@ -70,6 +70,43 @@ fn typed_preview_commit_resolves_keys_and_searches_choices() {
 }
 
 #[test]
+fn malformed_choice_metadata_keeps_authored_options_and_marks_the_actual_field() {
+    let mut f = Fixture::new();
+    let deck = f.deck("Import errors");
+    for (field, value, code) in [
+        ("shuffleChoices", Some(json!("false")), "booleanExpected"),
+        (
+            "selectionMode",
+            Some(json!("bogus")),
+            "invalidSelectionMode",
+        ),
+        ("correctChoices", None, "required"),
+    ] {
+        let mut row = mcq("Red", "Book", "first");
+        if let Some(value) = value {
+            row[field] = value;
+        } else {
+            row.as_object_mut().unwrap().remove(field);
+        }
+        let p = preview(&mut f, &deck, json!([row]));
+        let form = &p["cards"][0]["primary"];
+        assert_eq!(form["valid"], false);
+        assert_eq!(
+            form["issues"],
+            json!([{"field":format!("$[0].{field}"),"code":code}])
+        );
+        assert_eq!(form["multipleChoice"]["choices"][0]["text"], "Red");
+    }
+    let mut row = mcq("Red", "Book", "first");
+    row["choices"][0]["id"] = json!("supplied-id");
+    let p = preview(&mut f, &deck, json!([row]));
+    assert_eq!(
+        p["cards"][0]["primary"]["issues"],
+        json!([{"field":"$[0].choices.0.id","code":"invalidOwner"}])
+    );
+}
+
+#[test]
 fn reordered_keys_are_duplicate_but_case_and_correctness_are_meaningful() {
     let mut f = Fixture::new();
     let deck = f.deck("Duplicates");
