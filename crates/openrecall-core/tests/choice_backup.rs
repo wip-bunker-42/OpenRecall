@@ -3,6 +3,56 @@ use common::{Fixture, spelling};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
+fn rehash(raw: &mut Value) {
+    let mut data = raw["data"].clone();
+    data.sort_all_objects();
+    raw["payloadSha256"] = json!(
+        Sha256::digest(serde_json::to_vec(&data).unwrap())
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect::<String>()
+    );
+}
+
+#[test]
+fn current_choice_reservation_and_correct_receipt_cannot_be_removed() {
+    let mut f = Fixture::new();
+    let deck = f.deck("Saved correct choice");
+    f.call(
+        "createCard",
+        json!({"deckId":deck,"draft":{"forms":[{
+            "questionType":"multipleChoice","front":"Choose a color",
+            "multipleChoice":{"choices":[{"key":"a","text":"Red"},{"key":"b","text":"Book"}],
+              "correctChoiceKeys":["a"]}
+        }]}}),
+    );
+    let frame = f.call("startSession", json!({"deckId":deck}))["payload"].clone();
+    f.call("confirmChoices", json!({"sessionId":frame["sessionId"],"presentationId":frame["presentationId"],
+        "expectedCardRevision":frame["cardRevision"],"actionId":uuid::Uuid::new_v4().to_string(),
+        "submission":{"kind":"selected","choiceIds":frame["form"]["multipleChoice"]["correctChoiceIds"]}
+    }));
+    let path = f.dir.path().join("correct.json");
+    f.app.export_snapshot(&path).unwrap();
+    let valid: Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+    let target = Fixture::new();
+    assert!(target.app.preview_restore(&path).is_ok());
+    for field in ["choices", "actions"] {
+        let mut corrupt = valid.clone();
+        if field == "choices" {
+            corrupt["data"]["sessions"][0]["current"]["choices"] = Value::Null;
+        } else {
+            corrupt["data"]["actions"] = json!([]);
+        }
+        rehash(&mut corrupt);
+        let bad = target.dir.path().join("invalid.json");
+        std::fs::write(&bad, serde_json::to_vec(&corrupt).unwrap()).unwrap();
+        assert_eq!(
+            target.app.preview_restore(&bad).expect_err(field).code,
+            "invalidBackup"
+        );
+    }
+}
+
 #[test]
 fn committed_feedback_survives_restore_and_rejects_inconsistent_payloads() {
     let mut f = Fixture::new();
@@ -78,14 +128,7 @@ fn committed_feedback_survives_restore_and_rejects_inconsistent_payloads() {
                 raw["data"]["undoRecords"][0]["nextCardBefore"] = raw["data"]["cards"][1].clone();
             }
         }
-        let mut data = raw["data"].clone();
-        data.sort_all_objects();
-        raw["payloadSha256"] = json!(
-            Sha256::digest(serde_json::to_vec(&data).unwrap())
-                .iter()
-                .map(|b| format!("{b:02x}"))
-                .collect::<String>()
-        );
+        rehash(&mut raw);
         let invalid = target.dir.path().join("invalid.json");
         std::fs::write(&invalid, serde_json::to_vec(&raw).unwrap()).unwrap();
         assert_ne!(

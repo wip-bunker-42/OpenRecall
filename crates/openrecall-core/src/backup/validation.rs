@@ -103,9 +103,25 @@ fn presentation(p: &Presentation, deck: &str, cards: &HashMap<&str, &CardDetail>
                 && (set.shuffle_choices
                     || choices.order.iter().eq(set.choices.iter().map(|c| &c.id))),
         ),
-        (_, None) => Ok(()),
+        (Some(_), None) => check(p.card_revision != c.revision),
+        (None, None) => Ok(()),
         (None, Some(_)) => Err(AppError::new("invalidBackup")),
     }
+}
+fn confirmed_receipts(
+    session: &Session,
+    receipts: &HashSet<(String, String, Vec<String>)>,
+) -> AppResult<()> {
+    for p in session.current.iter().chain(&session.parked) {
+        if let Some(choice) = p.choices.as_ref().filter(|choice| choice.confirmed_correct) {
+            check(receipts.contains(&(
+                session.id.clone(),
+                p.id.clone(),
+                choice.selected_ids.clone(),
+            )))?;
+        }
+    }
+    Ok(())
 }
 fn session(s: &Session, cards: &HashMap<&str, &CardDetail>) -> AppResult<()> {
     at(&s.started_at)?;
@@ -316,6 +332,7 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
                 .unwrap_or_default(),
         )?;
     }
+    let mut receipts = HashSet::new();
     for a in &d.actions {
         check(
             sessions.contains(a.session_id.as_str())
@@ -340,6 +357,9 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
                             && choice_ids.windows(2).all(|pair| pair[0] < pair[1]),
                     )?;
                     ids(choice_ids.iter().map(String::as_str))?;
+                    if outcome == ChoiceOutcome::Correct {
+                        receipts.insert((input.session_id, input.presentation_id, choice_ids));
+                    }
                 }
             }
         } else {
@@ -348,6 +368,7 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
         }
     }
     for s in &d.sessions {
+        confirmed_receipts(s, &receipts)?;
         let Some(f) = &s.choice_feedback else {
             continue;
         };
@@ -488,6 +509,7 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
             before.insert(c.id.as_str(), c);
         }
         session(&u.session_before, &before)?;
+        confirmed_receipts(&u.session_before, &receipts)?;
         let action = actions_by_id
             .get(u.action_id.as_str())
             .ok_or_else(|| AppError::new("invalidBackup"))?;
