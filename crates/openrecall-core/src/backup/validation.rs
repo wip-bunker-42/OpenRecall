@@ -343,6 +343,7 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
             check(
                 input.action_id == a.id
                     && input.session_id == a.session_id
+                    && serde_json::to_string(&input)? == a.signature
                     && uuid::Uuid::parse_str(&input.presentation_id).is_ok()
                     && !input.expected_card_revision.is_empty()
                     && (outcome != ChoiceOutcome::Correct || a.status == "applied"),

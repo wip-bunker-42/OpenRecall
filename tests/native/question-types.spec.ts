@@ -1,10 +1,22 @@
 import { $, browser, expect, click, heading, audit, root, command, containing } from './helpers';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const deckName = 'اختبار أنواع الأسئلة';
 const statePath = resolve(root, 'question-types-state.json');
 const resume = process.env.OPENRECALL_NATIVE_QUESTION_PHASE === 'resume';
+
+async function restore(path: string) {
+  copyFileSync(path, resolve(root, 'restore.json'));
+  await click('المجموعات');
+  await click('الإعدادات');
+  await $('summary=النسخ الاحتياطي والاستعادة').click();
+  await click('اختيار نسخة للاستعادة');
+  await expect($('h2=معاينة الاستعادة')).toBeDisplayed();
+  await $('dialog input[type="checkbox"]').click();
+  await click('استعادة النسخة واستبدال المكتبة');
+  await heading('مجموعاتي');
+}
 
 describe('native typed questions and durable feedback', () => {
   if (resume) {
@@ -56,6 +68,27 @@ describe('native typed questions and durable feedback', () => {
       await $('.rating-easy').click();
       await heading('ملخص الجلسة');
       expect((await command('getCard', { cardId: view.payload.cardId })).reviewCount).toBe(1);
+      await click('الإعدادات');
+      await $('summary=النسخ الاحتياطي والاستعادة').click();
+      await click('تصدير جميع البيانات');
+      await expect($('p=اكتمل تصدير النسخة الاحتياطية.')).toBeDisplayed();
+      const path = await $('.result p[dir="auto"]').getText();
+      const backup = JSON.parse(readFileSync(path, 'utf8'));
+      expect(backup.schemaVersion).toBe(10);
+      expect(backup.formatVersion).toBe(2);
+      const fixture = resolve('crates/openrecall-core/tests/fixtures/backups/v0.2.0.json');
+      await restore(fixture);
+      const spelling = (await command('bootstrap', {})).resumableSessions[0];
+      expect(spelling).toBeDefined();
+      await click('استكمال مراجعة مجموعة التدرب على الكتابة');
+      await click('التراجع عن آخر تقييم');
+      await heading('الكلمة');
+      await click('إنهاء الجلسة');
+      await heading('ملخص الجلسة');
+      await restore(path);
+      const restored = await command('getCard', { cardId: view.payload.cardId });
+      expect(restored.forms).toEqual(gradedCard.forms);
+      expect(restored.reviewCount).toBe(1);
     });
   } else {
     it('copies and rates an essay, imports choices and commits a wrong answer only once', async () => {

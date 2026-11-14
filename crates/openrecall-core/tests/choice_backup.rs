@@ -36,12 +36,15 @@ fn current_choice_reservation_and_correct_receipt_cannot_be_removed() {
     let valid: Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
     let target = Fixture::new();
     assert!(target.app.preview_restore(&path).is_ok());
-    for field in ["choices", "actions"] {
+    for field in ["choices", "actions", "signature"] {
         let mut corrupt = valid.clone();
         if field == "choices" {
             corrupt["data"]["sessions"][0]["current"]["choices"] = Value::Null;
-        } else {
+        } else if field == "actions" {
             corrupt["data"]["actions"] = json!([]);
+        } else {
+            let signature = corrupt["data"]["actions"][0]["signature"].as_str().unwrap();
+            corrupt["data"]["actions"][0]["signature"] = json!(format!(" {signature}"));
         }
         rehash(&mut corrupt);
         let bad = target.dir.path().join("invalid.json");

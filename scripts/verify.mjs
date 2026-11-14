@@ -22,6 +22,10 @@ run('cargo', [
   'serde_json/preserve_order',
   '--test',
   'backups',
+  '--test',
+  'choice_backup',
+  '--test',
+  'legacy_backup_v2',
 ]);
 run('pnpm', ['contracts']);
 run('git', ['diff', '--exit-code', '--', 'src/shared/generated']);
