@@ -412,6 +412,7 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
         )?;
         check(
             u.session_before.id == u.session_id
+                && u.session_before.choice_feedback.is_none()
                 && session_map[u.session_id.as_str()].undo_id.as_deref() == Some(u.id.as_str()),
         )?;
         card(&u.card_before)?;

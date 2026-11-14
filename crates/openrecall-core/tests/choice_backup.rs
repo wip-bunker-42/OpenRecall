@@ -24,7 +24,7 @@ fn committed_feedback_survives_restore_and_rejects_inconsistent_payloads() {
     let original: Value = serde_json::from_slice(&std::fs::read(report.path).unwrap()).unwrap();
     let mut target = Fixture::new();
     let before = spelling::snapshot(&mut target);
-    for change in 0..5 {
+    for change in 0..6 {
         let mut raw = original.clone();
         match change {
             0 => {
@@ -40,7 +40,11 @@ fn committed_feedback_survives_restore_and_rejects_inconsistent_payloads() {
                 raw["data"]["sessions"][0]["choiceFeedback"]["actionId"] =
                     json!(uuid::Uuid::new_v4().to_string())
             }
-            _ => raw["data"]["actions"][0]["choiceOutcome"] = json!("correct"),
+            4 => raw["data"]["actions"][0]["choiceOutcome"] = json!("correct"),
+            _ => {
+                raw["data"]["undoRecords"][0]["sessionBefore"]["choiceFeedback"] =
+                    raw["data"]["sessions"][0]["choiceFeedback"].clone();
+            }
         }
         let mut data = raw["data"].clone();
         data.sort_all_objects();

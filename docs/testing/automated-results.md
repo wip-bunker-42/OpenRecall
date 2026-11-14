@@ -12,9 +12,11 @@ Windows 11 Pro 10.0.26300 x64 with WebView2 157. It uses a synthetic SQLite
 library behind the rejecting proxy. The first process exercises the native
 clipboard write, direct essay rating, JSON import, rejection of an unconfirmed
 choice grade, a single automatic Again and navigation back to saved feedback.
-After verifying process exit, the second process restores that feedback and its
-undo, then confirms a correct answer and rates it. The five named native axe
-states are retained under `target/native-tests/run-00HD9E/audits`.
+After verifying process exit, the second process restores that feedback, continues
+to a newly due card, undoes the grade and its reservation, then rates a correct
+answer. The full native run passed nine study-flow cases and two startup probes.
+Across its 27 axe reports each audit had 20–46 passing rules and zero detected
+violations. Evidence is under `target/native-tests/run-yZfBn6`.
 
 Rust tests exercise retry tokens, restored selections and reservations, complete
 undo, plain-text clipboard payloads, typed spelling contexts and format-2
