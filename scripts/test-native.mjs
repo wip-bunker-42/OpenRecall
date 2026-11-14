@@ -70,8 +70,19 @@ function assertStopped() {
   if (result.status !== 0)
     throw new Error('Native app process did not exit; restart privacy is unverified.');
 }
+async function questionTypes() {
+  await run(['--spec', 'tests/native/question-types.spec.ts'], {
+    OPENRECALL_NATIVE_QUESTION_PHASE: 'prepare',
+  });
+  assertStopped();
+  console.log('Confirmed choice app process exited. Restarting its saved feedback.');
+  await run(['--spec', 'tests/native/question-types.spec.ts'], {
+    OPENRECALL_NATIVE_QUESTION_PHASE: 'resume',
+  });
+}
 try {
-  if (process.argv.length > 2) await run(process.argv.slice(2));
+  if (process.argv[2] === '--question-types') await questionTypes();
+  else if (process.argv.length > 2) await run(process.argv.slice(2));
   else {
     await run(['--spec', 'tests/native/persistence.spec.ts']);
     const stopped = spawnSync(
@@ -114,6 +125,8 @@ try {
     await run(['--spec', 'tests/native/spelling.spec.ts'], {
       OPENRECALL_NATIVE_SPELLING_PHASE: 'resume',
     });
+    assertStopped();
+    await questionTypes();
     if (
       !blocked.some(
         (request) => request.method === 'CONNECT' && request.target === 'github.com:443',

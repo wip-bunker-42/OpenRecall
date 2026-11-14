@@ -140,6 +140,28 @@ fn wrong_and_unknown_grade_once_keep_feedback_and_restore_selection_on_undo() {
 }
 
 #[test]
+fn last_incorrect_question_stays_until_continue_and_continue_is_idempotent() {
+    let (mut f, frame, _) = setup();
+    let session = json!({"sessionId":frame["sessionId"]});
+    let response = f.call(
+        "confirmChoices",
+        submission(&frame, json!({"kind":"unknown"})),
+    );
+    assert_eq!(response["state"], "choiceFeedback");
+    assert_eq!(
+        f.call("readSession", session.clone())["state"],
+        "choiceFeedback"
+    );
+    let acknowledgement = json!({"sessionId":frame["sessionId"],
+        "feedbackId":response["payload"]["feedbackId"]});
+    let summary = f.call("continueChoiceFeedback", acknowledgement.clone());
+    assert_eq!(summary["state"], "summary");
+    assert_eq!(summary["payload"]["attempts"], 1);
+    assert_eq!(f.call("continueChoiceFeedback", acknowledgement), summary);
+    assert_eq!(f.call("undoReview", session)["state"], "question");
+}
+
+#[test]
 fn invalid_selections_and_rollback_leave_no_rating() {
     let (mut f, frame, _) = setup();
     let order = &frame["choices"]["order"];

@@ -106,7 +106,7 @@ impl App {
             let mut seen = HashSet::new();
             let terms = eligible_texts(form)
                 .into_iter()
-                .flat_map(|text| extract_words(text))
+                .flat_map(extract_words)
                 .filter(|word| seen.insert(word.canonical.clone()))
                 .collect::<Vec<_>>();
             let mut snapshot: Option<SourceSnapshot> = None;

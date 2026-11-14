@@ -163,7 +163,7 @@ pub fn validate(d: &BackupData) -> AppResult<()> {
         // Extract once per shared snapshot, then prove each edge by set membership.
         let terms: HashSet<_> = snapshot_eligible_texts(s)
             .into_iter()
-            .flat_map(|text| extract_words(text))
+            .flat_map(extract_words)
             .map(|word| word.canonical)
             .collect();
         membership.insert(s.id.as_str(), terms);

@@ -295,7 +295,7 @@ impl App {
             deck_id: card.deck_id.clone(),
             session_id: session.id.clone(),
             form_id: presentation.form_id.clone(),
-            rating: rating,
+            rating,
             reviewed_at: now.to_rfc3339(),
             elapsed_days: elapsed,
             response_ms: presentation.active_ms,
@@ -322,7 +322,7 @@ impl App {
         }
         session.last_review = Some(ReviewResult {
             card_id: card.id.clone(),
-            rating: rating,
+            rating,
             interval_seconds: outcome.interval_seconds,
             due_at: card.due_at.clone(),
         });

@@ -1,6 +1,6 @@
 {
   "generator": "cargo-about 0.9.2; pnpm licenses --prod",
-  "cargoLockSha256": "6a734973acafffef8934a4b973ef97ddbabf694dcb1ff556f25c8aa5e4f5db1f",
+  "cargoLockSha256": "dbc0a952ce890df7d69996dd5e042a796aa188a818453656a5cce09cfc223d31",
   "rustCrates": [
     {
       "name": "adler2",
