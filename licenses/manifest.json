@@ -1,6 +1,6 @@
 {
   "generator": "cargo-about 0.9.2; pnpm licenses --prod",
-  "cargoLockSha256": "dbc0a952ce890df7d69996dd5e042a796aa188a818453656a5cce09cfc223d31",
+  "cargoLockSha256": "e5df3387f3b04e575629795ea79d5bf3087ae4e93de6ffc35ded27112a4a83ca",
   "rustCrates": [
     {
       "name": "adler2",
@@ -121,12 +121,6 @@
       "version": "0.21.7",
       "license": "MIT OR Apache-2.0",
       "source": "https://crates.io/api/v1/crates/base64/0.21.7/download"
-    },
-    {
-      "name": "base64",
-      "version": "0.22.1",
-      "license": "MIT OR Apache-2.0",
-      "source": "https://crates.io/api/v1/crates/base64/0.22.1/download"
     },
     {
       "name": "base64",
@@ -289,6 +283,12 @@
       "version": "0.10.2",
       "license": "Apache-2.0 OR MIT",
       "source": "https://crates.io/api/v1/crates/const-oid/0.10.2/download"
+    },
+    {
+      "name": "constant_time_eq",
+      "version": "0.6.1",
+      "license": "CC0-1.0 OR MIT-0 OR Apache-2.0",
+      "source": "https://crates.io/api/v1/crates/constant_time_eq/0.6.1/download"
     },
     {
       "name": "cookie",
@@ -1263,6 +1263,12 @@
       "source": "https://crates.io/api/v1/crates/new_debug_unreachable/1.0.6/download"
     },
     {
+      "name": "nix",
+      "version": "0.31.3",
+      "license": "MIT",
+      "source": "https://crates.io/api/v1/crates/nix/0.31.3/download"
+    },
+    {
       "name": "nom",
       "version": "8.0.0",
       "license": "MIT",
@@ -2068,9 +2074,9 @@
     },
     {
       "name": "tauri-plugin-updater",
-      "version": "2.14.0",
+      "version": "2.14.1",
       "license": "Apache-2.0 OR MIT",
-      "source": "https://crates.io/api/v1/crates/tauri-plugin-updater/2.14.0/download"
+      "source": "https://crates.io/api/v1/crates/tauri-plugin-updater/2.14.1/download"
     },
     {
       "name": "tauri-runtime-wry",
@@ -2305,6 +2311,12 @@
       "version": "12.0.1",
       "license": "MIT",
       "source": "https://crates.io/api/v1/crates/ts-rs/12.0.1/download"
+    },
+    {
+      "name": "typed-path",
+      "version": "0.13.0",
+      "license": "MIT OR Apache-2.0",
+      "source": "https://crates.io/api/v1/crates/typed-path/0.13.0/download"
     },
     {
       "name": "typeid",
@@ -2733,6 +2745,12 @@
       "source": "https://crates.io/api/v1/crates/zeroize/1.9.1/download"
     },
     {
+      "name": "zeroize_derive",
+      "version": "1.5.0",
+      "license": "Apache-2.0 OR MIT",
+      "source": "https://crates.io/api/v1/crates/zeroize_derive/1.5.0/download"
+    },
+    {
       "name": "zerotrie",
       "version": "0.2.5",
       "license": "Unicode-3.0",
@@ -2752,9 +2770,9 @@
     },
     {
       "name": "zip",
-      "version": "4.6.1",
+      "version": "9.5.1",
       "license": "MIT",
-      "source": "https://crates.io/api/v1/crates/zip/4.6.1/download"
+      "source": "https://crates.io/api/v1/crates/zip/9.5.1/download"
     },
     {
       "name": "zmij",

@@ -17,6 +17,9 @@ to a newly due card, undoes the grade and its reservation, then rates a correct
 answer. The full native run passed nine study-flow cases and two startup probes.
 Across its 27 axe reports each audit had 20–46 passing rules and zero detected
 violations. Evidence is under `target/native-tests/run-yZfBn6`.
+The follow-up run under `target/native-tests/run-01bXVP` also exports and restores
+typed schema-10 data and restores the genuine v0.2.0 spelling session and undo
+through native backup IPC. The existing native spelling scenario restores v0.1.0.
 
 Rust tests exercise retry tokens, restored selections and reservations, complete
 undo, plain-text clipboard payloads, typed spelling contexts and format-2

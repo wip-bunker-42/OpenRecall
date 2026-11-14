@@ -23,7 +23,6 @@ packages. MPL-2.0 crate archives are also included under `sources/`.
 - [atk 0.18.2](https://crates.io/api/v1/crates/atk/0.18.2/download) — MIT
 - [atomic-waker 1.1.2](https://crates.io/api/v1/crates/atomic-waker/1.1.2/download) — Apache-2.0 OR MIT
 - [base64 0.21.7](https://crates.io/api/v1/crates/base64/0.21.7/download) — MIT OR Apache-2.0
-- [base64 0.22.1](https://crates.io/api/v1/crates/base64/0.22.1/download) — MIT OR Apache-2.0
 - [base64 0.23.1](https://crates.io/api/v1/crates/base64/0.23.1/download) — MIT OR Apache-2.0
 - [bit-set 0.8.0](https://crates.io/api/v1/crates/bit-set/0.8.0/download) — Apache-2.0 OR MIT
 - [bit-vec 0.8.0](https://crates.io/api/v1/crates/bit-vec/0.8.0/download) — Apache-2.0 OR MIT
@@ -51,6 +50,7 @@ packages. MPL-2.0 crate archives are also included under `sources/`.
 - [clipboard-win 5.4.3](https://crates.io/api/v1/crates/clipboard-win/5.4.3/download) — BSL-1.0
 - [concurrent-queue 2.5.0](https://crates.io/api/v1/crates/concurrent-queue/2.5.0/download) — Apache-2.0 OR MIT
 - [const-oid 0.10.2](https://crates.io/api/v1/crates/const-oid/0.10.2/download) — Apache-2.0 OR MIT
+- [constant_time_eq 0.6.1](https://crates.io/api/v1/crates/constant_time_eq/0.6.1/download) — CC0-1.0 OR MIT-0 OR Apache-2.0
 - [cookie 0.18.2](https://crates.io/api/v1/crates/cookie/0.18.2/download) — MIT OR Apache-2.0
 - [core-foundation-sys 0.8.7](https://crates.io/api/v1/crates/core-foundation-sys/0.8.7/download) — MIT OR Apache-2.0
 - [core-foundation 0.10.1](https://crates.io/api/v1/crates/core-foundation/0.10.1/download) — MIT OR Apache-2.0
@@ -213,6 +213,7 @@ packages. MPL-2.0 crate archives are also included under `sources/`.
 - [muda 0.20.0](https://crates.io/api/v1/crates/muda/0.20.0/download) — Apache-2.0 OR MIT
 - [ndarray 0.17.2](https://crates.io/api/v1/crates/ndarray/0.17.2/download) — MIT OR Apache-2.0
 - [new_debug_unreachable 1.0.6](https://crates.io/api/v1/crates/new_debug_unreachable/1.0.6/download) — MIT
+- [nix 0.31.3](https://crates.io/api/v1/crates/nix/0.31.3/download) — MIT
 - [nom 8.0.0](https://crates.io/api/v1/crates/nom/8.0.0/download) — MIT
 - [num-complex 0.4.6](https://crates.io/api/v1/crates/num-complex/0.4.6/download) — MIT OR Apache-2.0
 - [num-conv 0.2.2](https://crates.io/api/v1/crates/num-conv/0.2.2/download) — MIT OR Apache-2.0
@@ -347,7 +348,7 @@ packages. MPL-2.0 crate archives are also included under `sources/`.
 - [tauri-plugin-fs 2.7.1](https://crates.io/api/v1/crates/tauri-plugin-fs/2.7.1/download) — Apache-2.0 OR MIT
 - [tauri-plugin-opener 2.7.2](https://crates.io/api/v1/crates/tauri-plugin-opener/2.7.2/download) — Apache-2.0 OR MIT
 - [tauri-plugin-single-instance 2.5.4](https://crates.io/api/v1/crates/tauri-plugin-single-instance/2.5.4/download) — Apache-2.0 OR MIT
-- [tauri-plugin-updater 2.14.0](https://crates.io/api/v1/crates/tauri-plugin-updater/2.14.0/download) — Apache-2.0 OR MIT
+- [tauri-plugin-updater 2.14.1](https://crates.io/api/v1/crates/tauri-plugin-updater/2.14.1/download) — Apache-2.0 OR MIT
 - [tauri-runtime-wry 2.12.3](https://crates.io/api/v1/crates/tauri-runtime-wry/2.12.3/download) — Apache-2.0 OR MIT
 - [tauri-runtime 2.12.2](https://crates.io/api/v1/crates/tauri-runtime/2.12.2/download) — Apache-2.0 OR MIT
 - [tauri-utils 2.10.2](https://crates.io/api/v1/crates/tauri-utils/2.10.2/download) — Apache-2.0 OR MIT
@@ -387,6 +388,7 @@ packages. MPL-2.0 crate archives are also included under `sources/`.
 - [try-lock 0.2.5](https://crates.io/api/v1/crates/try-lock/0.2.5/download) — MIT
 - [ts-rs-macros 12.0.1](https://crates.io/api/v1/crates/ts-rs-macros/12.0.1/download) — MIT
 - [ts-rs 12.0.1](https://crates.io/api/v1/crates/ts-rs/12.0.1/download) — MIT
+- [typed-path 0.13.0](https://crates.io/api/v1/crates/typed-path/0.13.0/download) — MIT OR Apache-2.0
 - [typeid 1.0.3](https://crates.io/api/v1/crates/typeid/1.0.3/download) — MIT OR Apache-2.0
 - [typenum 1.20.1](https://crates.io/api/v1/crates/typenum/1.20.1/download) — MIT OR Apache-2.0
 - [uds_windows 1.2.1](https://crates.io/api/v1/crates/uds_windows/1.2.1/download) — MIT
@@ -458,10 +460,11 @@ packages. MPL-2.0 crate archives are also included under `sources/`.
 - [zerofrom-derive 0.1.8](https://crates.io/api/v1/crates/zerofrom-derive/0.1.8/download) — Unicode-3.0
 - [zerofrom 0.1.8](https://crates.io/api/v1/crates/zerofrom/0.1.8/download) — Unicode-3.0
 - [zeroize 1.9.1](https://crates.io/api/v1/crates/zeroize/1.9.1/download) — Apache-2.0 OR MIT
+- [zeroize_derive 1.5.0](https://crates.io/api/v1/crates/zeroize_derive/1.5.0/download) — Apache-2.0 OR MIT
 - [zerotrie 0.2.5](https://crates.io/api/v1/crates/zerotrie/0.2.5/download) — Unicode-3.0
 - [zerovec-derive 0.11.7](https://crates.io/api/v1/crates/zerovec-derive/0.11.7/download) — Unicode-3.0
 - [zerovec 0.11.9](https://crates.io/api/v1/crates/zerovec/0.11.9/download) — Unicode-3.0
-- [zip 4.6.1](https://crates.io/api/v1/crates/zip/4.6.1/download) — MIT
+- [zip 9.5.1](https://crates.io/api/v1/crates/zip/9.5.1/download) — MIT
 - [zmij 1.0.23](https://crates.io/api/v1/crates/zmij/1.0.23/download) — MIT
 - [zune-core 0.5.3](https://crates.io/api/v1/crates/zune-core/0.5.3/download) — MIT OR Apache-2.0 OR Zlib
 - [zune-jpeg 0.5.15](https://crates.io/api/v1/crates/zune-jpeg/0.5.15/download) — MIT OR Apache-2.0 OR Zlib
