@@ -381,6 +381,7 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
                 && c.deck_id == s.deck_id
                 && c.revision == f.card_revision
                 && c.forms.contains(&f.form)
+                && c.previous_choice_orders.get(&f.form.id) == Some(&f.choices.order)
                 && !f.choices.confirmed_correct
                 && crate::domain::questions::is_choice_permutation(set, &f.choices.order)
                 && (set.shuffle_choices
@@ -415,6 +416,17 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
                 && u.session_before.choice_feedback.is_none()
                 && session_map[u.session_id.as_str()].undo_id.as_deref() == Some(u.id.as_str()),
         )?;
+        if let Some(feedback) = &session_map[u.session_id.as_str()].choice_feedback {
+            check(
+                feedback.review_id == u.log_id
+                    && feedback.action_id == u.action_id
+                    && u.session_before
+                        .current
+                        .as_ref()
+                        .and_then(|p| p.choices.as_ref())
+                        == Some(&feedback.choices),
+            )?;
+        }
         card(&u.card_before)?;
         check(cards.contains(u.card_before.id.as_str()))?;
         let log = logs_by_id

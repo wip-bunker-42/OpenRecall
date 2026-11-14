@@ -31,6 +31,7 @@ export function useReviewSession(api: Api, sessionId: string) {
   }, []);
   const reportError = useCallback((error: unknown, background: boolean) => {
     if (!alive.current) return;
+    if (background && pending.current && errorSource.current?.background === false) return;
     const code =
       typeof error === 'object' && error !== null && 'code' in error
         ? String(error.code)

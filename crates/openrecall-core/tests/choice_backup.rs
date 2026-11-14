@@ -24,7 +24,7 @@ fn committed_feedback_survives_restore_and_rejects_inconsistent_payloads() {
     let original: Value = serde_json::from_slice(&std::fs::read(report.path).unwrap()).unwrap();
     let mut target = Fixture::new();
     let before = spelling::snapshot(&mut target);
-    for change in 0..6 {
+    for change in 0..8 {
         let mut raw = original.clone();
         match change {
             0 => {
@@ -41,9 +41,28 @@ fn committed_feedback_survives_restore_and_rejects_inconsistent_payloads() {
                     json!(uuid::Uuid::new_v4().to_string())
             }
             4 => raw["data"]["actions"][0]["choiceOutcome"] = json!("correct"),
-            _ => {
+            5 => {
                 raw["data"]["undoRecords"][0]["sessionBefore"]["choiceFeedback"] =
                     raw["data"]["sessions"][0]["choiceFeedback"].clone();
+            }
+            6 => raw["data"]["sessions"][0]["choiceFeedback"]["choices"]["order"]
+                .as_array_mut()
+                .unwrap()
+                .reverse(),
+            _ => {
+                let mut unrelated = raw["data"]["actions"][0].clone();
+                let id = json!(uuid::Uuid::new_v4().to_string());
+                let mut signature: Value =
+                    serde_json::from_str(unrelated["signature"].as_str().unwrap()).unwrap();
+                signature["actionId"] = id.clone();
+                signature["presentationId"] = json!(uuid::Uuid::new_v4().to_string());
+                unrelated["id"] = id.clone();
+                unrelated["signature"] = json!(serde_json::to_string(&signature).unwrap());
+                raw["data"]["actions"]
+                    .as_array_mut()
+                    .unwrap()
+                    .push(unrelated);
+                raw["data"]["sessions"][0]["choiceFeedback"]["actionId"] = id;
             }
         }
         let mut data = raw["data"].clone();

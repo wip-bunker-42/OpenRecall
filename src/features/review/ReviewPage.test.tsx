@@ -43,11 +43,17 @@ it('copies an essay from the active display and offers direct ratings', async ()
 it('retries the same choice confirmation and continues wrong feedback without manual grading', async () => {
   const calls: Request[] = [];
   let count = 0;
+  let failBackground = false;
   const api = fixtureApi((r) => {
     calls.push(r);
     if (r.kind === 'readSession') return { kind: r.kind, payload: choiceFixture };
-    if (r.kind === 'setSessionActivity')
+    if (r.kind === 'setSessionActivity') {
+      if (failBackground) {
+        failBackground = false;
+        throw { code: 'storageBusy' };
+      }
       return { kind: r.kind, payload: { activeMs: 0, questionMs: 0 } };
+    }
     if (r.kind === 'confirmChoices') {
       if (++count === 1) throw { code: 'storage' };
       return { kind: r.kind, payload: choiceFeedbackFixture };
@@ -58,6 +64,12 @@ it('retries the same choice confirmation and continues wrong feedback without ma
   render(<ReviewPage sessionId="session-1" api={api} navigate={vi.fn()} />);
   await user.click(await screen.findByRole('radio', { name: 'Rome' }));
   await user.click(screen.getByRole('button', { name: 'تحقق من الإجابة' }));
+  await screen.findByRole('button', { name: 'إعادة محاولة تأكيد الإجابة' });
+  failBackground = true;
+  await act(async () => {
+    window.dispatchEvent(new Event('focus'));
+  });
+  expect(failBackground).toBe(false);
   await user.click(await screen.findByRole('button', { name: 'إعادة محاولة تأكيد الإجابة' }));
   expect(await screen.findByRole('heading', { level: 2, name: 'النتيجة' })).toHaveFocus();
   expect(screen.queryByRole('group', { name: 'تقييم التذكر' })).not.toBeInTheDocument();
