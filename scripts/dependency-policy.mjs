@@ -3,14 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { github, pages, REPOSITORY } from './github.mjs';
-export const REQUIRED_CHECKS = [
-  'quality',
-  'native-windows',
-  'bundle-windows',
-  'bundle-linux',
-  'bundle-macos-arm64',
-  'bundle-macos-x64',
-];
+export const REQUIRED_CHECKS = ['quality', 'native-windows', 'bundle-windows', 'bundle-linux'];
 const allowed = new Set([
   '@eslint/js',
   'eslint',

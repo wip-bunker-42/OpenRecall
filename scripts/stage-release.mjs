@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdir, readdir, copyFile, access, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { releasePlatforms } from './release.mjs';
 async function one(folder, predicate) {
   const entries = await readdir(folder, { withFileTypes: true });
   const files = entries.filter((entry) => entry.isFile() && predicate(entry.name));
@@ -16,9 +17,7 @@ export async function stageArtifacts({
   offline = false,
 }) {
   assert.match(version, /^\d+\.\d+\.\d+$/);
-  assert.ok(
-    ['windows-x86_64', 'linux-x86_64', 'darwin-aarch64', 'darwin-x86_64'].includes(platform),
-  );
+  assert.ok(releasePlatforms(version).includes(platform));
   assert.ok(!offline || platform === 'windows-x86_64');
   await mkdir(destination, { recursive: true });
   async function copy(source, name, signed) {

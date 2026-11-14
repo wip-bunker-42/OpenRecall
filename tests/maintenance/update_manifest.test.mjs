@@ -17,6 +17,21 @@ test('complete updater manifest uses all verified platforms and exact release UR
   assert.equal(validateManifest(manifest), true);
   assert.deepEqual(Object.keys(manifest.platforms), platforms);
 });
+test('0.3.0 publishes only Windows and Linux updater targets', () => {
+  const input = {
+    version: '0.3.0',
+    notes: '',
+    publishedAt: '2026-11-14T00:00:00Z',
+    artifacts: artifacts.map((a) => ({ ...a, url: a.url.replace('v0.1.0', 'v0.3.0') })),
+  };
+  const supported = input.artifacts.filter((a) => !a.platform.startsWith('darwin-'));
+  assert.deepEqual(Object.keys(createManifest({ ...input, artifacts: supported }).platforms), [
+    'windows-x86_64',
+    'linux-x86_64',
+  ]);
+  assert.throws(() => createManifest(input));
+  assert.throws(() => createManifest({ ...input, artifacts: supported.slice(0, 1) }));
+});
 test('incomplete, insecure, unsigned, duplicate and mismatched release artifacts are rejected', () => {
   for (const altered of [
     artifacts.slice(0, 3),

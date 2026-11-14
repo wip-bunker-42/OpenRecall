@@ -2,8 +2,8 @@
 
 An Arabic, dark, keyboard-accessible desktop flashcard app for personal spaced
 repetition. Built with Tauri 2, React/TypeScript, SQLite and a native FSRS-7 engine.
-Windows 11 x64 is the primary target; Windows 10 x64, macOS ARM64/Intel and Linux
-x64 are secondary targets.
+Windows 11 x64 is the primary target. Releases also provide Windows 10 x64 and
+Linux x64 packages. macOS downloads remain available in releases through 0.2.0.
 
 [Download releases](https://github.com/wip-bunker-42/OpenRecall/releases)
 · [Arabic usage guide](docs/user-guide.ar.md)
@@ -131,9 +131,8 @@ Updates are requested in Settings: check, download, then explicitly confirm
 installation. The official Tauri updater verifies package bytes and their signed
 version. Installation waits for saved edits, completed/ended review and durable
 training state. See [signing and release operations](docs/releases/signing.md).
-Updater signing is separate from OS publisher certificates: Windows packages
-have no Authenticode publisher identity and macOS packages are ad-hoc signed
-unless additional organization credentials are supplied.
+Updater signing is separate from OS publisher certificates. Windows packages
+have no Authenticode publisher identity.
 
 Use the Linux AppImage for in-app updates; `.deb` is additional installation
 media managed through the system package installer. Linux builds use Ubuntu

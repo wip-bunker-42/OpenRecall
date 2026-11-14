@@ -13,7 +13,7 @@ function context() {
     sha,
     branchContainsTag: true,
     versions: ['0.1.0', '0.1.0', '0.1.0'],
-    checks: REQUIRED_CHECKS.map((name) => ({
+    checks: [...REQUIRED_CHECKS, 'bundle-macos-arm64', 'bundle-macos-x64'].map((name) => ({
       name,
       head_sha: sha,
       status: 'completed',
@@ -36,6 +36,15 @@ test('release secrets are gated by a reviewed main ancestor, matching versions a
     change(input);
     assert.throws(() => validateReleaseContext(input));
   }
+});
+test('current releases require green Windows and Linux jobs without waiting for macOS', () => {
+  const input = context();
+  input.tag = 'v0.3.0';
+  input.versions = ['0.3.0', '0.3.0', '0.3.0'];
+  input.checks = input.checks.filter((check) => !check.name.startsWith('bundle-macos'));
+  assert.deepEqual(validateReleaseContext(input), { version: '0.3.0', sha });
+  input.checks.pop();
+  assert.throws(() => validateReleaseContext(input));
 });
 test('normal and offline installer staging preserves both signed files and exposes one updater target', async (t) => {
   const folder = await mkdtemp(join(tmpdir(), 'openrecall-stage-test-'));

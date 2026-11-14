@@ -2,15 +2,21 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { resolve, dirname, basename } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import assert from 'node:assert/strict';
-const platforms = ['windows-x86_64', 'darwin-aarch64', 'darwin-x86_64', 'linux-x86_64'];
+const currentPlatforms = ['windows-x86_64', 'linux-x86_64'];
 const semver = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/;
+export const includesLegacyMac = (version) => version === '0.1.0' || version === '0.2.0';
+export function releasePlatforms(version) {
+  return includesLegacyMac(version)
+    ? [...currentPlatforms, 'darwin-aarch64', 'darwin-x86_64']
+    : currentPlatforms;
+}
 export function validateManifest(manifest) {
   assert.ok(manifest && semver.test(manifest.version), 'A release must have a semantic version');
   assert.equal(typeof manifest.notes, 'string');
   assert.ok(Number.isFinite(Date.parse(manifest.pub_date)), 'A publish timestamp is required');
   assert.deepEqual(
     Object.keys(manifest.platforms).sort(),
-    [...platforms].sort(),
+    [...releasePlatforms(manifest.version)].sort(),
     'All supported updater platforms are required',
   );
   for (const item of Object.values(manifest.platforms)) {
@@ -32,7 +38,7 @@ export function validateManifest(manifest) {
 export function createManifest({ version, notes, publishedAt, artifacts }) {
   const manifest = { version, notes, pub_date: publishedAt, platforms: {} };
   for (const { platform, url, signature } of artifacts) {
-    assert.ok(platforms.includes(platform), 'Unknown platform');
+    assert.ok(releasePlatforms(version).includes(platform), 'Unknown platform');
     assert.ok(!manifest.platforms[platform], 'Duplicate platform');
     manifest.platforms[platform] = { url, signature: signature.trim() };
   }
