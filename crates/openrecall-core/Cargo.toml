@@ -9,7 +9,7 @@ license.workspace = true
 chrono = { version = "0.4", features = ["serde"] }
 chrono-tz = "0.10"
 fsrs = { git = "https://github.com/open-spaced-repetition/fsrs-rs", rev = "0fd59949e9168af7194418c2dba99836b5548e87" }
-rand = "0.9"
+rand = "0.10"
 rusqlite = { version = "0.41", features = ["bundled"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
