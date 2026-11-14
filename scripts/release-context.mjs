@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { pages, REPOSITORY } from './github.mjs';
 import { REQUIRED_CHECKS } from './dependency-policy.mjs';
+import { includesLegacyMac } from './release.mjs';
 export function validateReleaseContext({ tag, sha, branchContainsTag, versions, checks }) {
   assert.match(tag, /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
   assert.match(sha, /^[a-f0-9]{40}$/);
@@ -15,7 +16,10 @@ export function validateReleaseContext({ tag, sha, branchContainsTag, versions, 
     versions.every((v) => v === version),
     'Cargo, package and Tauri versions must match the tag',
   );
-  for (const name of REQUIRED_CHECKS) {
+  const checksForVersion = includesLegacyMac(version)
+    ? [...REQUIRED_CHECKS, 'bundle-macos-arm64', 'bundle-macos-x64']
+    : REQUIRED_CHECKS;
+  for (const name of checksForVersion) {
     const matches = checks.filter((c) => c.name === name);
     assert.equal(matches.length, 1, `Required check missing or ambiguous: ${name}`);
     const check = matches[0];

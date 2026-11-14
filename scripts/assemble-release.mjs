@@ -3,7 +3,7 @@ import { readFile, writeFile, readdir, lstat } from 'node:fs/promises';
 import { resolve, join, basename } from 'node:path';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-import { createManifest } from './release.mjs';
+import { createManifest, releasePlatforms } from './release.mjs';
 const [folderInput, version] = process.argv.slice(2);
 assert.ok(
   folderInput && /^\d+\.\d+\.\d+$/.test(version),
@@ -13,7 +13,13 @@ const folder = resolve(folderInput);
 const names = await readdir(folder),
   artifacts = [];
 const metadataNames = names.filter((name) => /^artifact-.*\.json$/.test(name));
-assert.equal(metadataNames.length, 4, 'All four platform builds must supply metadata');
+assert.deepEqual(
+  metadataNames.sort(),
+  releasePlatforms(version)
+    .map((platform) => `artifact-${platform}.json`)
+    .sort(),
+  'All supported platform builds must supply metadata',
+);
 for (const metadataName of metadataNames) {
   const metadata = JSON.parse(await readFile(join(folder, metadataName), 'utf8'));
   assert.equal(metadata.version, version);
