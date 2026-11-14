@@ -24,7 +24,7 @@ fn committed_feedback_survives_restore_and_rejects_inconsistent_payloads() {
     let original: Value = serde_json::from_slice(&std::fs::read(report.path).unwrap()).unwrap();
     let mut target = Fixture::new();
     let before = spelling::snapshot(&mut target);
-    for change in 0..8 {
+    for change in 0..11 {
         let mut raw = original.clone();
         match change {
             0 => {
@@ -49,7 +49,7 @@ fn committed_feedback_survives_restore_and_rejects_inconsistent_payloads() {
                 .as_array_mut()
                 .unwrap()
                 .reverse(),
-            _ => {
+            7 => {
                 let mut unrelated = raw["data"]["actions"][0].clone();
                 let id = json!(uuid::Uuid::new_v4().to_string());
                 let mut signature: Value =
@@ -63,6 +63,19 @@ fn committed_feedback_survives_restore_and_rejects_inconsistent_payloads() {
                     .unwrap()
                     .push(unrelated);
                 raw["data"]["sessions"][0]["choiceFeedback"]["actionId"] = id;
+            }
+            8 => raw["data"]["undoRecords"][0]["cardBefore"]["bag"]["reserved"] = Value::Null,
+            9 => {
+                raw["data"]["undoRecords"][0]["sessionBefore"]["current"]["cardRevision"] =
+                    json!("stale-undo-presentation");
+            }
+            _ => {
+                let arrived = f.card(&deck, "Alternative reservation target", "Answer");
+                raw["data"]["cards"]
+                    .as_array_mut()
+                    .unwrap()
+                    .push(f.call("getCard", json!({"cardId":arrived})));
+                raw["data"]["undoRecords"][0]["nextCardBefore"] = raw["data"]["cards"][1].clone();
             }
         }
         let mut data = raw["data"].clone();

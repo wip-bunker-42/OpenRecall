@@ -497,7 +497,12 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
             .current
             .as_ref()
             .ok_or_else(|| AppError::new("invalidBackup"))?;
-        check(p.card_id == log.card_id && p.form_id == log.form_id)?;
+        check(
+            p.card_id == log.card_id
+                && p.form_id == log.form_id
+                && p.card_revision == u.card_before.revision
+                && u.card_before.bag.reserved.as_deref() == Some(p.form_id.as_str()),
+        )?;
         let form = u
             .card_before
             .forms
@@ -518,6 +523,7 @@ pub(crate) fn validate(d: &BackupData) -> AppResult<()> {
                 input.presentation_id == p.id
                     && input.expected_card_revision == u.card_before.revision
                     && log.rating == Rating::Again
+                    && u.next_card_before.is_none()
                     && outcome != ChoiceOutcome::Correct
                     && !choices.confirmed_correct
                     && outcome
